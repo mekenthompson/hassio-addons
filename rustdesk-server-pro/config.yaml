@@ -1,0 +1,36 @@
+name: RustDesk Server Pro
+version: "1.3.0"
+slug: rustdesk-server-pro
+description: Self-hosted RustDesk Pro server for remote desktop access
+url: https://github.com/mekenthompson/hassio-addons
+webui: http://[HOST]:[PORT:21114]
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+init: false
+host_network: true
+startup: services
+ports:
+  21114/tcp: 21114
+  21115/tcp: 21115
+  21116/tcp: 21116
+  21116/udp: 21116
+  21117/tcp: 21117
+  21118/tcp: 21118
+  21119/tcp: 21119
+ports_description:
+  21114/tcp: "API Server"
+  21115/tcp: "NAT type test"
+  21116/tcp: "ID registration & heartbeat (TCP)"
+  21116/udp: "ID registration & heartbeat (UDP)"
+  21117/tcp: "Relay services"
+  21118/tcp: "Web admin console"
+  21119/tcp: "Web console support"
+map:
+  - config:rw
+options:
+  always_use_relay: false
+schema:
+  always_use_relay: bool

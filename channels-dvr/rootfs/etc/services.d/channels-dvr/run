@@ -1,0 +1,34 @@
+#!/command/with-contenv bashio
+
+bashio::log.info "Starting Channels DVR Server..."
+
+# Define paths
+SEED_DIR="/opt/channels-dvr"
+PERSIST_DIR="/data/channels-dvr"
+
+# Ensure Persistent Storage is initialized
+if [ ! -d "$PERSIST_DIR" ]; then
+    bashio::log.info "First run detected. Initializing persistent storage at $PERSIST_DIR..."
+    mkdir -p "$PERSIST_DIR"
+    # Copy the seed install to persistent storage
+    cp -a "$SEED_DIR/." "$PERSIST_DIR/"
+    bashio::log.info "Initialization complete."
+else
+    bashio::log.info "Found existing storage at $PERSIST_DIR"
+fi
+
+# Create default recordings directory if it doesn't exist
+if [ -d "/share" ]; then
+    mkdir -p "/share/channels-dvr"
+fi
+
+if [ -d "/media" ]; then
+    mkdir -p "/media/dvr"
+fi
+
+# Start Channels DVR Server
+# We run from the persistent directory so updates are saved there
+cd "$PERSIST_DIR/latest"
+
+bashio::log.info "Starting Channels DVR binary from $(pwd)"
+exec ./channels-dvr

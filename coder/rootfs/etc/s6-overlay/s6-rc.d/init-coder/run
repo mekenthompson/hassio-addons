@@ -1,0 +1,38 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: VS Code Server
+# Configures code-server before running
+# ==============================================================================
+
+bashio::log.info "Preparing VS Code Server..."
+
+# Create data directory for code-server
+if ! bashio::fs.directory_exists '/data/code-server'; then
+    mkdir -p /data/code-server
+    bashio::log.info "Created code-server data directory"
+fi
+
+# Create user data directory
+if ! bashio::fs.directory_exists '/data/code-server/User'; then
+    mkdir -p /data/code-server/User
+fi
+
+# Create extensions directory
+if ! bashio::fs.directory_exists '/data/code-server/extensions'; then
+    mkdir -p /data/code-server/extensions
+fi
+
+# Run initialization commands if configured
+if bashio::config.has_value 'init_commands'; then
+    bashio::log.info "Running initialization commands..."
+    
+    for cmd in $(bashio::config 'init_commands'); do
+        bashio::log.debug "Executing: ${cmd}"
+        if ! eval "${cmd}"; then
+            bashio::log.warning "Init command failed: ${cmd}"
+        fi
+    done
+fi
+
+bashio::log.info "VS Code Server preparation complete"
