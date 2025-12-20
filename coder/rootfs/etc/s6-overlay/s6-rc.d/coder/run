@@ -1,0 +1,52 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: VS Code Server
+# Runs code-server
+# ==============================================================================
+
+declare -a options
+declare workspace
+
+bashio::log.info "Starting VS Code Server..."
+
+# Build code-server arguments
+options+=(--bind-addr=0.0.0.0:8080)
+options+=(--user-data-dir=/data/code-server)
+options+=(--extensions-dir=/data/code-server/extensions)
+options+=(--disable-telemetry)
+options+=(--disable-update-check)
+
+# Handle authentication
+if bashio::config.has_value 'password'; then
+    export PASSWORD
+    PASSWORD=$(bashio::config 'password')
+    options+=(--auth=password)
+    bashio::log.info "Password authentication enabled"
+else
+    options+=(--auth=none)
+    bashio::log.info "Authentication disabled (using Ingress)"
+fi
+
+# Get default workspace
+if bashio::config.has_value 'default_workspace'; then
+    workspace=$(bashio::config 'default_workspace')
+else
+    workspace="/homeassistant"
+fi
+
+# Validate workspace exists
+if [[ ! -d "${workspace}" ]]; then
+    bashio::log.warning "Workspace '${workspace}' does not exist, falling back to /homeassistant"
+    workspace="/homeassistant"
+fi
+
+options+=("${workspace}")
+
+bashio::log.info "code-server configuration:"
+bashio::log.info "  Workspace: ${workspace}"
+bashio::log.info "  Data dir: /data/code-server"
+bashio::log.info "  Auth: $(bashio::config.has_value 'password' && echo 'password' || echo 'none')"
+
+# Run code-server
+exec code-server "${options[@]}"

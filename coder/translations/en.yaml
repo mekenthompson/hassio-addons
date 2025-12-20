@@ -1,0 +1,26 @@
+---
+configuration:
+  password:
+    name: Password
+    description: >-
+      Password for VS Code Server access. Leave empty to use Home Assistant
+      authentication via Ingress (recommended). Only set if using direct port access.
+  default_workspace:
+    name: Default Workspace
+    description: >-
+      The directory that opens when VS Code starts. Defaults to /homeassistant.
+      Available paths: /homeassistant, /share, /config, /ssl, /addons, /backup.
+  init_commands:
+    name: Initialization Commands
+    description: >-
+      Shell commands to run when the add-on starts. Useful for Git configuration,
+      tool setup, or running custom scripts.
+  log_level:
+    name: Log Level
+    description: >-
+      Controls the verbosity of the add-on logs. Use 'debug' or 'trace' for
+      troubleshooting issues.
+network:
+  8080/tcp: >-
+    VS Code Server web interface. Leave disabled (empty) to use Ingress only.
+    Set a port number for direct access (requires password).

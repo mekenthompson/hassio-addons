@@ -1,0 +1,2 @@
+network:
+  8089/tcp: Web interface and API

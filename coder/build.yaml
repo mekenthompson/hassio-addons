@@ -1,0 +1,11 @@
+---
+build_from:
+  aarch64: ghcr.io/hassio-addons/debian-base:7.3.3
+  amd64: ghcr.io/hassio-addons/debian-base:7.3.3
+args:
+  CODE_SERVER_VERSION: "4.107.0"
+labels:
+  org.opencontainers.image.title: "Home Assistant Add-on: VS Code Server"
+  org.opencontainers.image.description: "VS Code in the browser powered by code-server"
+  org.opencontainers.image.source: "https://github.com/mekenthompson/hass-addon-coder"
+  org.opencontainers.image.licenses: "MIT"
