@@ -4,18 +4,22 @@ bashio::log.info "Starting Channels DVR Server..."
 
 # Define paths
 SEED_DIR="/opt/channels-dvr"
-PERSIST_DIR="/media/dvr/channels-dvr-server"
+BINARY_DIR="/media/dvr/channels-dvr-server"
+DATA_DIR="/media/dvr/channels-dvr-data"
 
-# Ensure Persistent Storage is initialized
-if [ ! -d "$PERSIST_DIR" ]; then
-    bashio::log.info "First run detected. Initializing persistent storage at $PERSIST_DIR..."
-    mkdir -p "$PERSIST_DIR"
-    # Copy the seed install to persistent storage
-    cp -a "$SEED_DIR/." "$PERSIST_DIR/"
-    bashio::log.info "Initialization complete."
+# Ensure binary directory is initialized
+if [ ! -d "$BINARY_DIR/latest" ]; then
+    bashio::log.info "First run detected. Initializing binary storage at $BINARY_DIR..."
+    mkdir -p "$BINARY_DIR"
+    cp -a "$SEED_DIR/." "$BINARY_DIR/"
+    bashio::log.info "Binary initialization complete."
 else
-    bashio::log.info "Found existing storage at $PERSIST_DIR"
+    bashio::log.info "Found existing binary at $BINARY_DIR"
 fi
+
+# Ensure data directory exists
+mkdir -p "$DATA_DIR"
+bashio::log.info "Using data directory: $DATA_DIR"
 
 # Create default recordings directory if it doesn't exist
 if [ -d "/share" ]; then
@@ -26,9 +30,8 @@ if [ -d "/media" ]; then
     mkdir -p "/media/dvr"
 fi
 
-# Start Channels DVR Server
-# We run from the persistent directory so updates are saved there
-cd "$PERSIST_DIR/latest"
+# Start Channels DVR Server with explicit data path
+cd "$BINARY_DIR/latest"
 
-bashio::log.info "Starting Channels DVR binary from $(pwd)"
-exec ./channels-dvr
+bashio::log.info "Starting Channels DVR binary from $(pwd) with data path $DATA_DIR"
+exec ./channels-dvr -path "$DATA_DIR"
