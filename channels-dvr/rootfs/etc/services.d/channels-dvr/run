@@ -34,4 +34,4 @@ fi
 cd "$BINARY_DIR/latest"
 
 bashio::log.info "Starting Channels DVR binary from $(pwd) with data path $DATA_DIR"
-exec ./channels-dvr -path "$DATA_DIR"
+exec ./channels-dvr -dir "$DATA_DIR"

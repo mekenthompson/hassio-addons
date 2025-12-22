@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.15
+
+- Fix: Use correct -dir flag (not -path) for data directory
+
 ## 1.0.14
 
 - Fix: Separate binary and data directories, use explicit -path flag for data persistence
