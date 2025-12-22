@@ -4,7 +4,7 @@ bashio::log.info "Starting Channels DVR Server..."
 
 # Define paths
 SEED_DIR="/opt/channels-dvr"
-PERSIST_DIR="/data/channels-dvr"
+PERSIST_DIR="/share/channels-dvr/server"
 
 # Ensure Persistent Storage is initialized
 if [ ! -d "$PERSIST_DIR" ]; then
