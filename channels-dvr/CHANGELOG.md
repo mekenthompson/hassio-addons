@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.14
+
+- Fix: Separate binary and data directories, use explicit -path flag for data persistence
+- Binary: /media/dvr/channels-dvr-server/
+- Data: /media/dvr/channels-dvr-data/
+
 ## 1.0.13
 
 - Change: Move server data to /media/dvr/channels-dvr-server/ for persistence alongside recordings/backups
