@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.13
+
+- Change: Move server data to /media/dvr/channels-dvr-server/ for persistence alongside recordings/backups
+
 ## 1.0.12
 
 - Fix: Move database to /share/channels-dvr/server/ to persist across reinstalls
