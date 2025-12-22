@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.12
+
+- Fix: Move database to /share/channels-dvr/server/ to persist across reinstalls
+
 ## 1.0.11
 
 - Fix: Ensure /media/dvr directory exists for recordings
