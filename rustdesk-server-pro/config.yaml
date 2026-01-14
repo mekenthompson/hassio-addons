@@ -1,5 +1,5 @@
 name: RustDesk Server Pro
-version: "1.3.0"
+version: "1.4.0"
 slug: rustdesk-server-pro
 description: Self-hosted RustDesk Pro server for remote desktop access
 url: https://github.com/mekenthompson/hassio-addons

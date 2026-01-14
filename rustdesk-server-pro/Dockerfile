@@ -1,4 +1,4 @@
-FROM rustdesk/rustdesk-server-pro:1.7.2
+FROM rustdesk/rustdesk-server-pro:1.7.3
 
 # Remove /root so we can replace it with a mount point
 RUN rm -rf /root && mkdir -p /root
