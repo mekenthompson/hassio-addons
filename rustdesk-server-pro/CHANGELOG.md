@@ -2,6 +2,14 @@
 
 All notable changes to this add-on will be documented in this file.
 
+## [1.4.0] - 2026-01-15
+
+### Changed
+- Updated base image to RustDesk Server Pro 1.7.3 (from 1.7.2)
+
+### RustDesk Server Pro 1.7.3 Highlights
+- Bug fixes and stability improvements
+
 ## [1.3.0] - 2025-12-13
 
 ### Added
