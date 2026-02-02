@@ -47,6 +47,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         nodejs \
+        nginx-light \
         git \
         curl \
         ca-certificates \
@@ -106,7 +107,11 @@ RUN groupadd --gid 1000 node \
     && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
     && chown -R node:node /app
 
-# Copy root filesystem (S6 overlay scripts)
+# Clean up default nginx config and prepare temp dir
+RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
+    && mkdir -p /tmp/nginx
+
+# Copy root filesystem (S6 overlay scripts + nginx config)
 COPY rootfs /
 
 # Set up persistent directories
