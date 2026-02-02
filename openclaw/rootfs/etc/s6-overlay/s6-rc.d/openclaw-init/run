@@ -48,7 +48,7 @@ cat > /data/openclaw-config/config.json <<JSONEOF
 {
   "gateway": {
     "mode": "local",
-    "port": 18789,
+    "port": 18800,
     "bind": "lan",
     "token": "${GATEWAY_TOKEN}"
   },
@@ -100,6 +100,12 @@ bashio::log.info "Configuration written to /home/node/.openclaw/config.json"
 bashio::log.info "Gateway mode: local"
 bashio::log.info "Telegram enabled: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'true' || echo 'false')"
 bashio::log.info "Claude session: $([ -n "$CLAUDE_SESSION_KEY" ] && echo 'configured' || echo 'not set')"
+
+# Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
+bashio::log.info "Running openclaw doctor --fix..."
+cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index.js doctor --fix" || {
+    bashio::log.warning "openclaw doctor --fix had warnings, continuing..."
+}
 
 # Install Chromium for Playwright (power-user feature)
 if [ ! -d "/data/openclaw-home/.cache/ms-playwright" ]; then

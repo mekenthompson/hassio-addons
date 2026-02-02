@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-02-03
+
+### Fixed
+
+- WebSocket disconnection when accessing Web UI through HA sidebar (ingress)
+- Telegram plugin not auto-enabling ("configured, not enabled yet")
+- Gateway now runs behind nginx reverse proxy for proper WebSocket proxying
+
+### Added
+
+- nginx reverse proxy for reliable ingress WebSocket support
+- Auto-run `openclaw doctor --fix` during initialization to enable configured plugins
+
 ## [1.0.1] - 2026-02-03
 
 ### Added

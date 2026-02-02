@@ -14,7 +14,7 @@ export NODE_ENV=production
 # Gateway configuration
 export OPENCLAW_GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
 export OPENCLAW_GATEWAY_BIND="lan"
-export OPENCLAW_GATEWAY_PORT="18789"
+export OPENCLAW_GATEWAY_PORT="18800"
 export OPENCLAW_BRIDGE_PORT="18790"
 
 # Telegram configuration
@@ -40,7 +40,7 @@ export PLAYWRIGHT_BROWSERS_PATH="/data/openclaw-home/.cache/ms-playwright"
 chown -R node:node /data/openclaw-*
 
 # Start the gateway as node user
-bashio::log.info "Starting gateway on port ${OPENCLAW_GATEWAY_PORT}..."
+bashio::log.info "Starting gateway on internal port ${OPENCLAW_GATEWAY_PORT} (nginx proxy on 18789)..."
 
 cd /app || exit 1
 
