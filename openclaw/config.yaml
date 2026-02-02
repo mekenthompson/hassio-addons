@@ -1,0 +1,52 @@
+---
+name: OpenClaw AI Assistant
+version: "1.0.0"
+slug: openclaw
+description: Your personal AI assistant powered by Claude Opus 4.5 via Telegram
+url: https://github.com/mekenthompson/hassio-addons
+arch:
+  - amd64
+homeassistant: "2024.1.0"
+stage: stable
+init: false
+startup: application
+
+# Watchdog for automatic restart on failure
+watchdog: http://[HOST]:[PORT:18789]/health
+
+# Port configuration
+ports:
+  18789/tcp: null
+  18790/tcp: null
+ports_description:
+  18789/tcp: OpenClaw Gateway (internal use)
+  18790/tcp: OpenClaw Bridge (internal use)
+
+# Directory mappings
+map:
+  - share:rw
+  - addon_config:rw
+  - ssl:ro
+
+# API access
+hassio_api: true
+auth_api: true
+
+# Default configuration
+options:
+  telegram_bot_token: ""
+  gateway_token: ""
+  claude_session_key: ""
+  telegram_user_id: ""
+  additional_packages: []
+  log_level: info
+
+# Configuration schema
+schema:
+  telegram_bot_token: password
+  gateway_token: str?
+  claude_session_key: password?
+  telegram_user_id: str?
+  additional_packages:
+    - str
+  log_level: list(trace|debug|info|warning|error)?
