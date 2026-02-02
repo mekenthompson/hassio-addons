@@ -9,6 +9,7 @@ bashio::log.info "Starting OpenClaw Gateway..."
 # Export environment variables
 export HOME=/home/node
 export TERM=xterm-256color
+export NODE_ENV=production
 
 # Gateway configuration
 export OPENCLAW_GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
@@ -29,7 +30,6 @@ if bashio::config.has_value 'claude_session_key'; then
 fi
 
 # Power-user features (enabled by default)
-export OPENCLAW_HOME_VOLUME="/data/openclaw-home"
 export OPENCLAW_CONFIG_DIR="/data/openclaw-config"
 export OPENCLAW_WORKSPACE_DIR="/data/openclaw-workspace"
 
@@ -46,5 +46,6 @@ cd /app || exit 1
 
 exec s6-setuidgid node \
     node dist/index.js gateway \
+    --allow-unconfigured \
     --bind "${OPENCLAW_GATEWAY_BIND}" \
     --port "${OPENCLAW_GATEWAY_PORT}"
