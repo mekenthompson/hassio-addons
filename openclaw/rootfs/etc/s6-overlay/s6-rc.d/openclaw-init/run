@@ -83,7 +83,9 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
     "mode": "local",
     "port": 18800,
     "bind": "lan",
-    "token": "${GATEWAY_TOKEN}",
+    "auth": {
+      "token": "${GATEWAY_TOKEN}"
+    },
     "trustedProxies": ["172.30.32.0/24", "172.30.33.0/24", "127.0.0.1"],
     "controlUi": {
       "enabled": true,
@@ -92,8 +94,9 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
   },
   "agents": {
     "defaults": {
-      "provider": "anthropic",
-      "model": "claude-opus-4-5"
+      "model": {
+        "primary": "claude-opus-4-5"
+      }
     }
   },
   "logging": {
