@@ -23,13 +23,19 @@ ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
 chown -R node:node /data/openclaw-*
 chown -h node:node /home/node/.openclaw
 
-# Generate gateway token if not provided
+# Generate gateway token if not provided (persist across restarts)
 GATEWAY_TOKEN=$(bashio::config 'gateway_token')
 if [ -z "$GATEWAY_TOKEN" ]; then
-    bashio::log.info "Generating gateway token..."
-    GATEWAY_TOKEN=$(openssl rand -hex 32)
-    echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
-    bashio::log.info "Gateway token generated and saved"
+    # Check for previously generated token
+    if [ -f /data/openclaw-config/gateway.token ]; then
+        GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
+        bashio::log.info "Using existing gateway token"
+    else
+        bashio::log.info "Generating gateway token..."
+        GATEWAY_TOKEN=$(openssl rand -hex 32)
+        echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
+        bashio::log.info "Gateway token generated and saved"
+    fi
 else
     echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
 fi
@@ -44,7 +50,7 @@ LOG_LEVEL=$(bashio::config 'log_level')
 bashio::log.info "Creating OpenClaw configuration..."
 
 # Build config JSON
-cat > /data/openclaw-config/config.json <<JSONEOF
+cat > /data/openclaw-config/openclaw.json <<JSONEOF
 {
   "channels": {
 JSONEOF
@@ -52,7 +58,7 @@ JSONEOF
 # Add Telegram block if bot token is provided
 if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
     if [ -n "$TELEGRAM_USER_ID" ]; then
-        cat >> /data/openclaw-config/config.json <<JSONEOF
+        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
     "telegram": {
       "enabled": true,
       "botToken": "${TELEGRAM_BOT_TOKEN}",
@@ -61,7 +67,7 @@ if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
     }
 JSONEOF
     else
-        cat >> /data/openclaw-config/config.json <<JSONEOF
+        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
     "telegram": {
       "enabled": true,
       "botToken": "${TELEGRAM_BOT_TOKEN}",
@@ -71,7 +77,7 @@ JSONEOF
     fi
 fi
 
-cat >> /data/openclaw-config/config.json <<JSONEOF
+cat >> /data/openclaw-config/openclaw.json <<JSONEOF
   },
   "gateway": {
     "mode": "local",
@@ -96,10 +102,10 @@ cat >> /data/openclaw-config/config.json <<JSONEOF
 }
 JSONEOF
 
-chown node:node /data/openclaw-config/config.json
+chown node:node /data/openclaw-config/openclaw.json
 chown node:node /data/openclaw-config/gateway.token
 
-bashio::log.info "Configuration written to /home/node/.openclaw/config.json"
+bashio::log.info "Configuration written to /home/node/.openclaw/openclaw.json"
 
 # Log the config for debugging (mask sensitive values)
 bashio::log.info "Gateway mode: local"
