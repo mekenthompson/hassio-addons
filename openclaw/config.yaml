@@ -1,6 +1,6 @@
 ---
 name: OpenClaw AI Assistant
-version: "1.0.0"
+version: "1.0.1"
 slug: openclaw
 description: Your personal AI assistant powered by Claude Opus 4.5 via Telegram
 url: https://github.com/mekenthompson/hassio-addons
@@ -14,12 +14,17 @@ startup: application
 # Watchdog for automatic restart on failure
 watchdog: http://[HOST]:[PORT:18789]/health
 
+# Web UI configuration
+webui: http://[HOST]:[PORT:18789]
+panel_icon: mdi:robot
+panel_title: OpenClaw
+
 # Port configuration
 ports:
-  18789/tcp: null
+  18789/tcp: 18789
   18790/tcp: null
 ports_description:
-  18789/tcp: OpenClaw Gateway (internal use)
+  18789/tcp: OpenClaw Web UI and Gateway
   18790/tcp: OpenClaw Bridge (internal use)
 
 # Directory mappings
