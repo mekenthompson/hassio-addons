@@ -1,0 +1,98 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# OpenClaw Init Script
+# Initializes OpenClaw configuration and installs Chromium
+# ==============================================================================
+
+bashio::log.info "Initializing OpenClaw..."
+
+# Create persistent directories
+mkdir -p /data/openclaw-config
+mkdir -p /data/openclaw-workspace
+mkdir -p /data/openclaw-home
+chown -R node:node /data/openclaw-*
+
+# Generate gateway token if not provided
+GATEWAY_TOKEN=$(bashio::config 'gateway_token')
+if [ -z "$GATEWAY_TOKEN" ]; then
+    bashio::log.info "Generating gateway token..."
+    GATEWAY_TOKEN=$(openssl rand -hex 32)
+    echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
+    chown node:node /data/openclaw-config/gateway.token
+    bashio::log.info "Gateway token generated and saved"
+else
+    echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
+    chown node:node /data/openclaw-config/gateway.token
+fi
+
+# Read configuration
+TELEGRAM_BOT_TOKEN=$(bashio::config 'telegram_bot_token')
+CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
+TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
+LOG_LEVEL=$(bashio::config 'log_level')
+
+# Create OpenClaw configuration
+bashio::log.info "Creating OpenClaw configuration..."
+
+# Build the config JSON
+CONFIG_JSON='{'
+CONFIG_JSON+='"channels": {'
+
+# Add Telegram if bot token is provided
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+    CONFIG_JSON+='"telegram": {'
+    CONFIG_JSON+='"enabled": true,'
+    CONFIG_JSON+='"botToken": "'"$TELEGRAM_BOT_TOKEN"'",'
+    CONFIG_JSON+='"dmPolicy": "pairing"'
+
+    # Add allowed user if specified
+    if [ -n "$TELEGRAM_USER_ID" ]; then
+        CONFIG_JSON+=', "allowFrom": ["'"$TELEGRAM_USER_ID"'"]'
+    fi
+
+    CONFIG_JSON+='}'
+fi
+
+CONFIG_JSON+='},'
+
+# Add agents configuration
+CONFIG_JSON+='"agents": {'
+CONFIG_JSON+='"defaults": {'
+CONFIG_JSON+='"provider": "anthropic",'
+CONFIG_JSON+='"model": "claude-opus-4-5"'
+CONFIG_JSON+='}'
+CONFIG_JSON+='},'
+
+# Add logging
+CONFIG_JSON+='"logging": {'
+CONFIG_JSON+='"level": "'"$LOG_LEVEL"'"'
+CONFIG_JSON+='}'
+
+CONFIG_JSON+='}'
+
+# Write config
+echo "$CONFIG_JSON" > /data/openclaw-config/config.json
+chown node:node /data/openclaw-config/config.json
+
+bashio::log.info "Configuration created at /data/openclaw-config/config.json"
+
+# Install Chromium for Playwright (power-user feature)
+bashio::log.info "Installing Chromium for Playwright..."
+su - node -c "cd /app && PLAYWRIGHT_BROWSERS_PATH=/data/openclaw-home/.cache/ms-playwright node node_modules/playwright-core/cli.js install chromium" || {
+    bashio::log.warning "Playwright Chromium installation failed, but continuing..."
+}
+
+# Install additional packages if specified
+if bashio::config.has_value 'additional_packages'; then
+    bashio::log.info "Installing additional packages..."
+    PACKAGES=$(bashio::config 'additional_packages | join(" ")')
+    if [ -n "$PACKAGES" ]; then
+        apt-get update
+        # shellcheck disable=SC2086
+        apt-get install -y --no-install-recommends $PACKAGES
+        apt-get clean
+        rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
+    fi
+fi
+
+bashio::log.info "OpenClaw initialization complete!"

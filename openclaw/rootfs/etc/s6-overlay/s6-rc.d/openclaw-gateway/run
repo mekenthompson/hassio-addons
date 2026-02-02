@@ -1,0 +1,50 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# OpenClaw Gateway Service
+# Starts the OpenClaw gateway
+# ==============================================================================
+
+bashio::log.info "Starting OpenClaw Gateway..."
+
+# Export environment variables
+export HOME=/home/node
+export TERM=xterm-256color
+
+# Gateway configuration
+export OPENCLAW_GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
+export OPENCLAW_GATEWAY_BIND="lan"
+export OPENCLAW_GATEWAY_PORT="18789"
+export OPENCLAW_BRIDGE_PORT="18790"
+
+# Telegram configuration
+if bashio::config.has_value 'telegram_bot_token'; then
+    export TELEGRAM_BOT_TOKEN=$(bashio::config 'telegram_bot_token')
+    bashio::log.info "Telegram bot configured"
+fi
+
+# Claude Pro configuration
+if bashio::config.has_value 'claude_session_key'; then
+    export CLAUDE_AI_SESSION_KEY=$(bashio::config 'claude_session_key')
+    bashio::log.info "Claude Pro session configured"
+fi
+
+# Power-user features (enabled by default)
+export OPENCLAW_HOME_VOLUME="/data/openclaw-home"
+export OPENCLAW_CONFIG_DIR="/data/openclaw-config"
+export OPENCLAW_WORKSPACE_DIR="/data/openclaw-workspace"
+
+# Playwright configuration
+export PLAYWRIGHT_BROWSERS_PATH="/data/openclaw-home/.cache/ms-playwright"
+
+# Set proper permissions
+chown -R node:node /data/openclaw-*
+
+# Start the gateway as node user
+bashio::log.info "Starting gateway on port ${OPENCLAW_GATEWAY_PORT}..."
+
+cd /app || exit 1
+
+exec s6-setuidgid node \
+    node dist/index.js gateway \
+    --bind "${OPENCLAW_GATEWAY_BIND}" \
+    --port "${OPENCLAW_GATEWAY_PORT}"
