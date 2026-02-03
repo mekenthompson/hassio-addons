@@ -95,7 +95,7 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
   "agents": {
     "defaults": {
       "model": {
-        "primary": "claude-opus-4-5"
+        "primary": "anthropic/claude-opus-4-5"
       }
     }
   },
