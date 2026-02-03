@@ -56,7 +56,7 @@ options:
 
 # Configuration schema
 schema:
-  telegram_bot_token: str
+  telegram_bot_token: password
   gateway_token: str?
   claude_session_key: password?
   telegram_user_id: str?
