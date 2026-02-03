@@ -46,8 +46,12 @@ CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
 LOG_LEVEL=$(bashio::config 'log_level')
 
-# Create OpenClaw configuration using a heredoc for clean JSON
-bashio::log.info "Creating OpenClaw configuration..."
+# Create OpenClaw configuration only if it doesn't exist yet.
+# Once created, the gateway manages openclaw.json — UI changes persist across restarts.
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    bashio::log.info "OpenClaw configuration already exists, preserving it"
+else
+    bashio::log.info "Creating initial OpenClaw configuration..."
 
 # Build config JSON
 cat > /data/openclaw-config/openclaw.json <<JSONEOF
@@ -105,10 +109,11 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
 }
 JSONEOF
 
-chown node:node /data/openclaw-config/openclaw.json
-chown node:node /data/openclaw-config/gateway.token
+    chown node:node /data/openclaw-config/openclaw.json
+    bashio::log.info "Initial configuration written to /home/node/.openclaw/openclaw.json"
+fi
 
-bashio::log.info "Configuration written to /home/node/.openclaw/openclaw.json"
+chown node:node /data/openclaw-config/gateway.token
 
 # Log the config for debugging (mask sensitive values)
 bashio::log.info "Gateway mode: local"
