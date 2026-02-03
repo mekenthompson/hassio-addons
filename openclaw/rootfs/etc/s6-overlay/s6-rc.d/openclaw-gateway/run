@@ -23,10 +23,11 @@ if bashio::config.has_value 'telegram_bot_token'; then
     bashio::log.info "Telegram bot configured"
 fi
 
-# Claude Pro configuration
+# Claude/Anthropic API authentication
+# Supports either an Anthropic API key or a Claude Pro setup-token
 if bashio::config.has_value 'claude_session_key'; then
-    export CLAUDE_AI_SESSION_KEY=$(bashio::config 'claude_session_key')
-    bashio::log.info "Claude Pro session configured"
+    export ANTHROPIC_API_KEY=$(bashio::config 'claude_session_key')
+    bashio::log.info "Anthropic API key configured"
 fi
 
 # Power-user features (enabled by default)
