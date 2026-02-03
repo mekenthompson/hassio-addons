@@ -1,6 +1,6 @@
 ---
 name: OpenClaw AI Assistant
-version: "1.0.11"
+version: "1.0.12"
 slug: openclaw
 description: Your personal AI assistant powered by Claude Opus 4.5 via Telegram
 url: https://github.com/mekenthompson/hassio-addons
@@ -41,6 +41,9 @@ map:
 # API access
 hassio_api: true
 auth_api: true
+
+# Enable terminal access in HA UI
+stdin: true
 
 # Default configuration
 options:
