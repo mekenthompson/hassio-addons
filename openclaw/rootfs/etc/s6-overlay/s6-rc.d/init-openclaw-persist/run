@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Persist gh CLI and git config across reboots
+# ==============================================================================
+
+bashio::log.info "Setting up persistent config symlinks..."
+
+# Ensure persistent dirs exist
+mkdir -p /data/openclaw-home/.config/gh
+mkdir -p /data/openclaw-home/.gitconfig.d
+
+# Symlink gh CLI config
+mkdir -p /home/node/.config
+ln -sf /data/openclaw-home/.config/gh /home/node/.config/gh
+
+# Symlink git global config
+if [ -f /data/openclaw-home/.gitconfig ]; then
+    ln -sf /data/openclaw-home/.gitconfig /home/node/.gitconfig
+fi
+
+# Fix ownership
+chown -R node:node /data/openclaw-home/.config
+chown -R node:node /home/node/.config
+
+bashio::log.info "Persistent config symlinks ready"
