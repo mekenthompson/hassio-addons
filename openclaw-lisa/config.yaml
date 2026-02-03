@@ -1,0 +1,65 @@
+---
+name: "OpenClaw AI Assistant (Lisa)"
+version: "1.0.15"
+slug: openclaw-lisa
+description: "Lisa's personal AI assistant powered by Claude via Telegram"
+url: https://github.com/mekenthompson/hassio-addons
+arch:
+  - amd64
+homeassistant: "2024.1.0"
+stage: stable
+init: false
+startup: application
+
+# Watchdog for automatic restart on failure
+watchdog: http://[HOST]:[PORT:18891]/health
+
+# Web UI configuration
+webui: http://[HOST]:[PORT:18891]
+
+# Ingress configuration (enables sidebar panel)
+ingress: true
+ingress_port: 18891
+ingress_stream: true
+panel_icon: mdi:robot-happy
+panel_title: "OpenClaw (Lisa)"
+
+# Port configuration
+ports:
+  18891/tcp: 18891
+  18892/tcp: null
+ports_description:
+  18891/tcp: OpenClaw Web UI and Gateway (Lisa)
+  18892/tcp: OpenClaw Bridge (internal use)
+
+# Directory mappings
+map:
+  - share:rw
+  - addon_config:rw
+  - ssl:ro
+
+# API access
+hassio_api: true
+auth_api: true
+
+# Enable terminal access in HA UI
+stdin: true
+
+# Default configuration
+options:
+  telegram_bot_token: ""
+  gateway_token: ""
+  claude_session_key: ""
+  telegram_user_id: ""
+  additional_packages: []
+  log_level: info
+
+# Configuration schema
+schema:
+  telegram_bot_token: str
+  gateway_token: str?
+  claude_session_key: password?
+  telegram_user_id: str?
+  additional_packages:
+    - str
+  log_level: list(trace|debug|info|warning|error)?
