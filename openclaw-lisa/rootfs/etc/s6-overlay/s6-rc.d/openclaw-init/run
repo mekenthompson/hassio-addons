@@ -23,6 +23,21 @@ ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
 chown -R node:node /data/openclaw-*
 chown -h node:node /home/node/.openclaw
 
+# Symlink persistent home directories for CLI tool configs (gh, railway, etc.)
+for dir in .config .local .railway; do
+    if [ -d "/data/openclaw-home/$dir" ]; then
+        rm -rf "/home/node/$dir"
+        ln -sf "/data/openclaw-home/$dir" "/home/node/$dir"
+        chown -h node:node "/home/node/$dir"
+        bashio::log.info "Linked ~/$dir -> /data/openclaw-home/$dir"
+    fi
+done
+
+# Ensure persistent bin dir is on PATH
+if [ -d "/data/openclaw-home/bin" ]; then
+    export PATH="/data/openclaw-home/bin:$PATH"
+fi
+
 # Generate gateway token if not provided (persist across restarts)
 GATEWAY_TOKEN=$(bashio::config 'gateway_token')
 if [ -z "$GATEWAY_TOKEN" ]; then
@@ -46,8 +61,12 @@ CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
 LOG_LEVEL=$(bashio::config 'log_level')
 
-# Create OpenClaw configuration using a heredoc for clean JSON
-bashio::log.info "Creating OpenClaw configuration..."
+# Create OpenClaw configuration only if it doesn't exist yet.
+# Once created, the gateway manages openclaw.json — UI changes persist across restarts.
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    bashio::log.info "OpenClaw configuration already exists, preserving it"
+else
+    bashio::log.info "Creating initial OpenClaw configuration..."
 
 # Build config JSON
 cat > /data/openclaw-config/openclaw.json <<JSONEOF
@@ -105,10 +124,11 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
 }
 JSONEOF
 
-chown node:node /data/openclaw-config/openclaw.json
-chown node:node /data/openclaw-config/gateway.token
+    chown node:node /data/openclaw-config/openclaw.json
+    bashio::log.info "Initial configuration written to /home/node/.openclaw/openclaw.json"
+fi
 
-bashio::log.info "Configuration written to /home/node/.openclaw/openclaw.json"
+chown node:node /data/openclaw-config/gateway.token
 
 # Log the config for debugging (mask sensitive values)
 bashio::log.info "Gateway mode: local"
