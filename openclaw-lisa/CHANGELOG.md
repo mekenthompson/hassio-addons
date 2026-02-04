@@ -5,6 +5,149 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.16] - 2026-02-04
+
+### Changed
+
+- **Pinned to OpenClaw v2026.2.2** - Dockerfile now pins to specific OpenClaw version tag instead of latest
+- This provides better stability and predictable updates
+
+### OpenClaw v2026.2.2 Upstream Changes
+
+- **New Features:**
+  - Feishu/Lark plugin support for team collaboration
+  - Web UI Agents dashboard for better agent management
+  - QMD memory backend for enhanced memory storage
+  - Default subagent thinking level configuration
+- **Security Improvements:**
+  - Operator approval system for sensitive operations
+  - Matrix allowlists for enhanced security
+  - SSRF (Server-Side Request Forgery) guards
+  - Various security fixes across the platform
+- **Reliability:**
+  - Telegram long-poll error recovery improvements
+  - Various agent/media/onboarding fixes and enhancements
+
+## [1.0.15] - 2026-02-04
+
+### Changed
+
+- **OpenClaw upstream:** latest as of 2026-02-04
+- Persist all `~/.config` and `~/.local` directories across container reboots
+- Improves tool installation persistence and user configuration retention
+
+### Added
+
+- Persistent symlinks for `.config`, `.local`, and `.railway` in init script
+- Better preservation of openclaw.json configuration across restarts (only created on first run)
+
+### Fixed
+
+- OpenClaw Lisa schema - telegram_bot_token now correctly marked as password type
+- Configuration preservation across addon restarts
+
+## [1.0.14] - 2026-02-04
+
+### Changed
+
+- **OpenClaw upstream:** latest as of 2026-02-04
+- Persist GitHub CLI and git configuration across container reboots
+
+### Added
+
+- Enhanced persistence for developer tools and authentication
+
+## [1.0.13] - 2026-02-03
+
+### Added
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- ffmpeg for media processing capabilities
+- ripgrep (rg) for fast text searching
+- tmux for terminal multiplexing
+- jq for JSON processing
+- GitHub CLI (gh) for git operations and authentication
+
+### Changed
+
+- Enhanced development and media processing capabilities in the container environment
+
+## [1.0.12] - 2026-02-03
+
+### Added
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Terminal access directly in Home Assistant addon UI
+- Interactive shell access through the HA interface
+
+### Changed
+
+- Enabled stdin in addon configuration for terminal interactivity
+
+## [1.0.11] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Claude authentication by properly exporting ANTHROPIC_API_KEY environment variable
+- API key now correctly accessible to OpenClaw processes
+
+## [1.0.10] - 2026-02-03
+
+### Changed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Use fully qualified model names in configuration to silence deprecation warnings
+- Improved model configuration clarity
+
+## [1.0.9] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- WebSocket connections by connecting directly to addon port instead of through ingress proxy
+- Improved Web UI connectivity and real-time features
+
+## [1.0.8] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Configuration keys updated to match current OpenClaw schema requirements
+- Ensures proper configuration parsing and validation
+
+## [1.0.7] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Configuration now written to `openclaw.json` (not `config.json`)
+- Matches expected configuration file naming convention
+
+## [1.0.6] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Ingress authentication with token-based auth and allowInsecureAuth setting
+- Improved Web UI access through Home Assistant sidebar
+
+## [1.0.5] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Inline ingress fix script to avoid file path resolution errors
+- Improved startup reliability
+
+## [1.0.4] - 2026-02-03
+
+### Fixed
+
+- **OpenClaw upstream:** latest as of 2026-02-03
+- Nginx configuration variable parsing error with `$` characters
+- Improved reverse proxy stability
+
 ## [1.0.3] - 2026-02-03
 
 ### Fixed
