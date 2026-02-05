@@ -1,0 +1,54 @@
+---
+name: Minecraft Bedrock Server
+version: "1.0.0"
+slug: minecraft-bedrock
+description: Minecraft Bedrock Dedicated Server for local multiplayer
+url: https://github.com/mekenthompson/hassio-addons
+arch:
+  - amd64
+homeassistant: "2024.1.0"
+stage: experimental
+init: false
+startup: services
+
+# Ports - Bedrock uses UDP 19132
+ports:
+  19132/udp: 19132
+ports_description:
+  19132/udp: Minecraft Bedrock Server (IPv4)
+
+# Host network mode for LAN discovery (so kids can find the server automatically)
+host_network: true
+
+# Persistent world data
+map:
+  - share:rw
+
+# Resource limits (optional but good practice)
+# No special API access needed
+
+options:
+  server_name: "My Minecraft Server"
+  gamemode: "survival"
+  difficulty: "normal"
+  max_players: 10
+  allow_cheats: false
+  view_distance: 32
+  level_name: "FamilyWorld"
+  level_seed: ""
+  online_mode: true
+  white_list: false
+  server_port: 19132
+
+schema:
+  server_name: str
+  gamemode: list(survival|creative|adventure)
+  difficulty: list(peaceful|easy|normal|hard)
+  max_players: int(1,20)
+  allow_cheats: bool
+  view_distance: int(5,48)
+  level_name: str
+  level_seed: str?
+  online_mode: bool
+  white_list: bool
+  server_port: port

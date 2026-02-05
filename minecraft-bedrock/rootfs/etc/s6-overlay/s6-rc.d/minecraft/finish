@@ -1,0 +1,10 @@
+#!/command/execlineb -S1
+# ==============================================================================
+# Minecraft Bedrock Server - Shutdown Script
+# ==============================================================================
+
+# Wait a moment before restart
+if { s6-test ${1} -ne 0 }
+  if { s6-test ${1} -ne 256 }
+    s6-echo "Minecraft server crashed, restarting in 5 seconds..."
+    sleep 5
