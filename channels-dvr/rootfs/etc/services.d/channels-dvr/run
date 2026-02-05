@@ -21,9 +21,14 @@ fi
 mkdir -p "$DATA_DIR"
 bashio::log.info "Using data directory: $DATA_DIR"
 
-# Auto-restore database from backup if missing
-if [ ! -f "$DATA_DIR/settings.db" ]; then
-    bashio::log.warning "Database missing in $DATA_DIR! Attempting restore from backup..."
+# Auto-restore database from backup if missing or empty
+# The backup settings.db is ~60KB; a fresh/empty one is much smaller
+SETTINGS_SIZE=0
+if [ -f "$DATA_DIR/settings.db" ]; then
+    SETTINGS_SIZE=$(stat -c%s "$DATA_DIR/settings.db" 2>/dev/null || echo 0)
+fi
+if [ "$SETTINGS_SIZE" -lt 50000 ]; then
+    bashio::log.warning "Database missing or empty in $DATA_DIR (size: ${SETTINGS_SIZE}B)! Attempting restore from backup..."
     BACKUP_BASE="/share/channels-dvr/Database"
     if [ -d "$BACKUP_BASE" ]; then
         LATEST_BACKUP=$(ls -td "$BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
