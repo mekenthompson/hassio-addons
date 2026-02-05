@@ -21,6 +21,27 @@ fi
 mkdir -p "$DATA_DIR"
 bashio::log.info "Using data directory: $DATA_DIR"
 
+# Auto-restore database from backup if missing
+if [ ! -f "$DATA_DIR/settings.db" ]; then
+    bashio::log.warning "Database missing in $DATA_DIR! Attempting restore from backup..."
+    BACKUP_BASE="/share/channels-dvr/Database"
+    if [ -d "$BACKUP_BASE" ]; then
+        LATEST_BACKUP=$(ls -td "$BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
+        if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
+            bashio::log.info "Restoring from backup: $LATEST_BACKUP"
+            cp "$LATEST_BACKUP/settings.db" "$DATA_DIR/"
+            [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$DATA_DIR/"
+            bashio::log.info "Database restored successfully."
+        else
+            bashio::log.warning "No valid backup found in $BACKUP_BASE"
+        fi
+    else
+        bashio::log.warning "No backup directory found at $BACKUP_BASE"
+    fi
+else
+    bashio::log.info "Database found in $DATA_DIR"
+fi
+
 # Create default recordings directory if it doesn't exist
 if [ -d "/share" ]; then
     mkdir -p "/share/channels-dvr"
