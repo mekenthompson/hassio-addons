@@ -205,6 +205,14 @@ cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index
     bashio::log.warning "openclaw doctor --fix had warnings, continuing..."
 }
 
+# Grant node user write access to HA config directory (for config management)
+if [ -d "/homeassistant" ]; then
+    bashio::log.info "Setting up HA config directory permissions..."
+    chown -R node:node /homeassistant/includes/ 2>/dev/null || true
+    # Make git work for the node user
+    git config --global --add safe.directory /homeassistant 2>/dev/null || true
+fi
+
 # Install Chromium for Playwright (power-user feature)
 if [ ! -d "/data/openclaw-home/.cache/ms-playwright" ]; then
     bashio::log.info "Installing Chromium for Playwright (first run)..."
