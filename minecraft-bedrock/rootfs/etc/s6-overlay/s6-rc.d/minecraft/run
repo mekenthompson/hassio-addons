@@ -1,0 +1,56 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Minecraft Bedrock Server - Startup Script
+# ==============================================================================
+
+bashio::log.info "Starting Minecraft Bedrock Server..."
+
+# Read configuration from HA add-on options
+SERVER_NAME=$(bashio::config 'server_name')
+GAMEMODE=$(bashio::config 'gamemode')
+DIFFICULTY=$(bashio::config 'difficulty')
+MAX_PLAYERS=$(bashio::config 'max_players')
+ALLOW_CHEATS=$(bashio::config 'allow_cheats')
+VIEW_DISTANCE=$(bashio::config 'view_distance')
+LEVEL_NAME=$(bashio::config 'level_name')
+LEVEL_SEED=$(bashio::config 'level_seed')
+ONLINE_MODE=$(bashio::config 'online_mode')
+WHITE_LIST=$(bashio::config 'white_list')
+SERVER_PORT=$(bashio::config 'server_port')
+
+# Set up persistent data directory
+DATA_DIR="/data/minecraft"
+mkdir -p "${DATA_DIR}"
+
+# Export environment variables that itzg/minecraft-bedrock-server expects
+export EULA=TRUE
+export SERVER_NAME="${SERVER_NAME}"
+export GAMEMODE="${GAMEMODE}"
+export DIFFICULTY="${DIFFICULTY}"
+export MAX_PLAYERS="${MAX_PLAYERS}"
+export ALLOW_CHEATS="${ALLOW_CHEATS}"
+export VIEW_DISTANCE="${VIEW_DISTANCE}"
+export LEVEL_NAME="${LEVEL_NAME}"
+export ONLINE_MODE="${ONLINE_MODE}"
+export WHITE_LIST="${WHITE_LIST}"
+export SERVER_PORT="${SERVER_PORT}"
+
+# Set level seed if provided
+if bashio::config.has_value 'level_seed'; then
+    export LEVEL_SEED="${LEVEL_SEED}"
+fi
+
+# Use /data/minecraft for persistent world storage
+export DATA="/data/minecraft"
+
+bashio::log.info "Server Name: ${SERVER_NAME}"
+bashio::log.info "Game Mode: ${GAMEMODE}"
+bashio::log.info "Difficulty: ${DIFFICULTY}"
+bashio::log.info "Max Players: ${MAX_PLAYERS}"
+bashio::log.info "Port: ${SERVER_PORT}"
+bashio::log.info "World: ${LEVEL_NAME}"
+bashio::log.info "Data directory: ${DATA_DIR}"
+
+# Run the itzg entrypoint script which handles downloading/updating the server
+# and starting it
+exec /usr/local/bin/entrypoint.sh
