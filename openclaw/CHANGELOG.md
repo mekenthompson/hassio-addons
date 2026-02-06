@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.22] - 2026-02-06
+
+### Changed
+
+- **Upgraded to OpenClaw v2026.2.3** - Updated from v2026.2.2
+
+### OpenClaw v2026.2.3 Upstream Changes
+
+- **New Features:**
+  - Telegram improvements with proper Grammy type definitions (removed @ts-nocheck)
+  - Cloudflare AI Gateway provider support
+  - Moonshot (.cn) authentication with preserved China base URLs
+  - Per-channel responsePrefix overrides for message tools
+  - Enhanced cron: ISO 8601 schedules, announce delivery mode, auto-cleanup of one-shot jobs
+  - Shell completion optimization for faster terminal startup
+
+- **Security Improvements:**
+  - Enforced sandboxed media paths for message attachments
+  - Required explicit credentials for gateway URL overrides (prevents credential leakage)
+  - Gated whatsapp_login tool access to owner senders only
+  - Hardened webhook verification with host allowlists and proxy trust validation
+  - Untrusted channel metadata kept out of system prompts
+
+- **Bug Fixes:**
+  - Multi-account channel heartbeat routing with explicit accountId support
+  - Telegram inline model selection persistence
+  - Web UI agent model selection and workspace path text wrapping
+  - Gateway control UI logo path resolution with basePath
+  - Cron store data reloading when files recreated
+  - macOS cron payload rendering and ISO 8601 formatter thread safety
+
+- **Breaking Changes:**
+  - Cron: Legacy post-to-main/payload delivery and atMs fields removed (migrated to announce/none modes)
+  - **Note**: No impact on add-on functionality
+
 ## [1.0.17] - 2026-02-04
 
 ### Added
