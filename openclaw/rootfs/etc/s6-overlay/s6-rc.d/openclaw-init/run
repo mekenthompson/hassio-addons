@@ -199,6 +199,53 @@ NGINXEOF
 
 bashio::log.info "nginx configuration generated with gateway token"
 
+# Patch new Claude models into pi-ai model registry (until upstream adds them)
+# This allows using models released after the pi-ai package version bundled with OpenClaw
+MODELS_FILE=$(find /app/node_modules -path "*pi-ai*/models.generated.js" -type f 2>/dev/null | head -1)
+if [ -n "$MODELS_FILE" ]; then
+    # Patch claude-opus-4-6 if not already present
+    if ! grep -q '"claude-opus-4-6"' "$MODELS_FILE"; then
+        bashio::log.info "Patching claude-opus-4-6 into model registry..."
+        # Use Node.js to safely patch the JavaScript file
+        node -e "
+const fs = require('fs');
+const path = '$MODELS_FILE';
+let content = fs.readFileSync(path, 'utf8');
+
+// Find the claude-opus-4-5 entry and add 4-6 after it
+const opus45Pattern = /(\"claude-opus-4-5\": \{[^}]+id: \"claude-opus-4-5\",[^}]+name: \"Claude Opus 4\.5 \(latest\)\"[^}]+\},)/s;
+const opus46Entry = \`\"claude-opus-4-6\": {
+            id: \"claude-opus-4-6\",
+            name: \"Claude Opus 4.6 (latest)\",
+            api: \"anthropic-messages\",
+            provider: \"anthropic\",
+            baseUrl: \"https://api.anthropic.com\",
+            reasoning: true,
+            input: [\"text\", \"image\"],
+            cost: {
+                input: 5,
+                output: 25,
+                cacheRead: 0.5,
+                cacheWrite: 6.25,
+            },
+            contextWindow: 200000,
+            maxTokens: 64000,
+        },
+        \`;
+
+if (opus45Pattern.test(content)) {
+    content = content.replace(opus45Pattern, '\$1\\n        ' + opus46Entry);
+    fs.writeFileSync(path, content);
+    console.log('Successfully patched claude-opus-4-6');
+} else {
+    console.log('Could not find claude-opus-4-5 entry to patch after');
+}
+" && bashio::log.info "claude-opus-4-6 patched successfully" || bashio::log.warning "Failed to patch claude-opus-4-6"
+    else
+        bashio::log.info "claude-opus-4-6 already present in model registry"
+    fi
+fi
+
 # Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
 bashio::log.info "Running openclaw doctor --fix..."
 cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index.js doctor --fix" || {
