@@ -176,6 +176,9 @@ http {
             proxy_read_timeout 86400s;
             proxy_send_timeout 86400s;
 
+            # Override Origin to match Host header so OpenClaw origin check passes
+            # (HA ingress Origin port 8123 != addon port 18789, causing mismatch)
+            proxy_set_header Origin http://$host;
             proxy_set_header Accept-Encoding "";
 
             # Strip CSP frame-ancestors header from upstream so HA ingress iframe works
