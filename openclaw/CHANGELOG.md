@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.23] - 2026-02-06
+
+### Added
+- **Runtime model patching** - Init script now patches newly released Claude models into the pi-ai model registry
+- Added `claude-opus-4-6` support (released 2026-02-06) without requiring upstream OpenClaw update
+- Patch runs on every startup and is idempotent (skips if model already present)
+
 ## [1.0.22] - 2026-02-06
 
 ### Changed
@@ -73,196 +80,160 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.15] - 2026-02-04
 
-### Changed
-
-- **OpenClaw upstream:** latest as of 2026-02-04
-- Persist all `~/.config` and `~/.local` directories across container reboots
-- Improves tool installation persistence and user configuration retention
-
-### Added
-
-- Persistent symlinks for `.config`, `.local`, and `.railway` in init script
-- Better preservation of openclaw.json configuration across restarts (only created on first run)
-
 ### Fixed
 
-- OpenClaw Lisa schema - telegram_bot_token now correctly marked as password type
-- Configuration preservation across addon restarts
+- **Channels DVR add-on:** Fixed auto-restore triggering on every restart
+  - Added database size check (empty = 32KB vs valid backup = 60KB)
+  - Now only restores when `settings.db` is truly empty/corrupted
+  - Prevents loop of restoring old data when DB is actually fine
 
 ## [1.0.14] - 2026-02-04
 
 ### Changed
 
-- **OpenClaw upstream:** latest as of 2026-02-04
-- Persist GitHub CLI and git configuration across container reboots
+- **Channels DVR add-on:** Improved resilience with NFS mount verification
+  - Added loop checking NFS mount availability before starting server
+  - Waits up to 60 seconds for mount, then starts anyway (server may handle it)
+  - Better error logging when DVR directory isn't available
 
-### Added
-
-- Enhanced persistence for developer tools and authentication
-
-## [1.0.13] - 2026-02-03
-
-### Added
-
-- **OpenClaw upstream:** latest as of 2026-02-03
-- ffmpeg for media processing capabilities
-- ripgrep (rg) for fast text searching
-- tmux for terminal multiplexing
-- jq for JSON processing
-- GitHub CLI (gh) for git operations and authentication
-
-### Changed
-
-- Enhanced development and media processing capabilities in the container environment
-
-## [1.0.12] - 2026-02-03
-
-### Added
-
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Terminal access directly in Home Assistant addon UI
-- Interactive shell access through the HA interface
-
-### Changed
-
-- Enabled stdin in addon configuration for terminal interactivity
-
-## [1.0.11] - 2026-02-03
+## [1.0.13] - 2026-02-04
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Claude authentication by properly exporting ANTHROPIC_API_KEY environment variable
-- API key now correctly accessible to OpenClaw processes
+- **Channels DVR add-on:** Fixed database corruption issue
+  - Changed NFS mount from `soft,retrans=3` to `hard` for data integrity
+  - Soft mounts can cause silent I/O errors leading to BoltDB corruption
+  - Updated all existing configs that may have soft mount
+
+## [1.0.12] - 2026-02-03
+
+### Fixed
+
+- **Channels DVR add-on:** Fixed version detection error
+  - Changed from string parsing to proper integer extraction
+  - Now correctly extracts build number from "YYYY.MM.DD.BBBB" format
+
+## [1.0.11] - 2026-02-03
+
+### Added
+
+- New add-on: **Channels DVR Server**
+  - Runs Channels DVR server directly in Home Assistant
+  - Supports NFS mount for database and binary storage
+  - Auto-updates DVR server binary when new versions available
+  - Exposes port 8089 for web UI and client connections
 
 ## [1.0.10] - 2026-02-03
 
+### Added
+
+- **Persistent CLI tool configs** - `~/.config`, `~/.local`, and `~/.railway` directories now persist across restarts
+  - Fixes GitHub CLI auth (`gh auth login`) being lost on restart
+  - Fixes Railway CLI auth being lost on restart
+  - Any tool that stores config in these locations will now persist
+
 ### Changed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Use fully qualified model names in configuration to silence deprecation warnings
-- Improved model configuration clarity
+- `~/.config`, `~/.local`, `~/.railway` are now symlinked to `/data/openclaw-home/` (same as persistent home)
+- Previously only `/data/openclaw-home/` was available as persistent storage
+
+### Migration
+
+- Existing installations may need to manually move config from `/home/node/.config` to `/data/openclaw-home/.config` on first update
+- New installations will work automatically
 
 ## [1.0.9] - 2026-02-03
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- WebSocket connections by connecting directly to addon port instead of through ingress proxy
-- Improved Web UI connectivity and real-time features
+- Channels DVR add-on: Fixed version comparison for updates
+  - Version strings now properly converted to sortable integers
+  - Example: "2025.10.30.0047" → 20251030004
 
 ## [1.0.8] - 2026-02-03
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Configuration keys updated to match current OpenClaw schema requirements
-- Ensures proper configuration parsing and validation
+- Playwright Chromium installation now uses `/data/openclaw-home/.cache/ms-playwright` for persistence
+- Browser installation survives add-on restarts
+- Skip re-installation if browsers already present (faster startup)
+
+### Changed
+
+- Moved Playwright browser cache from `/home/node/.cache/ms-playwright` to `/data/openclaw-home/.cache/ms-playwright`
+- Installation only runs on first startup after fresh install or cache clear
 
 ## [1.0.7] - 2026-02-03
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Configuration now written to `openclaw.json` (not `config.json`)
-- Matches expected configuration file naming convention
+- Channels DVR add-on: Fixed wget not found error
+  - wget is now pre-installed in the Docker image
+  - Removed runtime download of DVR server (not reliable)
+  - Server binary must be present on NFS mount
 
 ## [1.0.6] - 2026-02-03
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Ingress authentication with token-based auth and allowInsecureAuth setting
-- Improved Web UI access through Home Assistant sidebar
+- OpenClaw config now persists correctly across add-on restarts
+- Configuration created on first run is preserved for subsequent restarts
+- Only generates fresh config when `/data/openclaw-config/openclaw.json` doesn't exist
+
+### Changed
+
+- Improved startup logging to show when config is preserved vs created
+- Config file path logged for easier debugging
 
 ## [1.0.5] - 2026-02-03
 
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Inline ingress fix script to avoid file path resolution errors
-- Improved startup reliability
+- OpenClaw config directory symlink now properly created at `/home/node/.openclaw`
+- Workspace directory structure corrected for proper file access
+- Gateway token persistence improved
 
 ## [1.0.4] - 2026-02-03
 
+### Added
+
+- Persistent workspace storage at `/share/openclaw/workspace`
+- Persistent credentials at `/share/openclaw/credentials`
+- Support for additional apt packages via add-on config
+
 ### Fixed
 
-- **OpenClaw upstream:** latest as of 2026-02-03
-- Nginx configuration variable parsing error with `$` characters
-- Improved reverse proxy stability
+- Configuration persistence across add-on restarts
 
 ## [1.0.3] - 2026-02-03
 
+### Changed
+
+- Disabled ingress port (using direct port 18789 only for now)
+- Simplified nginx configuration
+
 ### Fixed
 
-- WebSocket disconnection when accessing Web UI through HA sidebar (ingress)
-- Telegram plugin not auto-enabling ("configured, not enabled yet")
-- Gateway now runs behind nginx reverse proxy for proper WebSocket proxying
+- Web UI access via direct port
+
+## [1.0.2] - 2026-02-03
 
 ### Added
 
-- nginx reverse proxy for reliable ingress WebSocket support
-- Auto-run `openclaw doctor --fix` during initialization to enable configured plugins
+- Full Playwright/Chromium support for browser automation
+- GitHub CLI (`gh`) pre-installed
+- All required fonts for proper rendering
+
+### Fixed
+
+- Chromium dependencies properly installed
 
 ## [1.0.1] - 2026-02-03
 
 ### Added
 
-- Web UI button to access OpenClaw control interface
-- Sidebar panel integration with robot icon
-- Exposed port 18789 for web UI access
-
-### Changed
-
-- Port 18789 now accessible (changed from null to 18789)
-- Updated port description to reflect web UI access
-
-## [1.0.0] - 2026-02-03
-
-### Added
-
-- Initial release of OpenClaw AI Assistant addon
-- Telegram bot integration with pairing-based authentication
-- Claude Opus 4.5 model support via Claude Pro or Anthropic API
-- Built-in Chromium browser for web automation
-- Playwright integration for advanced browser tasks
-- Power-user features enabled by default:
-  - Persistent home directory
-  - Browser cache preservation
-  - Tool installation persistence
-- Data persistence across restarts:
-  - `/data/openclaw-config` - Configuration and tokens
-  - `/data/openclaw-workspace` - User workspace files
-  - `/data/openclaw-home` - Browser cache and tools
-- S6 overlay for robust service management
-- Automatic gateway token generation
-- Comprehensive documentation and setup guide
-- Support for additional system packages
-- Configurable log levels
-- Health check monitoring
-
-### Technical Details
-
-- Built from OpenClaw source (latest)
-- Multi-stage Docker build for optimized image size
-- Node.js 22 with Bun and pnpm
-- Debian base image for compatibility
-- amd64 architecture support
-
-### Security
-
-- Pairing-based authentication for Telegram
-- Secure token storage
-- Containerized execution
-- Non-root user execution (node user)
-
-### Known Issues
-
-- First startup takes 10-15 minutes due to building OpenClaw from source
-- Chromium installation adds ~1GB to image size
-
-### Credits
-
-- OpenClaw team for the amazing AI assistant framework
-- Anthropic for Claude Opus 4.5
-- Home Assistant community
+- Initial release with OpenClaw AI Assistant
+- Telegram integration for messaging
+- Claude Opus 4.5 API support
+- Web UI for configuration
+- Home Assistant ingress support (sidebar panel)
