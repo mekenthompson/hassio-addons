@@ -5,10 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.21] - 2026-02-06
+
+### Fixed
+- **Web UI origin error** - Override Origin header in nginx to match Host header
+  - OpenClaw's origin check does exact matching (no wildcard support)
+  - HA ingress origin (port 8123) never matches addon port (18891), causing WebSocket disconnect
+  - nginx now rewrites Origin to `http://$host` so it matches the request Host header
+
 ## [1.0.20] - 2026-02-06
 
 ### Fixed
-- **Web UI origin error** - Added `allowedOrigins: ["*"]` to controlUi config for HA ingress compatibility
+- Added `allowedOrigins: ["*"]` to controlUi config (insufficient — see 1.0.21)
 - Patches existing configs on startup to add missing `allowedOrigins`
 
 ## [1.0.19] - 2026-02-06
