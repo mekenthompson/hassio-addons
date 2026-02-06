@@ -108,7 +108,8 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
     "trustedProxies": ["172.30.32.0/24", "172.30.33.0/24", "127.0.0.1"],
     "controlUi": {
       "enabled": true,
-      "allowInsecureAuth": true
+      "allowInsecureAuth": true,
+      "allowedOrigins": ["*"]
     }
   },
   "agents": {
@@ -198,6 +199,17 @@ cat >> /etc/nginx/nginx.conf <<'NGINXEOF'
 NGINXEOF
 
 bashio::log.info "nginx configuration generated with gateway token"
+
+# Ensure allowedOrigins is set for HA ingress (needed since OpenClaw main)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    if ! jq -e '.gateway.controlUi.allowedOrigins' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
+        bashio::log.info "Adding allowedOrigins to controlUi config..."
+        jq '.gateway.controlUi.allowedOrigins = ["*"]' \
+            /data/openclaw-config/openclaw.json > /tmp/oc-patch.json \
+            && mv /tmp/oc-patch.json /data/openclaw-config/openclaw.json
+        chown node:node /data/openclaw-config/openclaw.json
+    fi
+fi
 
 # Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
 bashio::log.info "Running openclaw doctor --fix..."

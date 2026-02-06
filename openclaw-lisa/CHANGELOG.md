@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.20] - 2026-02-06
+
+### Fixed
+- **Web UI origin error** - Added `allowedOrigins: ["*"]` to controlUi config for HA ingress compatibility
+- Patches existing configs on startup to add missing `allowedOrigins`
+
 ## [1.0.19] - 2026-02-06
 
 ### Changed
