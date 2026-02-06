@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.19] - 2026-02-06
+
+### Changed
+- **Upgraded to OpenClaw main** (post-v2026.2.3) for Claude Opus 4.6 support and numerous fixes
+
+### Key upstream fixes since v2026.2.3
+- **Claude Opus 4.6** built-in model support (#9853)
+- **Security:** Canvas host now requires auth, credentials redacted from gateway responses
+- **Telegram:** DM topic threading, forum topic binding, group member allowlist fixes
+- **Cron:** Scheduling regressions, timer re-arm on errors, legacy atMs handling
+- **Stability:** Multiple compaction retries on context overflow, orphaned tool_results cleanup
+- **New:** xAI Grok provider support
+
 ## [1.0.18] - 2026-02-06
 
 ### Changed

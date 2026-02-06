@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.23] - 2026-02-06
 
-### Added
-- **Runtime model patching** - Init script now patches newly released Claude models into the pi-ai model registry
-- Added `claude-opus-4-6` support (released 2026-02-06) without requiring upstream OpenClaw update
-- Patch runs on every startup and is idempotent (skips if model already present)
+### Changed
+- **Upgraded to OpenClaw main** (post-v2026.2.3) for Claude Opus 4.6 support and numerous fixes
+- Removed runtime model patching hack (no longer needed)
+
+### Key upstream fixes since v2026.2.3
+- **Claude Opus 4.6** built-in model support (#9853)
+- **Security:** Canvas host now requires auth, credentials redacted from gateway responses
+- **Telegram:** DM topic threading, forum topic binding, group member allowlist fixes
+- **Cron:** Scheduling regressions, timer re-arm on errors, legacy atMs handling
+- **Stability:** Multiple compaction retries on context overflow, orphaned tool_results cleanup
+- **New:** xAI Grok provider support
 
 ## [1.0.22] - 2026-02-06
 
