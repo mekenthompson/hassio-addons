@@ -6,6 +6,37 @@ bashio::log.info "Starting Channels DVR Server..."
 SEED_DIR="/opt/channels-dvr"
 BINARY_DIR="/media/dvr/channels-dvr-server"
 DATA_DIR="/media/dvr/channels-dvr-data"
+NFS_SERVER="192.168.2.5"
+
+# Wait for NFS server to be available
+MAX_WAIT=300  # 5 minutes
+WAITED=0
+bashio::log.info "Checking NFS availability at $NFS_SERVER..."
+
+while ! ping -c1 -W2 "$NFS_SERVER" >/dev/null 2>&1; do
+    if [ $WAITED -ge $MAX_WAIT ]; then
+        bashio::log.warning "NFS server $NFS_SERVER not responding after ${MAX_WAIT}s, proceeding anyway..."
+        break
+    fi
+    bashio::log.info "Waiting for NFS server $NFS_SERVER... (${WAITED}s/${MAX_WAIT}s)"
+    sleep 5
+    WAITED=$((WAITED+5))
+done
+
+# Additional wait for mount point to be accessible
+WAITED=0
+while [ ! -d "$BINARY_DIR" ] || [ ! -w "$BINARY_DIR" ]; do
+    if [ $WAITED -ge $MAX_WAIT ]; then
+        bashio::log.error "NFS mount not accessible after ${MAX_WAIT}s!"
+        bashio::log.error "Binary directory $BINARY_DIR is not available."
+        exit 1
+    fi
+    bashio::log.info "Waiting for NFS mount at $BINARY_DIR... (${WAITED}s/${MAX_WAIT}s)"
+    sleep 5
+    WAITED=$((WAITED+5))
+done
+
+bashio::log.info "NFS mount verified and accessible."
 
 # Ensure binary directory is initialized
 if [ ! -d "$BINARY_DIR/latest" ]; then
