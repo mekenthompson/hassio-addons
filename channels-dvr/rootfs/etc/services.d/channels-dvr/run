@@ -10,15 +10,20 @@ DATA_DIR="/media/dvr/channels-dvr-data"
 # Ensure binary directory is initialized
 if [ ! -d "$BINARY_DIR/latest" ]; then
     bashio::log.info "First run detected. Initializing binary storage at $BINARY_DIR..."
-    mkdir -p "$BINARY_DIR"
+    # Only create directory if parent mount exists and this directory doesn't
+    if [ -d "/media/dvr" ] && [ ! -d "$BINARY_DIR" ]; then
+        mkdir -p "$BINARY_DIR"
+    fi
     cp -a "$SEED_DIR/." "$BINARY_DIR/"
     bashio::log.info "Binary initialization complete."
 else
     bashio::log.info "Found existing binary at $BINARY_DIR"
 fi
 
-# Ensure data directory exists
-mkdir -p "$DATA_DIR"
+# Ensure data directory exists (only create if NFS mount is present but dir is missing)
+if [ -d "/media/dvr" ] && [ ! -d "$DATA_DIR" ]; then
+    mkdir -p "$DATA_DIR"
+fi
 bashio::log.info "Using data directory: $DATA_DIR"
 
 # Debug: show what's in the data directory
@@ -77,9 +82,8 @@ if [ -d "/share" ]; then
     mkdir -p "/share/channels-dvr"
 fi
 
-if [ -d "/media" ]; then
-    mkdir -p "/media/dvr"
-fi
+# Note: /media/dvr is an NFS mount - do NOT create it here
+# It should be mounted by the host system before addon starts
 
 # Start Channels DVR Server with explicit data path
 cd "$BINARY_DIR/latest"
