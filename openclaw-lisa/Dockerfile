@@ -18,8 +18,9 @@ RUN corepack enable
 WORKDIR /build
 
 # Clone and build OpenClaw
-ARG OPENCLAW_VERSION=latest
-RUN git clone --depth 1 --branch main https://github.com/openclaw/openclaw.git . \
+ARG OPENCLAW_VERSION=2026.2.6
+RUN echo "Building OpenClaw ${OPENCLAW_VERSION}" \
+    && git clone --depth 1 --branch main https://github.com/openclaw/openclaw.git . \
     && pnpm install --frozen-lockfile \
     && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build \
     && OPENCLAW_PREFER_PNPM=1 pnpm ui:build
