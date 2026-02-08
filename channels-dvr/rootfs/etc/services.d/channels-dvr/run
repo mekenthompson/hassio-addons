@@ -21,6 +21,14 @@ fi
 mkdir -p "$DATA_DIR"
 bashio::log.info "Using data directory: $DATA_DIR"
 
+# Debug: show what's in the data directory
+bashio::log.info "DEBUG: Contents of $DATA_DIR:"
+ls -la "$DATA_DIR/" 2>&1 | while read line; do bashio::log.info "  $line"; done
+bashio::log.info "DEBUG: Mount info:"
+mount | grep -E "media|dvr|nfs" 2>&1 | while read line; do bashio::log.info "  $line"; done
+bashio::log.info "DEBUG: df for DATA_DIR:"
+df -h "$DATA_DIR" 2>&1 | while read line; do bashio::log.info "  $line"; done
+
 # Auto-restore database from backup if missing or empty
 # The backup settings.db is ~60KB; a fresh/empty one is much smaller
 SETTINGS_SIZE=0
@@ -29,7 +37,23 @@ if [ -f "$DATA_DIR/settings.db" ]; then
 fi
 if [ "$SETTINGS_SIZE" -lt 50000 ]; then
     bashio::log.warning "Database missing or empty in $DATA_DIR (size: ${SETTINGS_SIZE}B)! Attempting restore from backup..."
+    # Try NAS backup first (has the good 204KB recorder.db)
+    NAS_BACKUP_BASE="/media/dvr/Database"
     BACKUP_BASE="/share/channels-dvr/Database"
+    if [ -d "$NAS_BACKUP_BASE" ]; then
+        LATEST_BACKUP=$(ls -td "$NAS_BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
+        if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
+            bashio::log.info "Restoring from NAS backup: $LATEST_BACKUP"
+            cp "$LATEST_BACKUP/settings.db" "$DATA_DIR/"
+            [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$DATA_DIR/"
+            bashio::log.info "Database restored from NAS successfully."
+            SETTINGS_SIZE=$(stat -c%s "$DATA_DIR/settings.db" 2>/dev/null || echo 0)
+        fi
+    fi
+    # Fall back to local backup if NAS restore didn't work
+    if [ "$SETTINGS_SIZE" -lt 50000 ]; then
+        bashio::log.warning "NAS backup not available, trying local backup..."
+        BACKUP_BASE="/share/channels-dvr/Database"
     if [ -d "$BACKUP_BASE" ]; then
         LATEST_BACKUP=$(ls -td "$BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
         if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
@@ -43,8 +67,9 @@ if [ "$SETTINGS_SIZE" -lt 50000 ]; then
     else
         bashio::log.warning "No backup directory found at $BACKUP_BASE"
     fi
+    fi
 else
-    bashio::log.info "Database found in $DATA_DIR"
+    bashio::log.info "Database found in $DATA_DIR (size: ${SETTINGS_SIZE}B)"
 fi
 
 # Create default recordings directory if it doesn't exist

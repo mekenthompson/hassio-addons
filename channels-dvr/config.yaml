@@ -1,6 +1,6 @@
 ---
 name: Channels DVR Server
-version: "1.0.17"
+version: "1.0.18"
 slug: channels-dvr
 description: Manage and record live TV with Channels DVR Server
 url: https://github.com/mekenthompson/hassio-addons
