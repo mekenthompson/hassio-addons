@@ -131,6 +131,18 @@ fi
 
 chown node:node /data/openclaw-config/gateway.token
 
+# Always sync gateway token to openclaw.json (token file and config can drift)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    CURRENT_TOKEN=$(jq -r '.gateway.auth.token // empty' /data/openclaw-config/openclaw.json 2>/dev/null)
+    if [ "$CURRENT_TOKEN" != "$GATEWAY_TOKEN" ]; then
+        bashio::log.info "Syncing gateway token to openclaw.json..."
+        jq --arg token "$GATEWAY_TOKEN" '.gateway.auth.token = $token' \
+            /data/openclaw-config/openclaw.json > /tmp/oc-token-sync.json \
+            && mv /tmp/oc-token-sync.json /data/openclaw-config/openclaw.json
+        chown node:node /data/openclaw-config/openclaw.json
+    fi
+fi
+
 # Log the config for debugging (mask sensitive values)
 bashio::log.info "Gateway mode: local"
 bashio::log.info "Telegram enabled: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'true' || echo 'false')"
