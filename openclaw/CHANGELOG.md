@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.29] - 2026-02-10
+
+### Changed
+- **Rebuilt from latest OpenClaw main** - Force fresh rebuild with cache busting
+- Incremented CACHEBUST to 2 and OPENCLAW_VERSION to 2026.2.10
+- Pulls ~33 commits of upstream improvements since last rebuild
+
 ## [1.0.25] - 2026-02-06
 
 ### Fixed
