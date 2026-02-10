@@ -265,6 +265,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Claude Opus 4.5 API support
 - Web UI for configuration
 - Home Assistant ingress support (sidebar panel)
-
-## 1.0.30
-- Apply messaging config improvements on startup (message queue ordering, thread session resets, block streaming, deleteMessage)
