@@ -300,3 +300,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenClaw team for the amazing AI assistant framework
 - Anthropic for Claude Opus 4.5
 - Home Assistant community
+
+## 1.0.25
+- Apply messaging config improvements on startup (message queue ordering, thread session resets, block streaming, deleteMessage)
