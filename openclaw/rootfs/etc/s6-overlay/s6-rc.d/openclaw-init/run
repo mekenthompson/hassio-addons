@@ -263,34 +263,4 @@ if bashio::config.has_value 'additional_packages'; then
     fi
 fi
 
-# Apply messaging & Telegram config improvements (message ordering, block streaming, etc.)
-# This patches existing config without overwriting user changes
-if [ -f /data/openclaw-config/openclaw.json ]; then
-    bashio::log.info "Applying messaging config improvements..."
-    jq '
-      # Message queue ordering
-      .messages.queue.mode = "steer+backlog" |
-      .messages.queue.debounceMs = 1500 |
-      .messages.queue.cap = 5 |
-      # Thread session resets (90min idle)
-      .session.resetByType.thread.mode = "idle" |
-      .session.resetByType.thread.idleMinutes = 90 |
-      # Telegram: replyToMode all, deleteMessage enabled
-      .channels.telegram.replyToMode = "all" |
-      .channels.telegram.actions.reactions = true |
-      .channels.telegram.actions.sendMessage = true |
-      .channels.telegram.actions.deleteMessage = true |
-      .channels.telegram.actions.sticker = true |
-      # Agent block streaming for outbound ordering
-      .agents.defaults.blockStreamingDefault = "on" |
-      .agents.defaults.blockStreamingBreak = "message_end" |
-      .agents.defaults.blockStreamingCoalesce.minChars = 100 |
-      .agents.defaults.blockStreamingCoalesce.maxChars = 4000 |
-      .agents.defaults.blockStreamingCoalesce.idleMs = 1500
-    ' /data/openclaw-config/openclaw.json > /tmp/oc-messaging-patch.json \
-        && mv /tmp/oc-messaging-patch.json /data/openclaw-config/openclaw.json
-    chown node:node /data/openclaw-config/openclaw.json
-    bashio::log.info "Messaging config improvements applied"
-fi
-
 bashio::log.info "OpenClaw initialization complete!"
