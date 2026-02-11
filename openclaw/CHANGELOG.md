@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.33] - 2026-02-12
+
+### Fixed
+- **Persist bun symlink for node user** - QMD (semantic search) now accessible
+  - Added `.bun` to persistent storage symlinks in `init-openclaw-persist` script
+  - Ensures `/home/node/.bun` persists across container rebuilds via `/data/openclaw-home/.bun`
+  - Added `/home/node/.bun/bin` to PATH in gateway run script
+  - Fixes issue where node user couldn't access bun/qmd installed for root during Docker build
+
 ## [1.0.30] - 2026-02-11
 
 ### Changed
