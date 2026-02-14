@@ -18,8 +18,8 @@ RUN corepack enable
 WORKDIR /build
 
 # Clone and build OpenClaw
-ARG OPENCLAW_VERSION=2026.2.10
-ARG CACHEBUST=5
+ARG OPENCLAW_VERSION=2026.2.12
+ARG CACHEBUST=6
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/openclaw/openclaw.git . \
     && pnpm install --frozen-lockfile \
