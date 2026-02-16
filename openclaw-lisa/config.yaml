@@ -1,6 +1,6 @@
 ---
 name: "OpenClaw AI Assistant (Lisa)"
-version: "1.0.31"
+version: "1.0.32"
 slug: openclaw-lisa
 description: "Lisa's personal AI assistant powered by Claude via Telegram"
 url: https://github.com/mekenthompson/hassio-addons
