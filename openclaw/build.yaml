@@ -3,7 +3,7 @@ build_from:
   amd64: ghcr.io/hassio-addons/debian-base:7.3.3
 
 args:
-  OPENCLAW_VERSION: "2026.2.15-patched"
+  OPENCLAW_VERSION: "2026.2.16-dev+dm-forum-fix"
 
 labels:
   org.opencontainers.image.title: "OpenClaw AI Assistant"
