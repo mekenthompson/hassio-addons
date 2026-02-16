@@ -199,10 +199,10 @@ http {
 NGINXEOF
 
 # Append the sub_filter with the actual gateway token
-# When accessed through HA ingress, connect WebSocket directly to addon port 18789
-# (HA ingress does not proxy WebSocket upgrades reliably)
+# When accessed through HA ingress, route WebSocket through the ingress proxy path
+# (ingress_stream: true enables WebSocket streaming; direct port fails with HTTPS/WSS)
 cat >> /etc/nginx/nginx.conf <<NGINXEOF
-            sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var gw=proto+"://"+location.hostname+":18789";var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
+            sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var gw=proto+"://"+location.host+p.replace(/\/\$/,"");var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
 NGINXEOF
 
 cat >> /etc/nginx/nginx.conf <<'NGINXEOF'
