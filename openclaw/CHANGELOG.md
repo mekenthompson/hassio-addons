@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.43] - 2026-07-17
+
+### Fixed
+- Adopted upstream DM topic thread routing fix (replaces scope-based #17980 fix)
+- DM forum/topic threads now correctly preserve message_thread_id in outbound messages
+- Fixed dmThreadId resolution using scope check instead of isGroup check
+- Updated bot-message-context.ts and bot-native-commands.ts for correct thread scoping
+
 ## [1.0.38] - 2026-06-19
 
 ### Changed
