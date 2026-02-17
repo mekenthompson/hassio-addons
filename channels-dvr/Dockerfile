@@ -12,6 +12,11 @@ RUN \
         curl \
         chromium \
         procps \
+        vainfo \
+        libva2 \
+        libva-drm2 \
+        intel-media-va-driver \
+    \
     && curl -fsSL https://getchannels.com/dvr/setup.sh -o /tmp/setup.sh \
     && chmod +x /tmp/setup.sh \
     && mkdir -p /opt \
