@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.35] - 2026-02-18
+<!-- last-upstream-sha: 81c5c02e -->
+
+### Changed
+- Upgraded to upstream openclaw/openclaw main (`81c5c02e`)
+- 218 commits since last update
+- See main openclaw addon changelog for detailed upstream changes
+
 ## [1.0.34] - 2026-02-17
 <!-- last-upstream-sha: 6d451c82 -->
 
