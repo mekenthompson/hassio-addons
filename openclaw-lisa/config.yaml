@@ -38,6 +38,9 @@ map:
   - addon_config:rw
   - ssl:ro
 
+# GPU access (Intel iGPU for GGUF/Vulkan inference)
+video: true
+
 # API access
 hassio_api: true
 auth_api: true
