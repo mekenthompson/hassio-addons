@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.34] - 2026-02-17
+
+### Changed
+- **Rebased to upstream openclaw/openclaw main** (`6d451c82`) — builds from upstream directly
+- 250+ commits since v2026.2.15: DM thread routing fixes, cron stability, memory improvements, security hardening
+- See openclaw addon changelog for full details
+
 ## [1.0.25] - 2026-02-11
 
 ### Changed

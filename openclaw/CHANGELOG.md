@@ -5,7 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.43] - 2026-07-17
+## [1.0.44] - 2026-02-17
+
+### Changed
+- **Rebased to upstream openclaw/openclaw main** (`6d451c82`) — no more fork patches
+- Builds directly from upstream repo instead of mekenthompson fork
+- 250+ commits since v2026.2.15 including:
+
+### Fixed (upstream)
+- DM forum/topic thread routing fully fixed ([#18021](https://github.com/openclaw/openclaw/pull/18021) + [#18586](https://github.com/openclaw/openclaw/pull/18586))
+- Cron spin loop prevention, session key routing alignment ([#18637](https://github.com/openclaw/openclaw/pull/18637))
+- Stale session lock release + watchdog for hung API calls ([#18060](https://github.com/openclaw/openclaw/pull/18060))
+- Announce infinite retry loop broken ([#18264](https://github.com/openclaw/openclaw/pull/18264))
+- Gateway crash loop prevention after failed self-update
+- Atomic session store writes (prevents context loss)
+- Security: credential theft via env var injection (OC-09), file permissions hardened
+- Heartbeat transcript pruning for HEARTBEAT_OK turns
+
+### Added (upstream)
+- Linq channel (real iMessage via API)
+- Gateway channel health monitor with auto-restart
+- Post-compaction workspace context injection
+- Memory: MMR re-ranking, temporal decay, FTS fallback, LLM query expansion
+- Per-model thinkingDefault override
+- Configurable tool loop detection
+- /subagents spawn and /export-session commands
+
+## [1.0.43] - 2026-02-17
 
 ### Fixed
 - Adopted upstream DM topic thread routing fix (replaces scope-based #17980 fix)
