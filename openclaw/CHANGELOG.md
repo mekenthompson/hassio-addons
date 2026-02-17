@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.46] - 2026-02-18
+
+### Fixed
+- **Providers configuration now persists** - Fixed init script to properly bootstrap `claude_session_key` into providers section on first setup
+- After initial setup, addon never overwrites providers section - multiple API keys configured via OpenClaw UI now persist across restarts
+- Only gateway token is synced on subsequent restarts, all other config (including providers) is preserved
+
 ## [1.0.45] - 2026-02-18
 <!-- last-upstream-sha: 81c5c02e -->
 
