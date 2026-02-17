@@ -18,6 +18,8 @@ ports:
 map:
   - share:rw
   - media:rw
+# GPU access (Intel iGPU for hardware transcoding via Quick Sync)
+video: true
 hassio_api: true
 options: {}
 schema: {}
