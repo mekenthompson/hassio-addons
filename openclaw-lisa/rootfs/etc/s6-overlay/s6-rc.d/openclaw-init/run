@@ -63,6 +63,11 @@ LOG_LEVEL=$(bashio::config 'log_level')
 
 # Create OpenClaw configuration only if it doesn't exist yet.
 # Once created, the gateway manages openclaw.json — UI changes persist across restarts.
+# Bootstrap behavior:
+#   - If claude_session_key is provided in addon config, it's used to create initial providers section
+#   - After initial setup, the addon NEVER overwrites the providers section
+#   - Users can add multiple API keys via OpenClaw web UI, and they persist
+#   - Only the gateway token is synced on subsequent restarts (preserves all other config)
 if [ -f /data/openclaw-config/openclaw.json ]; then
     bashio::log.info "OpenClaw configuration already exists, preserving it"
 else
@@ -112,6 +117,20 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
       "allowedOrigins": ["*"]
     }
   },
+JSONEOF
+
+# Add providers section if Claude session key is provided
+if [ -n "$CLAUDE_SESSION_KEY" ]; then
+    cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+  "providers": {
+    "anthropic": {
+      "sessionKey": "${CLAUDE_SESSION_KEY}"
+    }
+  },
+JSONEOF
+fi
+
+cat >> /data/openclaw-config/openclaw.json <<JSONEOF
   "agents": {
     "defaults": {
       "model": {
