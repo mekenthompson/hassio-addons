@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.45] - 2026-02-18
+<!-- last-upstream-sha: 81c5c02e -->
+
+### Changed
+- Upgraded to upstream openclaw/openclaw main (`81c5c02e`)
+- 218 commits since last update including extensive test coverage and bug fixes
+
+### Added (upstream)
+- iOS: auto-select local signing team for automated builds
+- Community plugins guide and vision documentation
+- Maintainer application process documentation
+
+### Fixed (upstream)
+- Cron announce routing and timeout handling improvements
+- BlueBubbles: outbound message ID recovery with sender metadata
+- Telegram: sanitize native command names for API compliance
+- Gateway: non-fatal stale token cleanup
+- Mattermost: reactions support surfaced
+
 ## [1.0.44] - 2026-02-17
 <!-- last-upstream-sha: 6d451c82 -->
 
