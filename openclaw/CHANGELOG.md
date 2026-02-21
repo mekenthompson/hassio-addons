@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.51] - 2026-02-22
+<!-- last-upstream-sha: 861718e4d -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (`861718e4d`, v2026.2.21) — 339 commits ahead of previous sync
+- GPU patches (browser `gpuEnabled` config) rebased cleanly on top
+- CACHEBUST incremented to 22 for fresh Docker rebuild
+
+### Added (upstream)
+- **Gemini 3.1** model support
+- **Apple Watch** companion app (inbox UI, notification relay, quick-reply actions)
+- **Discord voice channels** (`/vc` join/leave/status), stream preview mode, forum tag management
+- **Thread-aware model overrides** and per-channel model overrides (`channels.modelByChannel`)
+- **Telegram streaming overhaul** — simplified to `channels.telegram.streaming` (boolean), split reasoning/answer preview lanes
+- **Telegram/Discord lifecycle status reactions** — configurable emoji for queued/thinking/tool/done/error phases
+- **Volcano Engine (Doubao) and BytePlus** providers
+- **Discord ephemeral slash-command defaults** and thread-bound subagent sessions
+- **Subagent spawn depth** default raised to `maxSpawnDepth=2`
+
+### Fixed (upstream)
+- **Compaction safeguard** extension not loading in production builds
+- **Cron `maxConcurrentRuns`** now actually honored (was running serially)
+- **Subagent announce chain** — deep spawn chains no longer drop final completions
+- **Memory/QMD**: mixed-source search diversification, async close race, embed scheduling hardened, explicit unavailable status
+- **Session memory persists on `/reset`** (not just `/new`)
+- **Telegram**: topic targeting for cron/heartbeat, status reaction stall timers, `NO_REPLY` prefix suppression
+- **Telegram duplicate bot-token** detection at startup
+- **Docker image ~50% smaller** (~900MB reduction), base images pinned to SHA256 digests
+- **Owner-only tools** now work for authorized senders (forward `senderIsOwner` to embedded runner)
+- **Tool display**: compound commands no longer truncated to first stage
+
+### Security (upstream)
+- Unbounded compaction retry cost loop capped (`GHSA-76m6-pj3w-v7mf`)
+- Exec heredoc/shell startup-file env injection blocked (`BASH_ENV`, `LD_*`, `DYLD_*`)
+- Browser `file:`/`data:`/`javascript:` protocol navigation blocked
+- Untrusted content marker spoofing prevention (per-wrapper random IDs)
+- Browser upload symlink escape blocked
+- Canvas endpoints require token/session capability (no shared-IP fallback)
+- Credential header stripping on cross-origin redirects
+- Gateway X-Forwarded-For proxy-chain spoofing hardened
+- Browser sandbox: VNC password auth required, dedicated Docker network default
+- 20+ additional security fixes across Discord, WhatsApp, Signal, BlueBubbles, systemd, skills
+
 ## [1.0.46] - 2026-02-18
 
 ### Fixed
