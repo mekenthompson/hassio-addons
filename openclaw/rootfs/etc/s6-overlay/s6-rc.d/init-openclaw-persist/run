@@ -10,6 +10,12 @@ bashio::log.info "Setting up persistent config symlinks..."
 # Ensure persistent dirs exist
 mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun
 
+# Preserve Docker-installed bun+qmd to persistent storage on first boot
+if [ -d "/home/node/.bun" ] && [ ! -f "/data/openclaw-home/.bun/bin/qmd" ]; then
+    bashio::log.info "Preserving Docker-installed bun+qmd to persistent storage..."
+    cp -a /home/node/.bun/* /data/openclaw-home/.bun/ 2>/dev/null || true
+fi
+
 # Clean broken symlinks in persistent bun bin (prevents stale qmd EACCES)
 find /data/openclaw-home/.bun/bin -xtype l -delete 2>/dev/null || true
 
@@ -21,22 +27,6 @@ ln -sf /data/openclaw-home/.bun /home/node/.bun
 
 # Fix ownership
 chown -R node:node /data/openclaw-home
-
-# Install bun + qmd into persistent storage if not present
-# This matches the production pattern: node user owns everything in .bun/
-if [ ! -x /data/openclaw-home/.bun/bin/bun ]; then
-    bashio::log.info "Installing bun into persistent storage (first run)..."
-    su - node -s /bin/bash -c "curl -fsSL https://bun.sh/install | bash" || {
-        bashio::log.warning "Bun installation failed — qmd memory search will be unavailable"
-    }
-fi
-
-if [ -x /data/openclaw-home/.bun/bin/bun ] && ! su - node -s /bin/bash -c "command -v qmd" >/dev/null 2>&1; then
-    bashio::log.info "Installing qmd into persistent storage (first run, may take 1-2 min)..."
-    su - node -s /bin/bash -c "/home/node/.bun/bin/bun install -g https://github.com/tobi/qmd" || {
-        bashio::log.warning "qmd installation failed — memory search will be unavailable"
-    }
-fi
 
 # Ensure qmd command resolves to the persistent install
 if [ -f /data/openclaw-config/openclaw.json ] && [ -x /home/node/.bun/bin/qmd ]; then
