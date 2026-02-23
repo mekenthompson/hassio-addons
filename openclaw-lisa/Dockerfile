@@ -18,10 +18,10 @@ RUN corepack enable
 WORKDIR /build
 
 # Clone and build OpenClaw
-ARG OPENCLAW_VERSION=2026.02.23
-ARG CACHEBUST=15
+ARG OPENCLAW_VERSION=2026.02.23-gpu
+ARG CACHEBUST=24
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
-    && git clone --depth 1 --branch main https://github.com/openclaw/openclaw.git . \
+    && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && pnpm install --frozen-lockfile \
     && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build \
     && OPENCLAW_PREFER_PNPM=1 pnpm ui:build
@@ -59,6 +59,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
         ripgrep \
         tmux \
         jq \
+        mesa-vulkan-drivers \
     && apt-get clean \
     && rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
 
