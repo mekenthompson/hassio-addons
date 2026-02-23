@@ -245,55 +245,6 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     fi
 fi
 
-# Apply reference config if anthropic provider is missing (one-time upgrade)
-if [ -f /data/openclaw-config/openclaw.json ]; then
-    if ! jq -e '.models.providers.anthropic' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
-        if [ -f /app/reference-config.json ]; then
-            bashio::log.info "Applying reference config (adding providers, memory, browser, etc.)..."
-            # Preserve Lisa's Telegram and gateway settings
-            LISA_BOT_TOKEN=$(jq -r '.channels.telegram.botToken // empty' /data/openclaw-config/openclaw.json)
-            LISA_ALLOW_FROM=$(jq -c '.channels.telegram.allowFrom // []' /data/openclaw-config/openclaw.json)
-            LISA_GW_TOKEN=$(jq -r '.gateway.auth.token // empty' /data/openclaw-config/openclaw.json)
-            
-            cp /app/reference-config.json /data/openclaw-config/openclaw.json
-            
-            # Inject API keys from credential files on shared storage
-            ANTHROPIC_PERSONAL_KEY=""
-            OPENAI_KEY=""
-            GOOGLE_KEY=""
-            PERPLEXITY_KEY=""
-            [ -f /share/lisa-credentials/anthropic-personal ] && ANTHROPIC_PERSONAL_KEY=$(cat /share/lisa-credentials/anthropic-personal)
-            [ -f /share/lisa-credentials/openai ] && OPENAI_KEY=$(cat /share/lisa-credentials/openai)
-            [ -f /share/lisa-credentials/google ] && GOOGLE_KEY=$(cat /share/lisa-credentials/google)
-            [ -f /share/lisa-credentials/perplexity ] && PERPLEXITY_KEY=$(cat /share/lisa-credentials/perplexity)
-            
-            # Fall back to ANTHROPIC_API_KEY env var if no credential file
-            [ -z "$ANTHROPIC_PERSONAL_KEY" ] && ANTHROPIC_PERSONAL_KEY="${ANTHROPIC_API_KEY:-}"
-            
-            # Re-apply Lisa's specific settings and inject keys
-            jq --arg bt "$LISA_BOT_TOKEN" \
-               --argjson af "$LISA_ALLOW_FROM" \
-               --arg gt "$LISA_GW_TOKEN" \
-               --arg ak "$ANTHROPIC_PERSONAL_KEY" \
-               --arg ok "$OPENAI_KEY" \
-               --arg gk "$GOOGLE_KEY" \
-               --arg pk "$PERPLEXITY_KEY" '
-              .channels.telegram.botToken = $bt |
-              .channels.telegram.allowFrom = $af |
-              .gateway.auth.token = $gt |
-              (if $ak != "" then .models.providers.anthropic.apiKey = $ak else . end) |
-              (if $ok != "" then .models.providers.openai.apiKey = $ok else del(.models.providers.openai) end) |
-              (if $gk != "" then .models.providers.google.apiKey = $gk else del(.models.providers.google) end) |
-              (if $pk != "" then .tools.web.search.apiKey = $pk | .tools.web.search.perplexity.apiKey = $pk else del(.tools.web) end)
-            ' /data/openclaw-config/openclaw.json > /tmp/oc-merge.json \
-                && mv /tmp/oc-merge.json /data/openclaw-config/openclaw.json
-            
-            chown node:node /data/openclaw-config/openclaw.json
-            bashio::log.info "Reference config applied successfully"
-        fi
-    fi
-fi
-
 # Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
 bashio::log.info "Running openclaw doctor --fix..."
 cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index.js doctor --fix" || {
@@ -321,14 +272,6 @@ if bashio::config.has_value 'additional_packages'; then
         apt-get clean
         rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
     fi
-fi
-
-# Grant node user write access to HA config directory (for config management)
-if [ -d "/homeassistant" ]; then
-    bashio::log.info "Setting up HA config directory permissions..."
-    chown -R node:node /homeassistant/includes/ 2>/dev/null || true
-    # Make git work for the node user
-    git config --global --add safe.directory /homeassistant 2>/dev/null || true
 fi
 
 bashio::log.info "OpenClaw initialization complete!"
