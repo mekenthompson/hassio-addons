@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.02.23-gpu
-ARG CACHEBUST=38
+ARG CACHEBUST=39
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && pnpm install --frozen-lockfile \
@@ -129,7 +129,7 @@ RUN groupadd --gid 1000 node \
 USER node
 ENV HOME=/home/node
 RUN curl -fsSL https://bun.sh/install | bash \
-    && /home/node/.bun/bin/bun install -g https://github.com/tobi/qmd
+    && /home/node/.bun/bin/bun install -g "https://github.com/tobi/qmd#785bbcf"
 USER root
 ENV HOME=/root
 
