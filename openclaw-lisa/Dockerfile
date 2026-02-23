@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.02.23-gpu
-ARG CACHEBUST=25
+ARG CACHEBUST=26
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && pnpm install --frozen-lockfile \
@@ -123,6 +123,10 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
 RUN groupadd --gid 1000 node \
     && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
     && chown -R node:node /app
+
+# Install Bun for node user and install qmd
+RUN su - node -c "curl -fsSL https://bun.sh/install | bash" \
+    && su - node -c "/home/node/.bun/bin/bun install -g qmd"
 
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
