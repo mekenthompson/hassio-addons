@@ -124,15 +124,10 @@ RUN groupadd --gid 1000 node \
     && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
     && chown -R node:node /app
 
-# Install qmd (memory search sidecar) system-wide
-# Must live outside /root/ so the node user can access it
-# Copy both bun and qmd out of /root/ (mode 700) into world-accessible paths
-RUN /root/.bun/bin/bun install -g https://github.com/tobi/qmd \
-    && cp /root/.bun/bin/bun /usr/local/bin/bun \
-    && cp -r /root/.bun/install/global/node_modules/@tobilu/qmd /opt/qmd \
-    && chmod -R a+rX /opt/qmd \
-    && chmod 755 /usr/local/bin/bun \
-    && ln -sf /opt/qmd/qmd /usr/local/bin/qmd
+# Copy bun binary to /usr/local/bin as fallback
+# (qmd + bun are installed at runtime into persistent storage by init-openclaw-persist)
+RUN cp /root/.bun/bin/bun /usr/local/bin/bun \
+    && chmod 755 /usr/local/bin/bun
 
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
