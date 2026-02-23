@@ -10,6 +10,11 @@ bashio::log.info "Setting up persistent config symlinks..."
 # Ensure persistent dirs exist
 mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun
 
+# Copy image bun directory contents to persistent storage before symlinking (preserves qmd)
+if [ -d "/home/node/.bun" ] && [ "$(ls -A /home/node/.bun 2>/dev/null)" ]; then
+    cp -an /home/node/.bun/* /data/openclaw-home/.bun/ 2>/dev/null || true
+fi
+
 # Replace ephemeral dirs with symlinks to persistent storage
 rm -rf /home/node/.config /home/node/.local /home/node/.bun
 ln -sf /data/openclaw-home/.config /home/node/.config
