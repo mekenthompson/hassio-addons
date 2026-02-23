@@ -127,9 +127,11 @@ RUN groupadd --gid 1000 node \
 
 # Install qmd as node user (will be preserved to persistent storage on first boot)
 USER node
+ENV HOME=/home/node
 RUN curl -fsSL https://bun.sh/install | bash \
     && /home/node/.bun/bin/bun install -g https://github.com/tobi/qmd
 USER root
+ENV HOME=/root
 
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
