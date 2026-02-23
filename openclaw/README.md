@@ -3,20 +3,22 @@
 [![License][license-shield]](LICENSE)
 [![Project Stage][project-stage-shield]][project-stage]
 
-Your personal AI assistant powered by Claude Opus 4.5, accessible via Telegram, running directly on your Home Assistant instance.
+Your personal AI assistant powered by Claude, accessible via Telegram, running directly on your Home Assistant instance.
 
 ## About
 
-OpenClaw is an open-source AI assistant that brings Claude's powerful capabilities to your Home Assistant setup. Chat with Claude via Telegram, have it browse the web, manage files, and help with tasks - all from the convenience of your phone.
+OpenClaw is an open-source AI assistant that brings Claude's capabilities to your Home Assistant setup. Chat via Telegram, browse the web, manage files, search memory semantically, and automate tasks — all from your phone.
 
 ## Features
 
-- 🤖 **Claude Opus 4.5**: Access to Anthropic's most powerful AI model
-- 💬 **Telegram Integration**: Simple, familiar chat interface
-- 🌐 **Web Browsing**: Built-in Chromium for web automation
-- 🔧 **Power-User Ready**: Pre-configured with Chromium and Playwright
-- 💾 **Persistent Storage**: Conversations and settings survive restarts
-- 🔒 **Secure**: Pairing-based authentication, containerized execution
+- 🤖 **Claude Opus 4**: Access to Anthropic's most capable AI model (configurable)
+- 💬 **Telegram Integration**: Chat interface with topic threads, reactions, and inline buttons
+- 🌐 **Web Browsing**: Built-in Chromium with optional GPU acceleration (Intel iGPU)
+- 🧠 **Semantic Memory**: QMD-powered memory search with vector embeddings and BM25 hybrid retrieval
+- 💾 **Persistent Storage**: Config, sessions, CLI tools, caches, and memory indexes survive rebuilds
+- 🔧 **Power-User Ready**: Pre-installed gh CLI, bun, Playwright, and qmd
+- ⏰ **Cron Jobs**: Scheduled tasks with isolated sessions and Telegram delivery
+- 🔒 **Secure**: Pairing-based auth, containerized execution, exec allowlists
 - 🚀 **Fast**: Optimized Docker build with layer caching
 
 ## Prerequisites

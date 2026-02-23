@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.54] - 2026-02-23
+<!-- last-upstream-sha: c92c3ad22 -->
+
+### Changed
+- **Rebased fork to clean upstream + 2 GPU commits** — fork is now just `openclaw/openclaw main` + GPU headless Chrome support (was 54 diverged commits, now 2)
+- **Merged upstream openclaw** (v2026.2.22 → latest main) — 50+ commits
+
+### Added
+- **Persistent `~/.cache` directory** — qmd index, HuggingFace models, and Playwright browser cache now survive rebuilds via `/data/openclaw-home/.cache` symlink
+- **Auto qmd update+embed on boot** — runs in background on startup, resumes where it left off (no re-indexing from scratch after restarts)
+
+### Fixed (upstream)
+- **Telegram topic target normalization** — unified delivery target resolution, legacy prefixed targets preserved
+- **Cron telegram announce targets** — delivery targets now persisted correctly at runtime
+- **HTTP 502/503/504 treated as failover-eligible** — better resilience during provider outages
+- **Agent model fallback** — falls back to `agents.defaults.model` when agent has no model config
+- **OpenRouter reasoning_effort conflict** removed from payload
+- **Session key case canonicalization** — mixed-case keys now normalized
+- **Config write immutability** — `unsetPaths` no longer mutates input
+
+### Security (upstream)
+- Obfuscated command detection for allowlist bypass prevention
+- User input escaped in HTML gallery (stored XSS)
+- Sensitive data redacted in OTEL log exports
+
+### Added (upstream)
+- **Web UI**: Full cron edit parity, all-jobs run history, compact filters
+- **Mistral** media understanding provider
+- **Data-driven tools catalog** with provenance tracking
+- **Synology Chat** channel plugin
+- **Telegram delivery target validation** — rejects invalid formats
+
+## [1.0.53] - 2026-02-23
+
+### Changed
+- Synced fork to upstream (merge approach, later replaced by clean rebase in 1.0.54)
+
 ## [1.0.51] - 2026-02-22
 <!-- last-upstream-sha: 861718e4d -->
 
