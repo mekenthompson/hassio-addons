@@ -40,4 +40,11 @@ if [ -f /data/openclaw-config/openclaw.json ] && [ -x /home/node/.bun/bin/qmd ];
     fi
 fi
 
-bashio::log.info "Persistent config symlinks ready (~/.config, ~/.local, ~/.bun)"
+# Re-index and embed qmd collections in the background on boot
+# (resumes where it left off — safe to run every restart)
+if [ -x /home/node/.bun/bin/qmd ] && jq -e '.memory.backend == "qmd"' /data/openclaw-config/openclaw.json >/dev/null 2>&1; then
+    bashio::log.info "Starting qmd update+embed in background..."
+    s6-setuidgid node /bin/bash -c 'HOME=/home/node PATH="/home/node/.bun/bin:$PATH" qmd update && qmd embed' &
+fi
+
+bashio::log.info "Persistent config symlinks ready (~/.config, ~/.local, ~/.bun, ~/.cache)"
