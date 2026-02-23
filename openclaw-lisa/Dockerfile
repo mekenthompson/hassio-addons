@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.02.23-gpu
-ARG CACHEBUST=39
+ARG CACHEBUST=40
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && pnpm install --frozen-lockfile \
@@ -136,6 +136,9 @@ ENV HOME=/root
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
     && mkdir -p /tmp/nginx
+
+# Copy reference config for one-time upgrade
+COPY reference-config.json /app/reference-config.json
 
 # Copy root filesystem (S6 overlay scripts + nginx config)
 COPY rootfs /
