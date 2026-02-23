@@ -282,15 +282,4 @@ if bashio::config.has_value 'additional_packages'; then
     fi
 fi
 
-# Ensure qmd command points to system-wide install (avoids broken PATH lookups)
-if [ -f /data/openclaw-config/openclaw.json ] && [ -x /usr/local/bin/qmd ]; then
-    if jq -e '.memory.backend == "qmd"' /data/openclaw-config/openclaw.json >/dev/null 2>&1; then
-        bashio::log.info "Setting qmd command to /usr/local/bin/qmd..."
-        jq '.memory.qmd.command = "/usr/local/bin/qmd"' \
-            /data/openclaw-config/openclaw.json > /tmp/oc-patch.json \
-            && mv /tmp/oc-patch.json /data/openclaw-config/openclaw.json
-        chown node:node /data/openclaw-config/openclaw.json
-    fi
-fi
-
 bashio::log.info "OpenClaw initialization complete!"
