@@ -269,6 +269,16 @@ else
     bashio::log.info "Playwright Chromium already installed, skipping..."
 fi
 
+# Install qmd for memory search (if not already installed)
+if ! su - node -c "command -v qmd" >/dev/null 2>&1; then
+    bashio::log.info "Installing qmd for memory search..."
+    su - node -c "cd /app && HOME=/home/node /root/.bun/bin/bun install -g qmd" || {
+        bashio::log.warning "qmd installation failed, memory search will be unavailable"
+    }
+else
+    bashio::log.info "qmd already installed, skipping..."
+fi
+
 # Install additional packages if specified
 if bashio::config.has_value 'additional_packages'; then
     bashio::log.info "Installing additional packages..."
