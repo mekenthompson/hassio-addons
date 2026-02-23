@@ -10,6 +10,9 @@ bashio::log.info "Setting up persistent config symlinks..."
 # Ensure persistent dirs exist
 mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun
 
+# Clean broken symlinks in persistent bun bin (prevents stale qmd EACCES)
+find /data/openclaw-home/.bun/bin -xtype l -delete 2>/dev/null || true
+
 # Replace ephemeral dirs with symlinks to persistent storage
 rm -rf /home/node/.config /home/node/.local /home/node/.bun
 ln -sf /data/openclaw-home/.config /home/node/.config
