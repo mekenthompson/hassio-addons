@@ -129,7 +129,7 @@ RUN groupadd --gid 1000 node \
 USER node
 ENV HOME=/home/node
 RUN curl -fsSL https://bun.sh/install | bash \
-    && /home/node/.bun/bin/bun install -g https://github.com/tobi/qmd
+    && /home/node/.bun/bin/bun install -g "https://github.com/tobi/qmd#785bbcf"
 USER root
 ENV HOME=/root
 
