@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.02.23-gpu
-ARG CACHEBUST=32
+ARG CACHEBUST=33
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && pnpm install --frozen-lockfile \
@@ -126,10 +126,12 @@ RUN groupadd --gid 1000 node \
 
 # Install qmd (memory search sidecar) system-wide
 # Must live outside /root/ so the node user can access it
-# Note: bun installs as @tobilu/qmd (scoped package)
+# Copy both bun and qmd out of /root/ (mode 700) into world-accessible paths
 RUN /root/.bun/bin/bun install -g https://github.com/tobi/qmd \
+    && cp /root/.bun/bin/bun /usr/local/bin/bun \
     && cp -r /root/.bun/install/global/node_modules/@tobilu/qmd /opt/qmd \
     && chmod -R a+rX /opt/qmd \
+    && chmod 755 /usr/local/bin/bun \
     && ln -sf /opt/qmd/qmd /usr/local/bin/qmd
 
 # Clean up default nginx config and prepare temp dir
