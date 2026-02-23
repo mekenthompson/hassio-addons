@@ -1,21 +1,22 @@
 #!/command/with-contenv bashio
 # ==============================================================================
 # Persist all user config across reboots
-# Symlinks ~/.config and ~/.local to /data/openclaw-home so any CLI
-# that stores config there (gh, railway, docker, gcloud, etc.) persists.
+# Symlinks ~/.config, ~/.local, and ~/.bun to /data/openclaw-home so any CLI
+# that stores config there (gh, railway, docker, gcloud, bun, qmd, etc.) persists.
 # ==============================================================================
 
 bashio::log.info "Setting up persistent config symlinks..."
 
 # Ensure persistent dirs exist
-mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin
+mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun
 
 # Replace ephemeral dirs with symlinks to persistent storage
-rm -rf /home/node/.config /home/node/.local
+rm -rf /home/node/.config /home/node/.local /home/node/.bun
 ln -sf /data/openclaw-home/.config /home/node/.config
 ln -sf /data/openclaw-home/.local /home/node/.local
+ln -sf /data/openclaw-home/.bun /home/node/.bun
 
 # Fix ownership
 chown -R node:node /data/openclaw-home
 
-bashio::log.info "Persistent config symlinks ready (~/.config, ~/.local)"
+bashio::log.info "Persistent config symlinks ready (~/.config, ~/.local, ~/.bun)"
