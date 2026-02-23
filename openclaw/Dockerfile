@@ -126,8 +126,9 @@ RUN groupadd --gid 1000 node \
 
 # Install qmd (memory search sidecar) system-wide
 # Must live outside /root/ so the node user can access it
+# Note: bun installs as @tobilu/qmd (scoped package)
 RUN /root/.bun/bin/bun install -g https://github.com/tobi/qmd \
-    && cp -r /root/.bun/install/global/node_modules/qmd /opt/qmd \
+    && cp -r /root/.bun/install/global/node_modules/@tobilu/qmd /opt/qmd \
     && chmod -R a+rX /opt/qmd \
     && ln -sf /opt/qmd/qmd /usr/local/bin/qmd
 
