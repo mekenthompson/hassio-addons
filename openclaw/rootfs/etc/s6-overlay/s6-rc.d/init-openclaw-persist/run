@@ -8,7 +8,7 @@
 bashio::log.info "Setting up persistent config symlinks..."
 
 # Ensure persistent dirs exist
-mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun
+mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun /data/openclaw-home/.cache
 
 # Preserve Docker-installed bun+qmd to persistent storage on first boot
 if [ -d "/home/node/.bun" ] && [ ! -f "/data/openclaw-home/.bun/bin/qmd" ]; then
@@ -20,10 +20,11 @@ fi
 find /data/openclaw-home/.bun/bin -xtype l -delete 2>/dev/null || true
 
 # Replace ephemeral dirs with symlinks to persistent storage
-rm -rf /home/node/.config /home/node/.local /home/node/.bun
+rm -rf /home/node/.config /home/node/.local /home/node/.bun /home/node/.cache
 ln -sf /data/openclaw-home/.config /home/node/.config
 ln -sf /data/openclaw-home/.local /home/node/.local
 ln -sf /data/openclaw-home/.bun /home/node/.bun
+ln -sf /data/openclaw-home/.cache /home/node/.cache
 
 # Fix ownership
 chown -R node:node /data/openclaw-home
