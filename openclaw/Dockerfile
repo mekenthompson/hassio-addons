@@ -124,11 +124,9 @@ RUN groupadd --gid 1000 node \
     && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
     && chown -R node:node /app
 
-# Install Bun for node user and install qmd system-wide
-RUN su - node -c "curl -fsSL https://bun.sh/install | bash" \
-    && su - node -c "/home/node/.bun/bin/bun install -g qmd" \
-    && cp /home/node/.bun/install/global/node_modules/qmd/qmd /usr/local/bin/qmd \
-    && chmod 755 /usr/local/bin/qmd
+# Install qmd (memory search sidecar) system-wide
+RUN /root/.bun/bin/bun install -g https://github.com/tobi/qmd \
+    && ln -sf /root/.bun/install/global/node_modules/qmd/qmd /usr/local/bin/qmd
 
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
