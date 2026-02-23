@@ -124,10 +124,12 @@ RUN groupadd --gid 1000 node \
     && useradd --uid 1000 --gid node --shell /bin/bash --create-home node \
     && chown -R node:node /app
 
-# Copy bun binary to /usr/local/bin as fallback
-# (qmd + bun are installed at runtime into persistent storage by init-openclaw-persist)
-RUN cp /root/.bun/bin/bun /usr/local/bin/bun \
-    && chmod 755 /usr/local/bin/bun
+
+# Install qmd as node user (will be preserved to persistent storage on first boot)
+USER node
+RUN curl -fsSL https://bun.sh/install | bash \
+    && /home/node/.bun/bin/bun install -g https://github.com/tobi/qmd
+USER root
 
 # Clean up default nginx config and prepare temp dir
 RUN rm -rf /etc/nginx/sites-enabled /etc/nginx/conf.d /var/log/nginx \
