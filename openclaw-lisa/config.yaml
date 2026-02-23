@@ -1,6 +1,6 @@
 ---
 name: "OpenClaw AI Assistant (Lisa)"
-version: "1.0.69"
+version: "1.0.68"
 slug: openclaw-lisa
 description: "Lisa's personal AI assistant powered by Claude via Telegram"
 url: https://github.com/mekenthompson/hassio-addons
@@ -36,8 +36,6 @@ ports_description:
 map:
   - share:rw
   - addon_config:rw
-  - homeassistant_config:rw
-  - media:ro
   - ssl:ro
 
 # GPU access (Intel iGPU for GGUF/Vulkan inference)
@@ -45,7 +43,6 @@ video: true
 
 # API access
 hassio_api: true
-hassio_role: admin
 auth_api: true
 homeassistant_api: true
 
