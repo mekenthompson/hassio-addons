@@ -26,14 +26,6 @@ if [ -d "/media/dvr" ] && [ ! -d "$DATA_DIR" ]; then
 fi
 bashio::log.info "Using data directory: $DATA_DIR"
 
-# Debug: show what's in the data directory
-bashio::log.info "DEBUG: Contents of $DATA_DIR:"
-ls -la "$DATA_DIR/" 2>&1 | while read line; do bashio::log.info "  $line"; done
-bashio::log.info "DEBUG: Mount info:"
-mount | grep -E "media|dvr|nfs" 2>&1 | while read line; do bashio::log.info "  $line"; done
-bashio::log.info "DEBUG: df for DATA_DIR:"
-df -h "$DATA_DIR" 2>&1 | while read line; do bashio::log.info "  $line"; done
-
 # Auto-restore database from backup if missing or empty
 # The backup settings.db is ~60KB; a fresh/empty one is much smaller
 SETTINGS_SIZE=0
