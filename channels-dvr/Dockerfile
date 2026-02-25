@@ -10,7 +10,6 @@ RUN \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
-        chromium \
         procps \
         vainfo \
         libva2 \
