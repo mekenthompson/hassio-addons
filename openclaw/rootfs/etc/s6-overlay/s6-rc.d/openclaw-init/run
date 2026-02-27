@@ -8,7 +8,9 @@ SCRIPT_VERSION="2.0.0"
 
 bashio::log.info "Initializing OpenClaw (multi-agent) v${SCRIPT_VERSION}..."
 
-# ---- Persistent directories ----
+# ---- Persistent directories (/data/ survives rebuilds + restarts) ----
+# SAFETY: Never rm -rf anything in /data/ — only create if missing.
+
 # Ken (primary agent)
 mkdir -p /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
 mkdir -p /data/openclaw-config/credentials
@@ -16,13 +18,15 @@ mkdir -p /data/openclaw-config/credentials
 # Lisa (second agent)
 mkdir -p /data/openclaw-workspace-lisa
 
-# OpenClaw expects config at ~/.openclaw - symlink to persistent storage
-rm -rf /home/node/.openclaw
-ln -sf /data/openclaw-config /home/node/.openclaw
+# ~/.openclaw is ephemeral (/home is rebuilt each boot) — always recreate symlink
+ln -sfn /data/openclaw-config /home/node/.openclaw
 
-# Create workspace symlinks (remove first to avoid mkdir/ln-sf conflict on fresh install)
-rm -rf /data/openclaw-config/workspace
-ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
+# Workspace symlink: only create if it doesn't exist yet.
+# On first boot: creates symlink. On subsequent boots: leaves existing link/dir alone.
+if [ ! -e /data/openclaw-config/workspace ]; then
+    ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
+    bashio::log.info "Created workspace symlink"
+fi
 
 chown -R node:node /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
 chown -R node:node /data/openclaw-workspace-lisa
