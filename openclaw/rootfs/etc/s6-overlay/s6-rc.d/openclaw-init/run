@@ -4,7 +4,9 @@
 # Initializes configuration, workspaces, and utilities
 # ==============================================================================
 
-bashio::log.info "Initializing OpenClaw (multi-agent)..."
+SCRIPT_VERSION="2.0.0"
+
+bashio::log.info "Initializing OpenClaw (multi-agent) v${SCRIPT_VERSION}..."
 
 # ---- Persistent directories ----
 # Ken (primary agent)
@@ -12,25 +14,21 @@ mkdir -p /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
 mkdir -p /data/openclaw-config/credentials
 
 # Lisa (second agent)
-mkdir -p /data/openclaw-config-lisa /data/openclaw-workspace-lisa
+mkdir -p /data/openclaw-workspace-lisa
 
 # OpenClaw expects config at ~/.openclaw - symlink to persistent storage
 rm -rf /home/node/.openclaw
 ln -sf /data/openclaw-config /home/node/.openclaw
 
-# Create workspace symlinks
-mkdir -p /data/openclaw-config/workspace
+# Create workspace symlinks (remove first to avoid mkdir/ln-sf conflict on fresh install)
+rm -rf /data/openclaw-config/workspace
 ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
 
-mkdir -p /data/openclaw-config-lisa/workspace
-ln -sf /data/openclaw-workspace-lisa /data/openclaw-config-lisa/workspace
-
 chown -R node:node /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
-chown -R node:node /data/openclaw-config-lisa /data/openclaw-workspace-lisa
+chown -R node:node /data/openclaw-workspace-lisa
 chown -h node:node /home/node/.openclaw
 
 # ---- Persistent home directories ----
-# Symlink persistent home directories for CLI tool configs (gh, railway, etc.)
 for dir in .config .local .railway; do
     if [ -d "/data/openclaw-home/$dir" ]; then
         rm -rf "/home/node/$dir"
@@ -45,14 +43,14 @@ if [ -d "/data/openclaw-home/bin" ]; then
     export PATH="/data/openclaw-home/bin:$PATH"
 fi
 
-# ---- Install utility scripts (first run only) ----
+# ---- Install/update utility scripts ----
+# Always overwrite to pick up fixes (versioned by SCRIPT_VERSION)
 mkdir -p /data/openclaw-home/bin
 
 # ha-admin: proxy ha CLI commands through HA SSH add-on
-if [ ! -f /data/openclaw-home/bin/ha-admin ]; then
-    cat > /data/openclaw-home/bin/ha-admin << 'SCRIPTEOF'
+cat > /data/openclaw-home/bin/ha-admin << 'SCRIPTEOF'
 #!/bin/bash
-# Proxy ha CLI commands through the HA SSH add-on
+# ha-admin v2.0.0 — Proxy ha CLI commands through HA SSH add-on
 SSH_KEY="/data/openclaw-config/credentials/ha-ssh-key.pem"
 SSH_HOST="a0d7b954-ssh.local.hass.io"
 
@@ -62,17 +60,20 @@ if [ ! -f "$SSH_KEY" ]; then
     exit 1
 fi
 
-exec ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    root@"$SSH_HOST" "ha $*"
-SCRIPTEOF
-    bashio::log.info "Installed ha-admin script"
+if [ $# -eq 0 ]; then
+    echo "Usage: ha-admin <command> [args...]"
+    echo "Example: ha-admin host info"
+    exit 1
 fi
 
+exec ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    root@"$SSH_HOST" ha "$@"
+SCRIPTEOF
+
 # ha-api: thin wrapper for HA REST API calls
-if [ ! -f /data/openclaw-home/bin/ha-api ]; then
-    cat > /data/openclaw-home/bin/ha-api << 'SCRIPTEOF'
+cat > /data/openclaw-home/bin/ha-api << 'SCRIPTEOF'
 #!/bin/bash
-# Thin wrapper for HA REST API calls
+# ha-api v2.0.0 — Thin wrapper for HA REST API calls
 HA_URL="http://homeassistant.local.hass.io:8123"
 TOKEN_FILE="/data/openclaw-config/credentials/ha-access-token"
 
@@ -81,23 +82,27 @@ if [ ! -f "$TOKEN_FILE" ]; then
     exit 1
 fi
 
+if [ $# -lt 2 ]; then
+    echo "Usage: ha-api METHOD endpoint [curl-args...]"
+    echo "Example: ha-api GET states/sensor.temperature"
+    echo "Example: ha-api POST services/light/turn_on -d '{\"entity_id\":\"light.lounge\"}'"
+    exit 1
+fi
+
 HA_TOKEN=$(cat "$TOKEN_FILE")
-METHOD="${1:-GET}"
+METHOD="$1"
 ENDPOINT="$2"
-shift 2 2>/dev/null
+shift 2
 curl -s -X "$METHOD" \
     -H "Authorization: Bearer $HA_TOKEN" \
     -H "Content-Type: application/json" \
     "$HA_URL/api/$ENDPOINT" "$@"
 SCRIPTEOF
-    bashio::log.info "Installed ha-api script"
-fi
 
 # backup-secrets: age-encrypt credentials for disaster recovery
-if [ ! -f /data/openclaw-home/bin/backup-secrets ]; then
-    cat > /data/openclaw-home/bin/backup-secrets << 'SCRIPTEOF'
+cat > /data/openclaw-home/bin/backup-secrets << 'SCRIPTEOF'
 #!/bin/bash
-# Age-encrypt credentials dir for disaster recovery
+# backup-secrets v2.0.0 — Age-encrypt credentials for disaster recovery
 AGE_RECIPIENT=$(cat /data/openclaw-config/credentials/age-recipient.txt 2>/dev/null)
 if [ -z "$AGE_RECIPIENT" ]; then
     echo "Error: No age recipient key found at /data/openclaw-config/credentials/age-recipient.txt"
@@ -107,16 +112,21 @@ BACKUP_DIR="/share/backups/openclaw"
 DATE=$(date +%Y-%m-%d)
 
 mkdir -p "$BACKUP_DIR"
-tar -cf - -C /data/openclaw-config credentials/ \
+
+# Archive both Ken's and Lisa's credentials
+tar -cf - \
+    -C / \
+    data/openclaw-config/credentials/ \
+    data/openclaw-config/gateway.token \
+    2>/dev/null \
     | age -r "$AGE_RECIPIENT" -o "$BACKUP_DIR/secrets-$DATE.tar.age"
 
 find "$BACKUP_DIR" -name "secrets-*.tar.age" -mtime +14 -delete
 echo "Backup complete: $BACKUP_DIR/secrets-$DATE.tar.age"
 SCRIPTEOF
-    bashio::log.info "Installed backup-secrets script"
-fi
 
-chmod +x /data/openclaw-home/bin/ha-admin /data/openclaw-home/bin/ha-api /data/openclaw-home/bin/backup-secrets 2>/dev/null
+chmod +x /data/openclaw-home/bin/ha-admin /data/openclaw-home/bin/ha-api /data/openclaw-home/bin/backup-secrets
+bashio::log.info "Utility scripts installed (v${SCRIPT_VERSION})"
 
 # ---- Gateway token ----
 GATEWAY_TOKEN=$(bashio::config 'gateway_token')
@@ -140,7 +150,6 @@ TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
 CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 LOG_LEVEL=$(bashio::config 'log_level')
 
-# Lisa's config
 LISA_TELEGRAM_BOT_TOKEN=$(bashio::config 'lisa_telegram_bot_token')
 LISA_TELEGRAM_USER_ID=$(bashio::config 'lisa_telegram_user_id')
 
@@ -150,28 +159,27 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
 else
     bashio::log.info "Creating initial multi-agent OpenClaw configuration..."
 
-    # Build channels.telegram section
+    # Build Ken's Telegram account
+    # Default to "pairing" if no user ID (avoids empty allowlist lockout)
     TELEGRAM_ACCOUNTS=""
-
-    # Ken's bot account
     if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
-        KEN_ALLOW_FROM=""
         if [ -n "$TELEGRAM_USER_ID" ]; then
-            KEN_ALLOW_FROM=", \"allowFrom\": [\"$TELEGRAM_USER_ID\"]"
+            TELEGRAM_ACCOUNTS="\"default\": { \"botToken\": \"$TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\", \"allowFrom\": [\"$TELEGRAM_USER_ID\"] }"
+        else
+            TELEGRAM_ACCOUNTS="\"default\": { \"botToken\": \"$TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"pairing\" }"
         fi
-        TELEGRAM_ACCOUNTS="\"default\": { \"botToken\": \"$TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\"$KEN_ALLOW_FROM }"
     fi
 
-    # Lisa's bot account
+    # Build Lisa's Telegram account
     if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
-        LISA_ALLOW_FROM=""
-        if [ -n "$LISA_TELEGRAM_USER_ID" ]; then
-            LISA_ALLOW_FROM=", \"allowFrom\": [\"$LISA_TELEGRAM_USER_ID\"]"
-        fi
         if [ -n "$TELEGRAM_ACCOUNTS" ]; then
             TELEGRAM_ACCOUNTS="$TELEGRAM_ACCOUNTS, "
         fi
-        TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\"$LISA_ALLOW_FROM }"
+        if [ -n "$LISA_TELEGRAM_USER_ID" ]; then
+            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\", \"allowFrom\": [\"$LISA_TELEGRAM_USER_ID\"] }"
+        else
+            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"pairing\" }"
+        fi
     fi
 
     # Build bindings
@@ -184,6 +192,12 @@ else
     AGENTS_LIST="{ \"id\": \"main\", \"default\": true, \"workspace\": \"/data/openclaw-workspace\" }"
     if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
         AGENTS_LIST="$AGENTS_LIST, { \"id\": \"lisa\", \"workspace\": \"/data/openclaw-workspace-lisa\" }"
+    fi
+
+    # Build agentToAgent (only if multi-agent)
+    AGENT_TO_AGENT=""
+    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+        AGENT_TO_AGENT="\"tools\": { \"agentToAgent\": { \"enabled\": true, \"allow\": [\"main\", \"lisa\"] } },"
     fi
 
     # Build providers section
@@ -215,16 +229,14 @@ else
     }
   },
   $PROVIDERS
+  $AGENT_TO_AGENT
   "agents": {
     "defaults": {
       "model": {
-        "primary": "anthropic/claude-opus-4-5"
+        "primary": "anthropic/claude-opus-4-6"
       }
     },
     "list": [ $AGENTS_LIST ]
-  },
-  "tools": {
-    "agentToAgent": { "enabled": true, "allow": ["main", "lisa"] }
   },
   "logging": { "level": "$LOG_LEVEL" }
 }
@@ -293,11 +305,9 @@ http {
             proxy_read_timeout 86400s;
             proxy_send_timeout 86400s;
 
-            # Override Origin to match Host header so OpenClaw origin check passes
             proxy_set_header Origin http://$host;
             proxy_set_header Accept-Encoding "";
 
-            # Strip CSP frame-ancestors header from upstream so HA ingress iframe works
             proxy_hide_header Content-Security-Policy;
             proxy_hide_header X-Frame-Options;
 NGINXEOF
