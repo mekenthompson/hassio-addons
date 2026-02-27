@@ -1,28 +1,35 @@
 #!/command/with-contenv bashio
 # ==============================================================================
-# OpenClaw Init Script
-# Initializes OpenClaw configuration and installs Chromium
+# OpenClaw Init Script (Multi-Agent: Ken + Lisa)
+# Initializes configuration, workspaces, and utilities
 # ==============================================================================
 
-bashio::log.info "Initializing OpenClaw..."
+bashio::log.info "Initializing OpenClaw (multi-agent)..."
 
-# Create persistent directories
-mkdir -p /data/openclaw-config
-mkdir -p /data/openclaw-workspace
-mkdir -p /data/openclaw-home
+# ---- Persistent directories ----
+# Ken (primary agent)
+mkdir -p /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
+mkdir -p /data/openclaw-config/credentials
+
+# Lisa (second agent)
+mkdir -p /data/openclaw-config-lisa /data/openclaw-workspace-lisa
 
 # OpenClaw expects config at ~/.openclaw - symlink to persistent storage
-# Remove existing directory/symlink if it exists
 rm -rf /home/node/.openclaw
 ln -sf /data/openclaw-config /home/node/.openclaw
 
-# Create workspace symlink
+# Create workspace symlinks
 mkdir -p /data/openclaw-config/workspace
 ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
 
-chown -R node:node /data/openclaw-*
+mkdir -p /data/openclaw-config-lisa/workspace
+ln -sf /data/openclaw-workspace-lisa /data/openclaw-config-lisa/workspace
+
+chown -R node:node /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
+chown -R node:node /data/openclaw-config-lisa /data/openclaw-workspace-lisa
 chown -h node:node /home/node/.openclaw
 
+# ---- Persistent home directories ----
 # Symlink persistent home directories for CLI tool configs (gh, railway, etc.)
 for dir in .config .local .railway; do
     if [ -d "/data/openclaw-home/$dir" ]; then
@@ -38,10 +45,82 @@ if [ -d "/data/openclaw-home/bin" ]; then
     export PATH="/data/openclaw-home/bin:$PATH"
 fi
 
-# Generate gateway token if not provided (persist across restarts)
+# ---- Install utility scripts (first run only) ----
+mkdir -p /data/openclaw-home/bin
+
+# ha-admin: proxy ha CLI commands through HA SSH add-on
+if [ ! -f /data/openclaw-home/bin/ha-admin ]; then
+    cat > /data/openclaw-home/bin/ha-admin << 'SCRIPTEOF'
+#!/bin/bash
+# Proxy ha CLI commands through the HA SSH add-on
+SSH_KEY="/data/openclaw-config/credentials/ha-ssh-key.pem"
+SSH_HOST="a0d7b954-ssh.local.hass.io"
+
+if [ ! -f "$SSH_KEY" ]; then
+    echo "Error: SSH key not found at $SSH_KEY"
+    echo "Generate one with: ssh-keygen -t ed25519 -f $SSH_KEY -N ''"
+    exit 1
+fi
+
+exec ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    root@"$SSH_HOST" "ha $*"
+SCRIPTEOF
+    bashio::log.info "Installed ha-admin script"
+fi
+
+# ha-api: thin wrapper for HA REST API calls
+if [ ! -f /data/openclaw-home/bin/ha-api ]; then
+    cat > /data/openclaw-home/bin/ha-api << 'SCRIPTEOF'
+#!/bin/bash
+# Thin wrapper for HA REST API calls
+HA_URL="http://homeassistant.local.hass.io:8123"
+TOKEN_FILE="/data/openclaw-config/credentials/ha-access-token"
+
+if [ ! -f "$TOKEN_FILE" ]; then
+    echo "Error: HA access token not found at $TOKEN_FILE"
+    exit 1
+fi
+
+HA_TOKEN=$(cat "$TOKEN_FILE")
+METHOD="${1:-GET}"
+ENDPOINT="$2"
+shift 2 2>/dev/null
+curl -s -X "$METHOD" \
+    -H "Authorization: Bearer $HA_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$HA_URL/api/$ENDPOINT" "$@"
+SCRIPTEOF
+    bashio::log.info "Installed ha-api script"
+fi
+
+# backup-secrets: age-encrypt credentials for disaster recovery
+if [ ! -f /data/openclaw-home/bin/backup-secrets ]; then
+    cat > /data/openclaw-home/bin/backup-secrets << 'SCRIPTEOF'
+#!/bin/bash
+# Age-encrypt credentials dir for disaster recovery
+AGE_RECIPIENT=$(cat /data/openclaw-config/credentials/age-recipient.txt 2>/dev/null)
+if [ -z "$AGE_RECIPIENT" ]; then
+    echo "Error: No age recipient key found at /data/openclaw-config/credentials/age-recipient.txt"
+    exit 1
+fi
+BACKUP_DIR="/share/backups/openclaw"
+DATE=$(date +%Y-%m-%d)
+
+mkdir -p "$BACKUP_DIR"
+tar -cf - -C /data/openclaw-config credentials/ \
+    | age -r "$AGE_RECIPIENT" -o "$BACKUP_DIR/secrets-$DATE.tar.age"
+
+find "$BACKUP_DIR" -name "secrets-*.tar.age" -mtime +14 -delete
+echo "Backup complete: $BACKUP_DIR/secrets-$DATE.tar.age"
+SCRIPTEOF
+    bashio::log.info "Installed backup-secrets script"
+fi
+
+chmod +x /data/openclaw-home/bin/ha-admin /data/openclaw-home/bin/ha-api /data/openclaw-home/bin/backup-secrets 2>/dev/null
+
+# ---- Gateway token ----
 GATEWAY_TOKEN=$(bashio::config 'gateway_token')
 if [ -z "$GATEWAY_TOKEN" ]; then
-    # Check for previously generated token
     if [ -f /data/openclaw-config/gateway.token ]; then
         GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
         bashio::log.info "Using existing gateway token"
@@ -55,61 +134,79 @@ else
     echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
 fi
 
-# Read configuration
+# ---- Read addon configuration ----
 TELEGRAM_BOT_TOKEN=$(bashio::config 'telegram_bot_token')
-CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
+CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 LOG_LEVEL=$(bashio::config 'log_level')
 
-# Create OpenClaw configuration only if it doesn't exist yet.
-# Once created, the gateway manages openclaw.json — UI changes persist across restarts.
-# Bootstrap behavior:
-#   - If claude_session_key is provided in addon config, it's used to create initial providers section
-#   - After initial setup, the addon NEVER overwrites the providers section
-#   - Users can add multiple API keys via OpenClaw web UI, and they persist
-#   - Only the gateway token is synced on subsequent restarts (preserves all other config)
+# Lisa's config
+LISA_TELEGRAM_BOT_TOKEN=$(bashio::config 'lisa_telegram_bot_token')
+LISA_TELEGRAM_USER_ID=$(bashio::config 'lisa_telegram_user_id')
+
+# ---- Bootstrap openclaw.json (first run only) ----
 if [ -f /data/openclaw-config/openclaw.json ]; then
     bashio::log.info "OpenClaw configuration already exists, preserving it"
 else
-    bashio::log.info "Creating initial OpenClaw configuration..."
+    bashio::log.info "Creating initial multi-agent OpenClaw configuration..."
 
-# Build config JSON
-cat > /data/openclaw-config/openclaw.json <<JSONEOF
+    # Build channels.telegram section
+    TELEGRAM_ACCOUNTS=""
+
+    # Ken's bot account
+    if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+        KEN_ALLOW_FROM=""
+        if [ -n "$TELEGRAM_USER_ID" ]; then
+            KEN_ALLOW_FROM=", \"allowFrom\": [\"$TELEGRAM_USER_ID\"]"
+        fi
+        TELEGRAM_ACCOUNTS="\"default\": { \"botToken\": \"$TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\"$KEN_ALLOW_FROM }"
+    fi
+
+    # Lisa's bot account
+    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+        LISA_ALLOW_FROM=""
+        if [ -n "$LISA_TELEGRAM_USER_ID" ]; then
+            LISA_ALLOW_FROM=", \"allowFrom\": [\"$LISA_TELEGRAM_USER_ID\"]"
+        fi
+        if [ -n "$TELEGRAM_ACCOUNTS" ]; then
+            TELEGRAM_ACCOUNTS="$TELEGRAM_ACCOUNTS, "
+        fi
+        TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\"$LISA_ALLOW_FROM }"
+    fi
+
+    # Build bindings
+    BINDINGS="{ \"agentId\": \"main\", \"match\": { \"channel\": \"telegram\", \"accountId\": \"default\" } }"
+    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+        BINDINGS="$BINDINGS, { \"agentId\": \"lisa\", \"match\": { \"channel\": \"telegram\", \"accountId\": \"lisa\" } }"
+    fi
+
+    # Build agents list
+    AGENTS_LIST="{ \"id\": \"main\", \"default\": true, \"workspace\": \"/data/openclaw-workspace\" }"
+    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+        AGENTS_LIST="$AGENTS_LIST, { \"id\": \"lisa\", \"workspace\": \"/data/openclaw-workspace-lisa\" }"
+    fi
+
+    # Build providers section
+    PROVIDERS=""
+    if [ -n "$CLAUDE_SESSION_KEY" ]; then
+        PROVIDERS="\"providers\": { \"anthropic\": { \"sessionKey\": \"$CLAUDE_SESSION_KEY\" } },"
+    fi
+
+    cat > /data/openclaw-config/openclaw.json <<JSONEOF
 {
   "channels": {
-JSONEOF
-
-# Add Telegram block if bot token is provided
-if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
-    if [ -n "$TELEGRAM_USER_ID" ]; then
-        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
     "telegram": {
-      "enabled": true,
-      "botToken": "${TELEGRAM_BOT_TOKEN}",
-      "dmPolicy": "pairing",
-      "allowFrom": ["${TELEGRAM_USER_ID}"]
+      "accounts": {
+        $TELEGRAM_ACCOUNTS
+      }
     }
-JSONEOF
-    else
-        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
-    "telegram": {
-      "enabled": true,
-      "botToken": "${TELEGRAM_BOT_TOKEN}",
-      "dmPolicy": "pairing"
-    }
-JSONEOF
-    fi
-fi
-
-cat >> /data/openclaw-config/openclaw.json <<JSONEOF
   },
+  "bindings": [ $BINDINGS ],
   "gateway": {
     "mode": "local",
     "port": 18800,
     "bind": "lan",
-    "auth": {
-      "token": "${GATEWAY_TOKEN}"
-    },
+    "auth": { "token": "$GATEWAY_TOKEN" },
     "trustedProxies": ["172.30.32.0/24", "172.30.33.0/24", "127.0.0.1"],
     "controlUi": {
       "enabled": true,
@@ -117,40 +214,29 @@ cat >> /data/openclaw-config/openclaw.json <<JSONEOF
       "allowedOrigins": ["*"]
     }
   },
-JSONEOF
-
-# Add providers section if Claude session key is provided
-if [ -n "$CLAUDE_SESSION_KEY" ]; then
-    cat >> /data/openclaw-config/openclaw.json <<JSONEOF
-  "providers": {
-    "anthropic": {
-      "sessionKey": "${CLAUDE_SESSION_KEY}"
-    }
-  },
-JSONEOF
-fi
-
-cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+  $PROVIDERS
   "agents": {
     "defaults": {
       "model": {
         "primary": "anthropic/claude-opus-4-5"
       }
-    }
+    },
+    "list": [ $AGENTS_LIST ]
   },
-  "logging": {
-    "level": "${LOG_LEVEL}"
-  }
+  "tools": {
+    "agentToAgent": { "enabled": true, "allow": ["main", "lisa"] }
+  },
+  "logging": { "level": "$LOG_LEVEL" }
 }
 JSONEOF
 
     chown node:node /data/openclaw-config/openclaw.json
-    bashio::log.info "Initial configuration written to /home/node/.openclaw/openclaw.json"
+    bashio::log.info "Initial multi-agent configuration written"
 fi
 
 chown node:node /data/openclaw-config/gateway.token
 
-# Always sync gateway token to openclaw.json (token file and config can drift)
+# ---- Sync gateway token (can drift between addon config and openclaw.json) ----
 if [ -f /data/openclaw-config/openclaw.json ]; then
     CURRENT_TOKEN=$(jq -r '.gateway.auth.token // empty' /data/openclaw-config/openclaw.json 2>/dev/null)
     if [ "$CURRENT_TOKEN" != "$GATEWAY_TOKEN" ]; then
@@ -162,12 +248,12 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     fi
 fi
 
-# Log the config for debugging (mask sensitive values)
+# ---- Logging ----
 bashio::log.info "Gateway mode: local"
-bashio::log.info "Telegram enabled: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'true' || echo 'false')"
-bashio::log.info "Claude session: $([ -n "$CLAUDE_SESSION_KEY" ] && echo 'configured' || echo 'not set')"
+bashio::log.info "Ken Telegram: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
+bashio::log.info "Lisa Telegram: $([ -n "$LISA_TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
 
-# Generate nginx config with gateway token embedded for ingress WebSocket auth
+# ---- nginx proxy config ----
 bashio::log.info "Generating nginx proxy configuration..."
 cat > /etc/nginx/nginx.conf <<'NGINXEOF'
 worker_processes 1;
@@ -208,7 +294,6 @@ http {
             proxy_send_timeout 86400s;
 
             # Override Origin to match Host header so OpenClaw origin check passes
-            # (HA ingress Origin port 8123 != addon port 18789, causing mismatch)
             proxy_set_header Origin http://$host;
             proxy_set_header Accept-Encoding "";
 
@@ -217,9 +302,6 @@ http {
             proxy_hide_header X-Frame-Options;
 NGINXEOF
 
-# Append the sub_filter with the actual gateway token
-# When accessed through HA ingress, connect WebSocket directly to addon port 18789
-# (HA ingress does not proxy WebSocket upgrades reliably)
 cat >> /etc/nginx/nginx.conf <<NGINXEOF
             sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var gw=proto+"://"+location.hostname+":18789";var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
 NGINXEOF
@@ -232,9 +314,9 @@ cat >> /etc/nginx/nginx.conf <<'NGINXEOF'
 }
 NGINXEOF
 
-bashio::log.info "nginx configuration generated with gateway token"
+bashio::log.info "nginx configuration generated"
 
-# Ensure allowedOrigins is set for HA ingress (needed since OpenClaw main)
+# ---- Ensure allowedOrigins for HA ingress ----
 if [ -f /data/openclaw-config/openclaw.json ]; then
     if ! jq -e '.gateway.controlUi.allowedOrigins' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
         bashio::log.info "Adding allowedOrigins to controlUi config..."
@@ -245,21 +327,13 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     fi
 fi
 
-# Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
+# ---- Doctor check ----
 bashio::log.info "Running openclaw doctor --fix..."
 cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index.js doctor --fix" || {
     bashio::log.warning "openclaw doctor --fix had warnings, continuing..."
 }
 
-# Grant node user write access to HA config directory (for config management)
-if [ -d "/homeassistant" ]; then
-    bashio::log.info "Setting up HA config directory permissions..."
-    chown -R node:node /homeassistant/includes/ 2>/dev/null || true
-    # Make git work for the node user
-    git config --global --add safe.directory /homeassistant 2>/dev/null || true
-fi
-
-# Install Chromium for Playwright (power-user feature)
+# ---- Playwright Chromium ----
 if [ ! -d "/data/openclaw-home/.cache/ms-playwright" ]; then
     bashio::log.info "Installing Chromium for Playwright (first run)..."
     su - node -c "cd /app && PLAYWRIGHT_BROWSERS_PATH=/data/openclaw-home/.cache/ms-playwright node node_modules/playwright-core/cli.js install chromium" || {
@@ -269,7 +343,7 @@ else
     bashio::log.info "Playwright Chromium already installed, skipping..."
 fi
 
-# Install additional packages if specified
+# ---- Additional packages ----
 if bashio::config.has_value 'additional_packages'; then
     bashio::log.info "Installing additional packages..."
     PACKAGES=$(bashio::config 'additional_packages | join(" ")')
@@ -282,4 +356,4 @@ if bashio::config.has_value 'additional_packages'; then
     fi
 fi
 
-bashio::log.info "OpenClaw initialization complete!"
+bashio::log.info "OpenClaw initialization complete! (multi-agent: Ken + Lisa)"
