@@ -1,0 +1,50 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Persist all user config across reboots
+# Symlinks ~/.config, ~/.local, and ~/.bun to /data/openclaw-home so any CLI
+# that stores config there (gh, railway, docker, gcloud, bun, qmd, etc.) persists.
+# ==============================================================================
+
+bashio::log.info "Setting up persistent config symlinks..."
+
+# Ensure persistent dirs exist
+mkdir -p /data/openclaw-home/.config /data/openclaw-home/.local/bin /data/openclaw-home/.bun /data/openclaw-home/.cache
+
+# Preserve Docker-installed bun+qmd to persistent storage on first boot
+if [ -d "/home/node/.bun" ] && [ ! -f "/data/openclaw-home/.bun/bin/qmd" ]; then
+    bashio::log.info "Preserving Docker-installed bun+qmd to persistent storage..."
+    cp -a /home/node/.bun/* /data/openclaw-home/.bun/ 2>/dev/null || true
+fi
+
+# Clean broken symlinks in persistent bun bin (prevents stale qmd EACCES)
+find /data/openclaw-home/.bun/bin -xtype l -delete 2>/dev/null || true
+
+# Replace ephemeral dirs with symlinks to persistent storage
+rm -rf /home/node/.config /home/node/.local /home/node/.bun /home/node/.cache
+ln -sf /data/openclaw-home/.config /home/node/.config
+ln -sf /data/openclaw-home/.local /home/node/.local
+ln -sf /data/openclaw-home/.bun /home/node/.bun
+ln -sf /data/openclaw-home/.cache /home/node/.cache
+
+# Fix ownership
+chown -R node:node /data/openclaw-home
+
+# Ensure qmd command resolves to the persistent install
+if [ -f /data/openclaw-config/openclaw.json ] && [ -x /home/node/.bun/bin/qmd ]; then
+    if jq -e '.memory.backend == "qmd"' /data/openclaw-config/openclaw.json >/dev/null 2>&1; then
+        bashio::log.info "Setting qmd command to /home/node/.bun/bin/qmd..."
+        jq '.memory.qmd.command = "/home/node/.bun/bin/qmd"' \
+            /data/openclaw-config/openclaw.json > /tmp/oc-patch.json \
+            && mv /tmp/oc-patch.json /data/openclaw-config/openclaw.json
+        chown node:node /data/openclaw-config/openclaw.json
+    fi
+fi
+
+# Re-index and embed qmd collections in the background on boot
+# (resumes where it left off — safe to run every restart)
+if [ -x /home/node/.bun/bin/qmd ] && jq -e '.memory.backend == "qmd"' /data/openclaw-config/openclaw.json >/dev/null 2>&1; then
+    bashio::log.info "Starting qmd update+embed in background..."
+    s6-setuidgid node /bin/bash -c 'HOME=/home/node PATH="/home/node/.bun/bin:$PATH" qmd update && qmd embed' &
+fi
+
+bashio::log.info "Persistent config symlinks ready (~/.config, ~/.local, ~/.bun, ~/.cache)"

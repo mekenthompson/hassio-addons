@@ -1,0 +1,24 @@
+---
+configuration:
+  telegram_bot_token:
+    name: Telegram Bot Token
+    description: "Bot token from @BotFather (required for Telegram messaging)"
+  gateway_token:
+    name: Gateway Token
+    description: "Authentication token for OpenClaw gateway (auto-generated if empty)"
+  claude_session_key:
+    name: Claude Pro Session Key
+    description: "Session key from 'claude setup-token' for Claude Pro authentication"
+  telegram_user_id:
+    name: Telegram User ID
+    description: "Your Telegram user ID for automatic approval (optional - leave empty to use pairing)"
+  additional_packages:
+    name: Additional Packages
+    description: "Additional apt packages to install (e.g., ffmpeg, imagemagick)"
+  log_level:
+    name: Log Level
+    description: "Verbosity of logs (info recommended)"
+
+network:
+  18789/tcp: "OpenClaw Gateway (internal use only)"
+  18790/tcp: "OpenClaw Bridge (internal use only)"
