@@ -3,97 +3,155 @@
 [![License][license-shield]](LICENSE)
 [![Project Stage][project-stage-shield]][project-stage]
 
-Your personal AI assistant powered by Claude, accessible via Telegram, running directly on your Home Assistant instance.
+A multi-agent AI assistant running directly on your Home Assistant instance. Chat via Telegram, browse the web, manage files, search memory, and automate tasks.
 
 ## About
 
-OpenClaw is an open-source AI assistant that brings Claude's capabilities to your Home Assistant setup. Chat via Telegram, browse the web, manage files, search memory semantically, and automate tasks — all from your phone.
+OpenClaw is an open-source AI assistant framework. This add-on packages it for Home Assistant with persistent storage, Telegram integration, and multi-agent support — run separate agents for different family members from a single add-on.
 
 ## Features
 
-- 🤖 **Claude Opus 4**: Access to Anthropic's most capable AI model (configurable)
-- 💬 **Telegram Integration**: Chat interface with topic threads, reactions, and inline buttons
-- 🌐 **Web Browsing**: Built-in Chromium with optional GPU acceleration (Intel iGPU)
-- 🧠 **Semantic Memory**: QMD-powered memory search with vector embeddings and BM25 hybrid retrieval
-- 💾 **Persistent Storage**: Config, sessions, CLI tools, caches, and memory indexes survive rebuilds
-- 🔧 **Power-User Ready**: Pre-installed gh CLI, bun, Playwright, and qmd
-- ⏰ **Cron Jobs**: Scheduled tasks with isolated sessions and Telegram delivery
-- 🔒 **Secure**: Pairing-based auth, containerized execution, exec allowlists
-- 🚀 **Fast**: Optimized Docker build with layer caching
-
-## Prerequisites
-
-Before installing, you'll need:
-
-1. **Telegram Bot**: Create one via @BotFather (takes 2 minutes)
-2. **Claude Access**: Either Claude Pro subscription or Anthropic API key
-
-See [full documentation](DOCS.md) for detailed setup instructions.
-
-## Installation
-
-1. Add this repository to Home Assistant:
-   ```
-   https://github.com/mekenthompson/hassio-addons
-   ```
-
-2. Install the **OpenClaw AI Assistant** addon
-
-3. Configure your Telegram bot token
-
-4. Start the addon and pair with your bot!
-
-## Quick Start
-
-1. Open Telegram and message your bot
-2. Send `/start` to initiate pairing
-3. Approve the pairing code in the addon logs
-4. Start chatting with Claude!
-
-```
-You: What's the weather in San Francisco?
-Bot: [Searches and provides current weather information]
-
-You: Can you browse to example.com and summarize what you see?
-Bot: [Uses Chromium to visit the site and provides a summary]
-```
-
-## Configuration
-
-Minimal configuration:
-
-```yaml
-telegram_bot_token: "your-bot-token-from-botfather"
-```
-
-Full options available in the addon configuration UI.
-
-## Documentation
-
-- [Full Documentation](DOCS.md) - Complete setup and usage guide
-- [OpenClaw Docs](https://docs.openclaw.ai) - Official OpenClaw documentation
-- [Telegram Setup](https://docs.openclaw.ai/channels/telegram) - Telegram integration guide
-
-## Support
-
-Found a bug or have a feature request?
-
-- [Open an issue](https://github.com/mekenthompson/hassio-addons/issues)
-- [OpenClaw GitHub](https://github.com/openclaw/openclaw)
+- 🤖 **Multi-Agent** — Run separate agents with isolated workspaces, memory, and personas
+- 💬 **Telegram** — Each agent gets its own Telegram bot with topic threads, reactions, and inline buttons
+- 🌐 **Web Browsing** — Built-in Chromium with optional Intel iGPU acceleration
+- 🧠 **Semantic Memory** — QMD-powered vector + BM25 hybrid retrieval per agent
+- ⏰ **Cron Jobs** — Scheduled tasks with isolated sessions
+- 🔧 **Power Tools** — Pre-installed gh CLI, Bun, Playwright, ripgrep, tmux
+- 🔐 **Config-as-Code** — SecretRef support, `${VAR}` substitution, modular `$include` configs
+- 🔒 **Secure** — No supervisor API access; HA control via scoped SSH + REST API tokens
 
 ## Architecture
 
-- **amd64** (Intel/AMD 64-bit)
+```
+┌─────────────────────────────────────────┐
+│  Home Assistant OS                       │
+│  ┌─────────────────────────────────────┐ │
+│  │ OpenClaw Add-on (single container)  │ │
+│  │                                     │ │
+│  │  Agent: "main"    Agent: "lisa"     │ │
+│  │  ├─ Workspace     ├─ Workspace      │ │
+│  │  ├─ Memory        ├─ Memory         │ │
+│  │  ├─ Sessions      ├─ Sessions       │ │
+│  │  └─ @KenBot       └─ @LisaBot      │ │
+│  │                                     │ │
+│  │  Shared: models, tools, gateway     │ │
+│  └─────────────────────────────────────┘ │
+│           │              │               │
+│    SSH (ha CLI)    REST API (entities)   │
+│           ↓              ↓               │
+│  ┌─────────────────────────────────────┐ │
+│  │  Home Assistant Core                │ │
+│  └─────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+```
 
-## Credits
+## Quick Start
 
-- [OpenClaw](https://github.com/openclaw/openclaw) - Open-source AI assistant framework
-- [Anthropic Claude](https://www.anthropic.com) - AI model provider
-- [Home Assistant](https://www.home-assistant.io) - Smart home platform
+### Prerequisites
+
+1. **Telegram Bot(s)** — Create via [@BotFather](https://t.me/BotFather) (one per agent)
+2. **Anthropic API Key** or **Claude Pro session key**
+3. **Telegram User ID(s)** — Message [@userinfobot](https://t.me/userinfobot) to find yours
+
+### Install
+
+1. Add this repository to HA: `https://github.com/mekenthompson/hassio-addons`
+2. Install **OpenClaw AI Assistant** from the add-on store
+3. Enter your Telegram bot token in the add-on configuration
+4. Start the add-on and message your bot
+
+### Adding a Second Agent
+
+1. Create a second Telegram bot via @BotFather
+2. Enter the second bot token and user ID in the add-on config
+3. Restart the add-on — both agents start automatically
+4. Each agent has its own workspace, memory, and persona
+
+## Configuration
+
+### Add-on Options (HA UI)
+
+These are **bootstrap settings** — used on first run to generate the initial `openclaw.json`. After first boot, `openclaw.json` is the source of truth.
+
+| Option | Purpose | When Used |
+|--------|---------|-----------|
+| `telegram_bot_token` | Primary agent's Telegram bot | First run only |
+| `telegram_user_id` | Primary agent's allowed Telegram user | First run only |
+| `lisa_telegram_bot_token` | Second agent's Telegram bot | First run only |
+| `lisa_telegram_user_id` | Second agent's allowed Telegram user | First run only |
+| `claude_session_key` | Initial Claude Pro auth | First run only |
+| `gateway_token` | Web UI / API auth token | Every restart |
+| `additional_packages` | Extra apt packages to install | Every restart |
+| `log_level` | Logging verbosity | First run only |
+
+### openclaw.json (Source of Truth)
+
+After first boot, all configuration lives in `/data/openclaw-config/openclaw.json`:
+- Agent definitions, workspaces, and models
+- Channel accounts and bindings
+- Tool settings and permissions
+- Cron jobs and hooks
+
+Edit via the OpenClaw web UI (sidebar panel) or directly.
+
+### Config-as-Code
+
+For version-controlled configuration:
+
+1. Use **SecretRef** objects in `openclaw.json` for API keys:
+   ```json
+   { "source": "file", "provider": "creds", "id": "/anthropic/apiKey" }
+   ```
+2. Store actual secrets in `/data/openclaw-config/credentials/secrets.json`
+3. Commit `openclaw.json` to git (safe — no plaintext secrets)
+4. Keep `secrets.json` out of git, backed up with `age` encryption
+
+See [DOCS.md](DOCS.md) for the full config-as-code guide.
+
+## Data Persistence
+
+All data survives add-on restarts and updates:
+
+| Path | Contents |
+|------|----------|
+| `/data/openclaw-config/` | Main config, credentials, gateway token |
+| `/data/openclaw-workspace/` | Primary agent's workspace and memory |
+| `/data/openclaw-workspace-lisa/` | Second agent's workspace and memory |
+| `/data/openclaw-home/` | CLI tools, browser cache, custom scripts |
+
+## Home Assistant Integration
+
+This add-on does **not** use the Supervisor API. HA control is via scoped credentials:
+
+- **SSH** to HA SSH add-on → `ha` CLI for admin tasks (add-ons, backups, host)
+- **REST API** with long-lived token → entity control, service calls, automations
+- **MCP Server** (optional) → structured tools for entity control via OpenClaw's mcporter
+
+Setup:
+1. Generate an SSH keypair and add to the HA SSH add-on
+2. Create an HA user and long-lived access token
+3. Store credentials in `/data/openclaw-config/credentials/`
+4. Use the `ha-admin` and `ha-api` wrapper scripts (auto-installed on first boot)
+
+## Utility Scripts
+
+Installed to `/data/openclaw-home/bin/` on first run:
+
+| Script | Purpose |
+|--------|---------|
+| `ha-admin` | Proxy `ha` CLI commands through HA SSH add-on |
+| `ha-api` | Thin wrapper for HA REST API calls |
+| `backup-secrets` | Age-encrypt credentials directory for disaster recovery |
+
+## Support
+
+- [OpenClaw Documentation](https://docs.openclaw.ai)
+- [Telegram Setup Guide](https://docs.openclaw.ai/channels/telegram)
+- [Issue Tracker](https://github.com/mekenthompson/hassio-addons/issues)
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details.
+MIT License — See [LICENSE](LICENSE) for details.
 
 [license-shield]: https://img.shields.io/github/license/mekenthompson/hassio-addons.svg
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-stable-green.svg
