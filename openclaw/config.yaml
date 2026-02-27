@@ -1,8 +1,8 @@
 ---
 name: OpenClaw AI Assistant
-version: "1.0.57"
+version: "2.0.0"
 slug: openclaw
-description: Your personal AI assistant powered by Claude Opus 4.5 via Telegram
+description: Multi-agent AI assistant via Telegram, running on Home Assistant
 url: https://github.com/mekenthompson/hassio-addons
 arch:
   - amd64
@@ -27,46 +27,55 @@ panel_title: OpenClaw
 # Port configuration
 ports:
   18789/tcp: 18789
-  18790/tcp: null
 ports_description:
   18789/tcp: OpenClaw Web UI and Gateway
-  18790/tcp: OpenClaw Bridge (internal use)
 
 # Directory mappings
 map:
   - share:rw
   - addon_config:rw
-  - homeassistant_config:rw
-  - media:ro
   - ssl:ro
 
 # GPU access (Intel iGPU for GGUF/Vulkan inference)
 video: true
 
-# API access
-hassio_api: true
-hassio_role: admin
-auth_api: true
-homeassistant_api: true
-
 # Enable terminal access in HA UI
 stdin: true
 
-# Default configuration
+# ---- Configuration ----
+# These options are for INITIAL SETUP / BOOTSTRAP only.
+# After first boot, openclaw.json is the source of truth for all
+# agent, channel, model, and tool configuration.
+# Edit openclaw.json directly or via the OpenClaw web UI.
+#
+# The only options re-applied on every restart are:
+#   - gateway_token (synced to nginx proxy and openclaw.json)
+#   - additional_packages (installed on every boot)
+#   - log_level (applied to bootstrap config only)
+
 options:
+  # --- Bootstrap (first run only) ---
+  # Primary agent Telegram bot
   telegram_bot_token: ""
-  gateway_token: ""
-  claude_session_key: ""
   telegram_user_id: ""
+  # Second agent Telegram bot (optional)
+  lisa_telegram_bot_token: ""
+  lisa_telegram_user_id: ""
+  # Initial Claude auth (optional — can also configure via web UI)
+  claude_session_key: ""
+
+  # --- Infrastructure (every restart) ---
+  gateway_token: ""
   additional_packages: []
   log_level: info
 
-# Configuration schema
 schema:
   telegram_bot_token: password
-  gateway_token: str?
-  claude_session_key: password?
   telegram_user_id: str?
+  lisa_telegram_bot_token: password?
+  lisa_telegram_user_id: str?
+  claude_session_key: password?
+  gateway_token: str?
   additional_packages:
     - str
   log_level: list(trace|debug|info|warning|error)?

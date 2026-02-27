@@ -60,6 +60,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
         tmux \
         jq \
         mesa-vulkan-drivers \
+        openssh-client \
     && apt-get clean \
     && rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
 
@@ -104,6 +105,11 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     && apt-get install -y --no-install-recommends gh \
     && apt-get clean \
     && rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
+
+# Install age for encrypted secret backups
+RUN curl -fsSL -o /tmp/age.tar.gz "https://dl.filippo.io/age/v1.2.1?for=linux/amd64" \
+    && tar -xzf /tmp/age.tar.gz -C /usr/local/bin --strip-components=1 \
+    && rm /tmp/age.tar.gz
 
 # Enable pnpm and Bun for runtime
 RUN corepack enable \
