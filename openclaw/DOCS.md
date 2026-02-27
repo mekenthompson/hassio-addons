@@ -10,6 +10,7 @@
 - [Encrypted Backups](#encrypted-backups)
 - [Data Layout](#data-layout)
 - [Migration from Separate Add-ons](#migration-from-separate-add-ons)
+- [Breaking Changes in v2.0.0](#breaking-changes-in-v200)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -206,7 +207,7 @@ Manage your OpenClaw configuration in a git repository for reproducibility and d
 
 ```
 your-openclaw-config/
-├── openclaw.json5              # SecretRef objects, safe to commit
+├── openclaw.json              # SecretRef objects, safe to commit
 ├── ken/
 │   ├── workspace/
 │   │   ├── SOUL.md
@@ -233,7 +234,7 @@ your-openclaw-config/
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Sync config (hot-reloaded by gateway)
-cp "$REPO_DIR/openclaw.json5" /data/openclaw-config/openclaw.json
+cp "$REPO_DIR/openclaw.json" /data/openclaw-config/openclaw.json
 
 # Sync workspaces (exclude memory — runtime state)
 rsync -av --exclude='memory/' --exclude='MEMORY.md' \
@@ -353,7 +354,6 @@ Schedule `backup-secrets` as an OpenClaw cron job for daily encrypted backups.
 │   ├── SOUL.md, USER.md, ...     # Agent persona files
 │   ├── MEMORY.md                 # Long-term memory
 │   └── memory/                   # Daily memory notes
-├── openclaw-config-lisa/         # Second agent config
 │   └── workspace -> /data/openclaw-workspace-lisa/
 ├── openclaw-workspace-lisa/      # Second agent workspace
 │   ├── SOUL.md, USER.md, ...
@@ -399,7 +399,6 @@ cp -a /share/openclaw-lisa-migration/workspace/* /data/openclaw-workspace-lisa/
 
 # Copy any Lisa-specific credentials
 cp -a /share/openclaw-lisa-migration/config/credentials/* \
-    /data/openclaw-config-lisa/credentials/ 2>/dev/null || true
 ```
 
 ### 4. Verify
@@ -446,3 +445,30 @@ Each agent's memory search indexes only their own workspace. Check:
 ### Permission errors
 
 The init script sets ownership on boot. Try restarting the add-on. If persistent, check that `/data/openclaw-*` directories are owned by `node:node`.
+
+---
+
+## Breaking Changes in v2.0.0
+
+### Supervisor API Access Removed
+
+The add-on no longer requests `hassio_api`, `auth_api`, or `homeassistant_api` permissions. The `$SUPERVISOR_TOKEN` and `$HASSIO_TOKEN` environment variables are no longer available inside the container.
+
+**Impact:** Any custom scripts or automations that used `curl http://supervisor/...` from within the add-on will stop working.
+
+**Migration:** Use `ha-admin` (SSH to HA SSH add-on) or `ha-api` (REST API with long-lived token) instead. See [Home Assistant Integration](#home-assistant-integration).
+
+### Directory Mappings Reduced
+
+The following directory mappings have been removed:
+
+- `homeassistant_config:rw` — the `/homeassistant/` path is no longer available inside the container
+- `media:ro` — the `/media/` path is no longer available inside the container
+
+**Impact:** Any agent workflows that read/write HA config files or access media files will break.
+
+**Migration:** Access HA config via the REST API or SSH. For media files, use the `/share/` directory (still mapped `rw`).
+
+### Lisa Add-on Replaced
+
+The separate `openclaw-lisa` add-on is replaced by the multi-agent support in the main `openclaw` add-on. See [Migration from Separate Add-ons](#migration-from-separate-add-ons).
