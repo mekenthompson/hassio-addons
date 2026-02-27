@@ -261,7 +261,7 @@ For add-on management, backups, host operations:
 
 1. Generate an SSH keypair:
    ```bash
-   ssh-keygen -t ed25519 -f /data/openclaw-config/credentials/ha-ssh-key.pem -N ""
+   ssh-keygen -t ed25519 -f /data/openclaw-config/credentials/ha-ssh-key -N ""
    ```
 
 2. Add the public key to HA SSH add-on's `authorized_keys` config
@@ -345,7 +345,7 @@ Schedule `backup-secrets` as an OpenClaw cron job for daily encrypted backups.
 │   ├── workspace -> /data/openclaw-workspace/
 │   ├── credentials/
 │   │   ├── secrets.json          # SecretRef values (API keys)
-│   │   ├── ha-ssh-key.pem        # SSH key for HA admin
+│   │   ├── ha-ssh-key        # SSH key for HA admin
 │   │   ├── ha-access-token       # HA REST API token
 │   │   ├── age-recipient.txt     # Age public key for backups
 │   │   └── ...                   # OAuth tokens, other creds

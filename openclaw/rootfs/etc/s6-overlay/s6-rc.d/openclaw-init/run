@@ -51,7 +51,7 @@ mkdir -p /data/openclaw-home/bin
 cat > /data/openclaw-home/bin/ha-admin << 'SCRIPTEOF'
 #!/bin/bash
 # ha-admin v2.0.0 — Proxy ha CLI commands through HA SSH add-on
-SSH_KEY="/data/openclaw-config/credentials/ha-ssh-key.pem"
+SSH_KEY="/data/openclaw-config/credentials/ha-ssh-key"
 SSH_HOST="a0d7b954-ssh.local.hass.io"
 
 if [ ! -f "$SSH_KEY" ]; then
