@@ -1,0 +1,9 @@
+---
+build_from:
+  amd64: ghcr.io/hassio-addons/debian-base:7.3.3
+
+labels:
+  org.opencontainers.image.title: "OpenClaw AI Assistant (Lisa)"
+  org.opencontainers.image.description: "Lisa's personal AI assistant powered by Claude via Telegram"
+  org.opencontainers.image.source: "https://github.com/mekenthompson/hassio-addons"
+  org.opencontainers.image.licenses: "MIT"

@@ -1,0 +1,277 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# OpenClaw Init Script
+# Initializes OpenClaw configuration and installs Chromium
+# ==============================================================================
+
+bashio::log.info "Initializing OpenClaw..."
+
+# Create persistent directories
+mkdir -p /data/openclaw-config
+mkdir -p /data/openclaw-workspace
+mkdir -p /data/openclaw-home
+
+# OpenClaw expects config at ~/.openclaw - symlink to persistent storage
+# Remove existing directory/symlink if it exists
+rm -rf /home/node/.openclaw
+ln -sf /data/openclaw-config /home/node/.openclaw
+
+# Create workspace symlink
+mkdir -p /data/openclaw-config/workspace
+ln -sf /data/openclaw-workspace /data/openclaw-config/workspace
+
+chown -R node:node /data/openclaw-*
+chown -h node:node /home/node/.openclaw
+
+# Symlink persistent home directories for CLI tool configs (gh, railway, etc.)
+for dir in .config .local .railway; do
+    if [ -d "/data/openclaw-home/$dir" ]; then
+        rm -rf "/home/node/$dir"
+        ln -sf "/data/openclaw-home/$dir" "/home/node/$dir"
+        chown -h node:node "/home/node/$dir"
+        bashio::log.info "Linked ~/$dir -> /data/openclaw-home/$dir"
+    fi
+done
+
+# Ensure persistent bin dir is on PATH
+if [ -d "/data/openclaw-home/bin" ]; then
+    export PATH="/data/openclaw-home/bin:$PATH"
+fi
+
+# Generate gateway token if not provided (persist across restarts)
+GATEWAY_TOKEN=$(bashio::config 'gateway_token')
+if [ -z "$GATEWAY_TOKEN" ]; then
+    # Check for previously generated token
+    if [ -f /data/openclaw-config/gateway.token ]; then
+        GATEWAY_TOKEN=$(cat /data/openclaw-config/gateway.token)
+        bashio::log.info "Using existing gateway token"
+    else
+        bashio::log.info "Generating gateway token..."
+        GATEWAY_TOKEN=$(openssl rand -hex 32)
+        echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
+        bashio::log.info "Gateway token generated and saved"
+    fi
+else
+    echo "$GATEWAY_TOKEN" > /data/openclaw-config/gateway.token
+fi
+
+# Read configuration
+TELEGRAM_BOT_TOKEN=$(bashio::config 'telegram_bot_token')
+CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
+TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
+LOG_LEVEL=$(bashio::config 'log_level')
+
+# Create OpenClaw configuration only if it doesn't exist yet.
+# Once created, the gateway manages openclaw.json — UI changes persist across restarts.
+# Bootstrap behavior:
+#   - If claude_session_key is provided in addon config, it's used to create initial providers section
+#   - After initial setup, the addon NEVER overwrites the providers section
+#   - Users can add multiple API keys via OpenClaw web UI, and they persist
+#   - Only the gateway token is synced on subsequent restarts (preserves all other config)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    bashio::log.info "OpenClaw configuration already exists, preserving it"
+else
+    bashio::log.info "Creating initial OpenClaw configuration..."
+
+# Build config JSON
+cat > /data/openclaw-config/openclaw.json <<JSONEOF
+{
+  "channels": {
+JSONEOF
+
+# Add Telegram block if bot token is provided
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+    if [ -n "$TELEGRAM_USER_ID" ]; then
+        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "pairing",
+      "allowFrom": ["${TELEGRAM_USER_ID}"]
+    }
+JSONEOF
+    else
+        cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "pairing"
+    }
+JSONEOF
+    fi
+fi
+
+cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+  },
+  "gateway": {
+    "mode": "local",
+    "port": 18800,
+    "bind": "lan",
+    "auth": {
+      "token": "${GATEWAY_TOKEN}"
+    },
+    "trustedProxies": ["172.30.32.0/24", "172.30.33.0/24", "127.0.0.1"],
+    "controlUi": {
+      "enabled": true,
+      "allowInsecureAuth": true,
+      "allowedOrigins": ["*"]
+    }
+  },
+JSONEOF
+
+# Add providers section if Claude session key is provided
+if [ -n "$CLAUDE_SESSION_KEY" ]; then
+    cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+  "providers": {
+    "anthropic": {
+      "sessionKey": "${CLAUDE_SESSION_KEY}"
+    }
+  },
+JSONEOF
+fi
+
+cat >> /data/openclaw-config/openclaw.json <<JSONEOF
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-opus-4-5"
+      }
+    }
+  },
+  "logging": {
+    "level": "${LOG_LEVEL}"
+  }
+}
+JSONEOF
+
+    chown node:node /data/openclaw-config/openclaw.json
+    bashio::log.info "Initial configuration written to /home/node/.openclaw/openclaw.json"
+fi
+
+chown node:node /data/openclaw-config/gateway.token
+
+# Always sync gateway token to openclaw.json (token file and config can drift)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    CURRENT_TOKEN=$(jq -r '.gateway.auth.token // empty' /data/openclaw-config/openclaw.json 2>/dev/null)
+    if [ "$CURRENT_TOKEN" != "$GATEWAY_TOKEN" ]; then
+        bashio::log.info "Syncing gateway token to openclaw.json..."
+        jq --arg token "$GATEWAY_TOKEN" '.gateway.auth.token = $token' \
+            /data/openclaw-config/openclaw.json > /tmp/oc-token-sync.json \
+            && mv /tmp/oc-token-sync.json /data/openclaw-config/openclaw.json
+        chown node:node /data/openclaw-config/openclaw.json
+    fi
+fi
+
+# Log the config for debugging (mask sensitive values)
+bashio::log.info "Gateway mode: local"
+bashio::log.info "Telegram enabled: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'true' || echo 'false')"
+bashio::log.info "Claude session: $([ -n "$CLAUDE_SESSION_KEY" ] && echo 'configured' || echo 'not set')"
+
+# Generate nginx config with gateway token embedded for ingress WebSocket auth
+bashio::log.info "Generating nginx proxy configuration..."
+cat > /etc/nginx/nginx.conf <<'NGINXEOF'
+worker_processes 1;
+error_log /dev/stderr warn;
+pid /tmp/nginx.pid;
+daemon off;
+
+events {
+    worker_connections 128;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log off;
+    proxy_buffers 16 64k;
+    proxy_buffer_size 64k;
+
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+    server {
+        listen 18891;
+        server_name _;
+
+        location / {
+            proxy_pass http://127.0.0.1:18800;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 86400s;
+            proxy_send_timeout 86400s;
+
+            # Override Origin to match Host header so OpenClaw origin check passes
+            # (HA ingress Origin port 8123 != addon port 18891, causing mismatch)
+            proxy_set_header Origin http://$host;
+            proxy_set_header Accept-Encoding "";
+
+            # Strip CSP frame-ancestors header from upstream so HA ingress iframe works
+            proxy_hide_header Content-Security-Policy;
+            proxy_hide_header X-Frame-Options;
+NGINXEOF
+
+# Append the sub_filter with the actual gateway token
+# When accessed through HA ingress, connect WebSocket directly to addon port 18891
+# (HA ingress does not proxy WebSocket upgrades reliably)
+cat >> /etc/nginx/nginx.conf <<NGINXEOF
+            sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var gw=proto+"://"+location.hostname+":18891";var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
+NGINXEOF
+
+cat >> /etc/nginx/nginx.conf <<'NGINXEOF'
+            sub_filter_once on;
+            sub_filter_types text/html;
+        }
+    }
+}
+NGINXEOF
+
+bashio::log.info "nginx configuration generated with gateway token"
+
+# Ensure allowedOrigins is set for HA ingress (needed since OpenClaw main)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    if ! jq -e '.gateway.controlUi.allowedOrigins' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
+        bashio::log.info "Adding allowedOrigins to controlUi config..."
+        jq '.gateway.controlUi.allowedOrigins = ["*"]' \
+            /data/openclaw-config/openclaw.json > /tmp/oc-patch.json \
+            && mv /tmp/oc-patch.json /data/openclaw-config/openclaw.json
+        chown node:node /data/openclaw-config/openclaw.json
+    fi
+fi
+
+# Run doctor --fix to auto-enable configured plugins (Telegram, etc.)
+bashio::log.info "Running openclaw doctor --fix..."
+cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node node dist/index.js doctor --fix" || {
+    bashio::log.warning "openclaw doctor --fix had warnings, continuing..."
+}
+
+# Install Chromium for Playwright (power-user feature)
+if [ ! -d "/data/openclaw-home/.cache/ms-playwright" ]; then
+    bashio::log.info "Installing Chromium for Playwright (first run)..."
+    su - node -c "cd /app && PLAYWRIGHT_BROWSERS_PATH=/data/openclaw-home/.cache/ms-playwright node node_modules/playwright-core/cli.js install chromium" || {
+        bashio::log.warning "Playwright Chromium installation failed, but continuing..."
+    }
+else
+    bashio::log.info "Playwright Chromium already installed, skipping..."
+fi
+
+# Install additional packages if specified
+if bashio::config.has_value 'additional_packages'; then
+    bashio::log.info "Installing additional packages..."
+    PACKAGES=$(bashio::config 'additional_packages | join(" ")')
+    if [ -n "$PACKAGES" ]; then
+        apt-get update
+        # shellcheck disable=SC2086
+        apt-get install -y --no-install-recommends $PACKAGES
+        apt-get clean
+        rm -rf /tmp/* /var/cache/* /var/lib/apt/lists/*
+    fi
+fi
+
+bashio::log.info "OpenClaw initialization complete!"
