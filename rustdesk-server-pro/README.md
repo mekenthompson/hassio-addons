@@ -1,6 +1,5 @@
 # RustDesk Server Pro - Home Assistant Add-on
 
-[![Donate](https://img.shields.io/badge/donate-Coffee-yellow.svg)](https://www.example.com)
 
 Run your own private RustDesk remote desktop server! This add-on provides a self-hosted alternative to TeamViewer, AnyDesk, and other commercial remote desktop solutions.
 

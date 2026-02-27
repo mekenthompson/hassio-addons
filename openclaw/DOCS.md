@@ -73,7 +73,7 @@ lisa_telegram_user_id: "second-telegram-id"
 ```
 
 Restart the add-on. The init script creates a multi-agent `openclaw.json` with:
-- Two agents (`main` and `lisa`) with separate workspaces
+- Two agents (`main` and `second`) with separate workspaces
 - Two Telegram bot accounts bound to their respective agents
 - Agent-to-agent messaging enabled
 
@@ -135,7 +135,7 @@ Understanding what configures what:
 │  - SOUL.md, USER.md, AGENTS.md          │
 │  - MEMORY.md, IDENTITY.md, TOOLS.md     │
 │  Path: /data/openclaw-workspace/        │
-│        /data/openclaw-workspace-lisa/    │
+│        /data/openclaw-workspace-second/  │
 ├─────────────────────────────────────────┤
 │  Credentials (Secrets)                  │
 │  Purpose: API keys, tokens, SSH keys    │
@@ -167,7 +167,7 @@ Manage your OpenClaw configuration in a git repository for reproducibility and d
      "anthropic": { "apiKey": "sk-ant-..." },
      "openai": { "apiKey": "sk-..." },
      "telegram": {
-       "botTokenMain": "8588...",
+       "botTokenMain": "1234...",
        "botTokenSecond": "..."
      }
    }
@@ -208,7 +208,7 @@ Manage your OpenClaw configuration in a git repository for reproducibility and d
 ```
 your-openclaw-config/
 ├── openclaw.json              # SecretRef objects, safe to commit
-├── ken/
+├── main/
 │   ├── workspace/
 │   │   ├── SOUL.md
 │   │   ├── USER.md
@@ -217,7 +217,7 @@ your-openclaw-config/
 │   │   ├── HEARTBEAT.md
 │   │   └── TOOLS.md
 │   └── bin/                    # Custom scripts
-├── lisa/
+├── second/
 │   └── workspace/
 │       ├── SOUL.md
 │       ├── USER.md
@@ -238,12 +238,12 @@ cp "$REPO_DIR/openclaw.json" /data/openclaw-config/openclaw.json
 
 # Sync workspaces (exclude memory — runtime state)
 rsync -av --exclude='memory/' --exclude='MEMORY.md' \
-    "$REPO_DIR/ken/workspace/" /data/openclaw-workspace/
+    "$REPO_DIR/main/workspace/" /data/openclaw-workspace/
 rsync -av --exclude='memory/' --exclude='MEMORY.md' \
-    "$REPO_DIR/lisa/workspace/" /data/openclaw-workspace-lisa/
+    "$REPO_DIR/second/workspace/" /data/openclaw-workspace-second/
 
 # Sync custom scripts
-rsync -av "$REPO_DIR/ken/bin/" /data/openclaw-home/bin/
+rsync -av "$REPO_DIR/main/bin/" /data/openclaw-home/bin/
 chmod +x /data/openclaw-home/bin/*
 
 echo "Deployed. Gateway will hot-reload config changes."
@@ -354,8 +354,8 @@ Schedule `backup-secrets` as an OpenClaw cron job for daily encrypted backups.
 │   ├── SOUL.md, USER.md, ...     # Agent persona files
 │   ├── MEMORY.md                 # Long-term memory
 │   └── memory/                   # Daily memory notes
-│   └── workspace -> /data/openclaw-workspace-lisa/
-├── openclaw-workspace-lisa/      # Second agent workspace
+│   └── workspace -> /data/openclaw-workspace-second/
+├── openclaw-workspace-second/    # Second agent workspace
 │   ├── SOUL.md, USER.md, ...
 │   ├── MEMORY.md
 │   └── memory/
@@ -373,7 +373,7 @@ Schedule `backup-secrets` as an OpenClaw cron job for daily encrypted backups.
 
 If you previously ran separate `openclaw` and `openclaw-lisa` add-ons:
 
-### 1. Back Up Lisa's Data
+### 1. Back Up Second Agent's Data
 
 From HA Terminal or SSH add-on:
 ```bash
@@ -388,16 +388,16 @@ docker exec addon_XXXXX_openclaw-lisa bash -c '
 ### 2. Update the Add-on
 
 - Pull the new version of the consolidated add-on
-- Enter Lisa's bot token and user ID in the add-on config
+- Enter the second agent's bot token and user ID in the add-on config
 - Rebuild and start
 
-### 3. Restore Lisa's Workspace
+### 3. Restore Second Agent's Workspace
 
 ```bash
 # Copy workspace files (memory, persona, work files)
-cp -a /share/openclaw-lisa-migration/workspace/* /data/openclaw-workspace-lisa/
+cp -a /share/openclaw-lisa-migration/workspace/* /data/openclaw-workspace-second/
 
-# Copy any Lisa-specific credentials
+# Copy any second agent-specific credentials
 cp -a /share/openclaw-lisa-migration/config/credentials/* \
 ```
 
@@ -426,10 +426,10 @@ Once verified:
 
 ### Second agent not working
 
-1. Verify `lisa_telegram_bot_token` is set in add-on config
-2. Check logs for "Lisa Telegram: configured"
-3. Verify `openclaw.json` has the `lisa` agent and binding
-4. Check that Lisa's workspace directory exists
+1. Verify `lisa_telegram_bot_token` (second agent) is set in add-on config
+2. Check logs for "Secondary Telegram: configured"
+3. Verify `openclaw.json` has the second agent and binding
+4. Check that the second agent's workspace directory exists
 
 ### "Pairing required"
 
@@ -469,6 +469,6 @@ The following directory mappings have been removed:
 
 **Migration:** Access HA config via the REST API or SSH. For media files, use the `/share/` directory (still mapped `rw`).
 
-### Lisa Add-on Replaced
+### Second Agent Add-on Consolidated
 
 The separate `openclaw-lisa` add-on is replaced by the multi-agent support in the main `openclaw` add-on. See [Migration from Separate Add-ons](#migration-from-separate-add-ons).

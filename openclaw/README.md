@@ -28,7 +28,7 @@ OpenClaw is an open-source AI assistant framework. This add-on packages it for H
 │  ┌─────────────────────────────────────┐ │
 │  │ OpenClaw Add-on (single container)  │ │
 │  │                                     │ │
-│  │  Agent: "main"    Agent: "lisa"     │ │
+│  │  Agent: "main"    Agent: "second"     │ │
 │  │  ├─ Workspace     ├─ Workspace      │ │
 │  │  ├─ Memory        ├─ Memory         │ │
 │  │  ├─ Sessions      ├─ Sessions       │ │
@@ -116,7 +116,7 @@ All data survives add-on restarts and updates:
 |------|----------|
 | `/data/openclaw-config/` | Main config, credentials, gateway token |
 | `/data/openclaw-workspace/` | Primary agent's workspace and memory |
-| `/data/openclaw-workspace-lisa/` | Second agent's workspace and memory |
+| `/data/openclaw-workspace-second/` | Second agent's workspace and memory |
 | `/data/openclaw-home/` | CLI tools, browser cache, custom scripts |
 
 ## Home Assistant Integration

@@ -1,6 +1,6 @@
 #!/command/with-contenv bashio
 # ==============================================================================
-# OpenClaw Init Script (Multi-Agent: Multi-Agent)
+# OpenClaw Init Script (Multi-Agent)
 # Initializes configuration, workspaces, and utilities
 # ==============================================================================
 
@@ -11,11 +11,11 @@ bashio::log.info "Initializing OpenClaw (multi-agent) v${SCRIPT_VERSION}..."
 # ---- Persistent directories (/data/ survives rebuilds + restarts) ----
 # SAFETY: Never rm -rf anything in /data/ — only create if missing.
 
-# Ken (primary agent)
+# Primary agent
 mkdir -p /data/openclaw-config /data/openclaw-workspace /data/openclaw-home
 mkdir -p /data/openclaw-config/credentials
 
-# Lisa (second agent)
+# Second agent
 mkdir -p /data/openclaw-workspace-lisa
 
 # ~/.openclaw is ephemeral (/home is rebuilt each boot) — always recreate symlink
@@ -117,7 +117,7 @@ DATE=$(date +%Y-%m-%d)
 
 mkdir -p "$BACKUP_DIR"
 
-# Archive both Ken's and Lisa's credentials
+# Archive all agent credentials
 tar -cf - \
     -C / \
     data/openclaw-config/credentials/ \
@@ -163,7 +163,7 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
 else
     bashio::log.info "Creating initial multi-agent OpenClaw configuration..."
 
-    # Build Ken's Telegram account
+    # Build primary agent's Telegram account
     # Default to "pairing" if no user ID (avoids empty allowlist lockout)
     TELEGRAM_ACCOUNTS=""
     if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
@@ -174,7 +174,7 @@ else
         fi
     fi
 
-    # Build Lisa's Telegram account
+    # Build second agent's Telegram account
     if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
         if [ -n "$TELEGRAM_ACCOUNTS" ]; then
             TELEGRAM_ACCOUNTS="$TELEGRAM_ACCOUNTS, "
@@ -266,8 +266,8 @@ fi
 
 # ---- Logging ----
 bashio::log.info "Gateway mode: local"
-bashio::log.info "Ken Telegram: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
-bashio::log.info "Lisa Telegram: $([ -n "$LISA_TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
+bashio::log.info "Primary Telegram: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
+bashio::log.info "Secondary Telegram: $([ -n "$LISA_TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
 
 # ---- nginx proxy config ----
 bashio::log.info "Generating nginx proxy configuration..."
@@ -370,4 +370,4 @@ if bashio::config.has_value 'additional_packages'; then
     fi
 fi
 
-bashio::log.info "OpenClaw initialization complete! (multi-agent: Multi-Agent)"
+bashio::log.info "OpenClaw initialization complete! (multi-agent)"
