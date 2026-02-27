@@ -32,6 +32,18 @@ chown -R node:node /data/openclaw-config /data/openclaw-workspace /data/openclaw
 chown -R node:node /data/openclaw-workspace-lisa
 chown -h node:node /home/node/.openclaw
 
+# ---- Dynamic agent workspace creation ----
+# Create workspace dirs for any agents defined in openclaw.json (safe — skips existing)
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    jq -r '.agents.list[]?.workspace // empty' /data/openclaw-config/openclaw.json | while read -r ws; do
+        if [ ! -d "$ws" ]; then
+            mkdir -p "$ws"
+            chown -R node:node "$ws"
+            bashio::log.info "Created agent workspace: $ws"
+        fi
+    done
+fi
+
 # ---- Persistent home directories ----
 for dir in .config .local .railway; do
     if [ -d "/data/openclaw-home/$dir" ]; then
