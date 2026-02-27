@@ -1,0 +1,9 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# OpenClaw Nginx Proxy Service
+# Reverse proxy for WebSocket support through HA ingress
+# ==============================================================================
+
+bashio::log.info "Starting nginx reverse proxy..."
+
+exec nginx -c /etc/nginx/nginx.conf
