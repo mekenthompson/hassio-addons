@@ -1,6 +1,6 @@
 ---
 name: OpenClaw AI Assistant
-version: "2.0.1"
+version: "2.0.2"
 slug: openclaw
 description: Multi-agent AI assistant via Telegram, running on Home Assistant
 url: https://github.com/mekenthompson/hassio-addons

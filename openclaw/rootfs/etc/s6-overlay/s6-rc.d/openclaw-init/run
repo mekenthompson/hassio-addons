@@ -329,7 +329,7 @@ http {
 NGINXEOF
 
 cat >> /etc/nginx/nginx.conf <<NGINXEOF
-            sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var gw=proto+"://"+location.hostname+":18789";var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
+            sub_filter '</head>' '<script>(function(){var p=location.pathname;if(p.indexOf("/hassio/ingress/")===0||p.indexOf("/api/hassio_ingress/")===0){var proto=location.protocol==="https:"?"wss":"ws";var parts=p.split("/");var slug=parts[3];var gw=proto+"://"+location.host+"/api/hassio_ingress/"+slug;var k="openclaw.control.settings.v1";var s;try{s=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){s={}}var changed=false;if(s.gatewayUrl!==gw){s.gatewayUrl=gw;changed=true}if(s.token!=="${GATEWAY_TOKEN}"){s.token="${GATEWAY_TOKEN}";changed=true}if(changed){localStorage.setItem(k,JSON.stringify(s));location.reload()}}})();</script></head>';
 NGINXEOF
 
 cat >> /etc/nginx/nginx.conf <<'NGINXEOF'
