@@ -68,8 +68,8 @@ telegram_bot_token: "your-bot-token"
 telegram_user_id: "your-telegram-id"
 
 # Second agent
-lisa_telegram_bot_token: "second-bot-token"
-lisa_telegram_user_id: "second-telegram-id"
+second_agent_bot_token: "second-bot-token"
+second_agent_user_id: "second-telegram-id"
 ```
 
 Restart the add-on. The init script creates a multi-agent `openclaw.json` with:
@@ -426,7 +426,7 @@ Once verified:
 
 ### Second agent not working
 
-1. Verify `lisa_telegram_bot_token` (second agent) is set in add-on config
+1. Verify `second_agent_bot_token` (second agent) is set in add-on config
 2. Check logs for "Secondary Telegram: configured"
 3. Verify `openclaw.json` has the second agent and binding
 4. Check that the second agent's workspace directory exists

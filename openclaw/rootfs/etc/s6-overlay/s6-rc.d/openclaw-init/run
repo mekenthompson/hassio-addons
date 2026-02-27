@@ -154,8 +154,8 @@ TELEGRAM_USER_ID=$(bashio::config 'telegram_user_id')
 CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
 LOG_LEVEL=$(bashio::config 'log_level')
 
-LISA_TELEGRAM_BOT_TOKEN=$(bashio::config 'lisa_telegram_bot_token')
-LISA_TELEGRAM_USER_ID=$(bashio::config 'lisa_telegram_user_id')
+SECOND_AGENT_BOT_TOKEN=$(bashio::config 'second_agent_bot_token')
+SECOND_AGENT_USER_ID=$(bashio::config 'second_agent_user_id')
 
 # ---- Bootstrap openclaw.json (first run only) ----
 if [ -f /data/openclaw-config/openclaw.json ]; then
@@ -175,32 +175,32 @@ else
     fi
 
     # Build second agent's Telegram account
-    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+    if [ -n "$SECOND_AGENT_BOT_TOKEN" ]; then
         if [ -n "$TELEGRAM_ACCOUNTS" ]; then
             TELEGRAM_ACCOUNTS="$TELEGRAM_ACCOUNTS, "
         fi
-        if [ -n "$LISA_TELEGRAM_USER_ID" ]; then
-            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"allowlist\", \"allowFrom\": [\"$LISA_TELEGRAM_USER_ID\"] }"
+        if [ -n "$SECOND_AGENT_USER_ID" ]; then
+            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$SECOND_AGENT_BOT_TOKEN\", \"dmPolicy\": \"allowlist\", \"allowFrom\": [\"$SECOND_AGENT_USER_ID\"] }"
         else
-            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$LISA_TELEGRAM_BOT_TOKEN\", \"dmPolicy\": \"pairing\" }"
+            TELEGRAM_ACCOUNTS="${TELEGRAM_ACCOUNTS}\"lisa\": { \"botToken\": \"$SECOND_AGENT_BOT_TOKEN\", \"dmPolicy\": \"pairing\" }"
         fi
     fi
 
     # Build bindings
     BINDINGS="{ \"agentId\": \"main\", \"match\": { \"channel\": \"telegram\", \"accountId\": \"default\" } }"
-    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+    if [ -n "$SECOND_AGENT_BOT_TOKEN" ]; then
         BINDINGS="$BINDINGS, { \"agentId\": \"lisa\", \"match\": { \"channel\": \"telegram\", \"accountId\": \"lisa\" } }"
     fi
 
     # Build agents list
     AGENTS_LIST="{ \"id\": \"main\", \"default\": true, \"workspace\": \"/data/openclaw-workspace\" }"
-    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+    if [ -n "$SECOND_AGENT_BOT_TOKEN" ]; then
         AGENTS_LIST="$AGENTS_LIST, { \"id\": \"lisa\", \"workspace\": \"/data/openclaw-workspace-lisa\" }"
     fi
 
     # Build agentToAgent (only if multi-agent)
     AGENT_TO_AGENT=""
-    if [ -n "$LISA_TELEGRAM_BOT_TOKEN" ]; then
+    if [ -n "$SECOND_AGENT_BOT_TOKEN" ]; then
         AGENT_TO_AGENT="\"tools\": { \"agentToAgent\": { \"enabled\": true, \"allow\": [\"main\", \"lisa\"] } },"
     fi
 
@@ -267,7 +267,7 @@ fi
 # ---- Logging ----
 bashio::log.info "Gateway mode: local"
 bashio::log.info "Primary Telegram: $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
-bashio::log.info "Secondary Telegram: $([ -n "$LISA_TELEGRAM_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
+bashio::log.info "Secondary Telegram: $([ -n "$SECOND_AGENT_BOT_TOKEN" ] && echo 'configured' || echo 'not set')"
 
 # ---- nginx proxy config ----
 bashio::log.info "Generating nginx proxy configuration..."

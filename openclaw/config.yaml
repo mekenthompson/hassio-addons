@@ -59,8 +59,8 @@ options:
   telegram_bot_token: ""
   telegram_user_id: ""
   # Second agent Telegram bot (optional)
-  lisa_telegram_bot_token: ""
-  lisa_telegram_user_id: ""
+  second_agent_bot_token: ""
+  second_agent_user_id: ""
   # Initial Claude auth (optional — can also configure via web UI)
   claude_session_key: ""
 
@@ -72,8 +72,8 @@ options:
 schema:
   telegram_bot_token: password
   telegram_user_id: str?
-  lisa_telegram_bot_token: password?
-  lisa_telegram_user_id: str?
+  second_agent_bot_token: password?
+  second_agent_user_id: str?
   claude_session_key: password?
   gateway_token: str?
   additional_packages:

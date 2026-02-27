@@ -77,8 +77,8 @@ These are **bootstrap settings** — used on first run to generate the initial `
 |--------|---------|-----------|
 | `telegram_bot_token` | Primary agent's Telegram bot | First run only |
 | `telegram_user_id` | Primary agent's allowed Telegram user | First run only |
-| `lisa_telegram_bot_token` | Second agent's Telegram bot | First run only |
-| `lisa_telegram_user_id` | Second agent's allowed Telegram user | First run only |
+| `second_agent_bot_token` | Second agent's Telegram bot | First run only |
+| `second_agent_user_id` | Second agent's allowed Telegram user | First run only |
 | `claude_session_key` | Initial Claude Pro auth | First run only |
 | `gateway_token` | Web UI / API auth token | Every restart |
 | `additional_packages` | Extra apt packages to install | Every restart |
