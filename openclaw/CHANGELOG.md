@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2026-02-28
+<!-- last-upstream-sha: f1bf558685 -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (89 commits since last sync)
+- GPU commits (browser `gpuEnabled` config) rebased cleanly on top
+
+### Fixed (upstream)
+- **Telegram outbound chunking** — unified shared chunking logic, whitespace preserved in HTML retry
+- **Model reasoning preserved in provider fallback** — thinking/reasoning no longer silently dropped when falling back between providers
+- **Ollama context window handling** — unified across discovery, merge, and OpenAI-compat transport
+- **Ollama autodiscovery hardened** — better warning behavior and apiKey config without predeclared provider
+- **Heartbeat wake dedup** — skip wake on deduplicated notifications, scope wakeups to correct session
+- **Post-compaction audit injection removed** — internal system messages no longer leak into context (security)
+- **`tools.fs.workspaceOnly=false` honored** — host write/edit outside workspace now works correctly
+- **Browser `url` alias** — accepted for open and navigate actions
+- **Doctor detects empty groupAllowFrom** with groupPolicy=allowlist
+- **Control UI CSP** — Google Fonts origins now allowed
+- **Gateway restart** — actively kickstart launchd on supervised restart
+
+### Added (upstream)
+- **Android node capabilities** — calendar, contacts, photos, notifications, motion/pedometer handlers
+- **TTS opus format** — voice bubbles for WhatsApp
+- **Codex usage label** — weekly window correctly labeled "Week"
+
 ## [1.0.54] - 2026-02-23
 <!-- last-upstream-sha: c92c3ad22 -->
 
