@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-03-01
+<!-- last-upstream-sha: 3685ccb536 -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (70 commits since last sync)
+- GPU commits (browser `gpuEnabled` config) cherry-picked cleanly on top
+
+### Fixed (upstream)
+- **Memory flush gating** — correct context token accounting for flush decisions
+- **Memory keyword search** — keep keyword hits when hybrid vector search misses
+- **sessions_list transcriptPath** — path resolution fixed
+- **Cron fixes (11)** — heartbeat target for main-session jobs, disable messaging tool when delivery.mode=none, avoid marking queued announce as delivered, completion direct send for text-only announce, force main-target system events onto main session, condition requireExplicitMessageTarget on delivery, schedule nextWakeAtMs for isolated sessionTarget jobs, preserve session scope for main-target reminders
+- **Browser navigate** — resolve correct targetId after renderer swap
+- **Gateway restart** — shorter manual reinstall/restart delays
+- **Telegram reply dedup** — fix duplicate block replies by unblocking coalesced payloads
+- **TUI shutdown** — guard SIGTERM against setRawMode EBADF
+
+### Added (upstream)
+- **Diffs plugin** — new plugin with image/view modes
+- **Control UI** — session deletion support
+- **Cron** — `--account` flag for multi-account delivery
+
+### Not relevant (skipped)
+- Android voice/onboarding fixes (12 commits)
+- Feishu locale/features (4 commits)
+- Azure OpenAI endpoint fixes (6 commits)
+- Podman Quadlet fixes
+
 ## [2.0.3] - 2026-02-28
 <!-- last-upstream-sha: f1bf558685 -->
 
