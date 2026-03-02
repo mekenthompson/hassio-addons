@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.7] - 2026-03-02
+<!-- last-upstream-sha: 0c2d85529 -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (176 additional commits, version bump to 2026.3.2)
+- GPU commits cherry-picked cleanly on top
+
+### Fixed (upstream)
+- **Telegram:** DM topic thread keys scoped by chat id, retry sends without message_thread_id, IPv4 media fetch fallback, first-chunk voice fallback reply refs, replyToMode 'first' scoped to first chunk
+- **Browser:** prefer openclaw profile in headless/noSandbox, honor attachOnly for loopback CDP, Chrome stderr in startup errors, relay navigation retry after frame detach, stale relay target eviction, configurable CDP auto-port range
+- **Cron:** re-arm one-shot at-jobs when rescheduled, year-rollback guard
+- **Sessions:** harden recycled PID lock recovery, preserve external routing for internal turns
+- **Thinking:** default Claude 4.6 to adaptive, support `thinkingDefault: "adaptive"`
+- **Pairing:** handle missing accountId in allowFrom reads
+- **Gateway:** origin wildcard honour, healthz/readyz probes, ws:// to private network
+- **Usage:** clamp negative input token counts to zero
+
+### Security (upstream)
+- Harden spoofed system marker handling
+- Harden diffs viewer security
+- 0o644 for inbound media files (sandbox read access)
+
+### Added (upstream)
+- PDF analysis tool with native provider support
+- `openclaw config validate` CLI command
+- Docker opt-in sandbox support
+- Gateway healthz/readyz probe endpoints
+- OPENCLAW_SHELL env injection for exec/ACP
+- Diffs: image quality configs + PDF format option
+- Improved Telegram DM topics support
+
 ## [2.0.6] - 2026-03-02
 <!-- last-upstream-sha: aaa7de45f -->
 
