@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6] - 2026-03-02
+<!-- last-upstream-sha: aaa7de45f -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (236 commits since last sync)
+- GPU commits (browser `gpuEnabled` config) cherry-picked cleanly on top
+
+### Fixed (upstream)
+- **Cron:** prevent armTimer tight loop when job has stuck runningAtMs
+- **Cron:** fix 1/3 timeout on fresh isolated CLI runs
+- **Cron:** recover flat patch params for update action and fix schema
+- **Cron:** reject sessionTarget "main" for non-default agents at creation time
+- **CLI:** set cron run exit code from run outcome
+- **Telegram:** skip nullish final text sends
+- **Routing:** treat group/channel peer.kind as equivalent
+- **Gateway:** support wildcard in controlUi.allowedOrigins for remote access
+- **Gateway:** handle CLI session expired errors gracefully instead of crashing
+- **Gateway:** enforce owner boundary for agent runs
+- **Session:** retire stale dm main route after dmScope migration
+- **Signal:** prevent sentTranscript sync messages from bypassing loop protection
+- **Doctor:** use posix path semantics for linux sd detection; warn when state dir is on SD/eMMC
+
+### Security (upstream)
+- Harden root-scoped writes against symlink races
+- Enforce sandbox inheritance for sessions_spawn
+- Block private-network web_search citation redirects
+- Harden sandbox media reads against TOCTOU escapes
+- Fix minor security vulnerability (#30948)
+
+### Added (upstream)
+- `sessions_spawn` sandbox require mode
+- Control UI/Cron: persist delivery mode none on edit
+- Node install: persist gateway token in service env
+
 ## [2.0.5] - 2026-03-01
 <!-- last-upstream-sha: 3685ccb536 -->
 
