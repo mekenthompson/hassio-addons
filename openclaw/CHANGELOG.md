@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2026-03-03
+<!-- last-upstream-sha: d98a61a97 -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (358 commits since last sync)
+- GPU commits cherry-picked cleanly on top
+
+### Fixed (upstream)
+- **Telegram:** preserve original filename from document/audio/video uploads, compact model callback fallback for long names
+- **Browser:** GPU warn without headless mode (our commit now in upstream context)
+- **Cron:** migrate legacy string schedule and command jobs, cache schedule evaluators
+- **Sessions:** reclaim orphan same-pid lock files, harden session path credit rollup
+- **Config:** move sensitive-schema hint warnings to debug, harden backup permissions and cleanup
+- **Plugins:** prefer bundled plugin ids over bare npm specs, fall back to bundled when npm resolves to non-OpenClaw package
+- **Heartbeat:** suppress HEARTBEAT_OK fallback leak
+- **Discord:** per-channel message queues to restore parallel agent dispatch
+- **Slack:** apply mrkdwn conversion in streaming/preview, memoize allow-from and mention paths
+- **MS Teams:** harden webhook timeouts, scope auth across media redirects, guarded dispatcher redirects
+- **Tools:** strip xAI-unsupported JSON Schema keywords from tool definitions
+- **Reasoning:** prevent reasoning text leak through handleMessageEnd fallback
+
+### Performance (upstream)
+- Core routing, pairing, slack, and security scan speedups
+- Cache normalized agent-id lookups, skip redundant schema/session-store work
+- Cache scanner directory walks, cron schedule evaluators
+
+### Refactored (upstream)
+- Unify queueing and normalize telegram/slack flows
+- Dedupe CLI config, cron, and install flows
+- Dedupe protocol schema typing and session/media helpers
+
 ## [2.0.7] - 2026-03-02
 <!-- last-upstream-sha: 0c2d85529 -->
 
