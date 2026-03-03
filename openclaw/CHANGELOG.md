@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Telegram DM streaming**: Disabled `sendMessageDraft` for DM streaming — causes `TEXTDRAFT_PEER_INVALID` for regular bots (#7803), loses reply_to support, breaks progressive message editing. Reverted DM default to `sendMessage`+`editMessageText` transport.
 
+## [2.0.10] - 2026-03-04
+<!-- last-upstream-sha: 2cd3be896 -->
+
+### Changed
+- **Synced fork to upstream openclaw/openclaw main** (473 commits since v2.0.8)
+- **Dropped sendMessageDraft cherry-pick** — upstream merged the same fix in #33169
+- GPU commits (3) cherry-picked cleanly, one test conflict resolved (upstream refactored test to suite imports)
+
+### Fixed (upstream)
+- **Telegram:** draft stream boundaries stabilized, NO_REPLY lead-fragment leaks suppressed (#33169), duplicate messages in DM draft mode (#32118), preserve original filenames
+- **Discord:** per-channel message queues for parallel dispatch, allowBots mention gating, dropped opus dependency
+- **Config:** sensitive-schema warnings moved to debug, backup permissions hardened
+- **Plugins:** bundled plugin id preference, fallback when npm resolves non-OpenClaw package
+- **Sessions:** orphan same-pid lock recovery
+- **Cron:** legacy schedule/command migration, schedule evaluator caching
+
+### Performance (upstream)
+- Core routing, pairing, security scan caching
+- Agent-id lookup memoization, redundant schema work skipped
+
 ## [2.0.8] - 2026-03-03
 <!-- last-upstream-sha: d98a61a97 -->
 
