@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Telegram DM streaming**: Disabled `sendMessageDraft` for DM streaming — causes `TEXTDRAFT_PEER_INVALID` for regular bots (#7803), loses reply_to support, breaks progressive message editing. Reverted DM default to `sendMessage`+`editMessageText` transport.
 
+## [2.0.11] - 2026-03-04
+
+### Fixed
+- **Telegram DM streaming coalesce**: In `partial` mode, responses now coalesce into a single progressively-edited message across tool-call boundaries instead of creating separate messages per turn. Aligns Telegram with Discord's existing `shouldSplitPreviewMessages` pattern. Forces message transport for all DM lanes, resets stream state in `forceNewMessage()`, adds `keepStreamAlive` to lane-delivery. Controlled by existing `streaming` config (`partial` = one message, `block` = split).
+
 ## [2.0.10] - 2026-03-04
 <!-- last-upstream-sha: 2cd3be896 -->
 
