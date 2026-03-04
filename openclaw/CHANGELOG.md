@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.17] - 2026-03-05
+
+### Changed
+- **Synced with upstream**: 29 new commits from `openclaw/openclaw` (9c6847074)
+- Key upstream changes: gateway restart health fixes, AGENTS.md compaction alignment, Ollama header passthrough, outbound media fallback fixes, poll-vote actions, ACP session streaming relay, draft preview materialization
+- **Custom commits re-applied**: 3 GPU + 1 DM streaming coalesce cherry-picked cleanly
+
 ## [2.0.13] - 2026-03-04
 
 ### Changed
