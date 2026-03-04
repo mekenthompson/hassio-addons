@@ -5,13 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.12] - 2026-03-04
+## [2.0.13] - 2026-03-04
+
+### Changed
+- **Rebased on upstream**: Synced with upstream `openclaw/openclaw` HEAD (19 commits). Includes serial callback queue, async materialization, smarter archive cleanup.
+- **Simplified streaming fix**: Replaced complex `keepStreamAlive`/`needsFlushForKeepAlive` with simple `revive()` after finalization. Down from 5 changed files to 2.
+- **GPU commits re-applied**: All 3 GPU browser config commits cherry-picked on top of upstream HEAD.
 
 ### Fixed
-- **Telegram DM streaming flush race**: Fixed race condition where stream throttle delay (250ms) meant no `messageId` existed when final delivery arrived, causing fallback to `sendPayload` (new messages). Now detects unflushed streams and forces a stop-flush + revive cycle.
-- **Block-mode regression**: Split `onAssistantMessageStart` skip paths — block-mode pre-rotation no longer clears `hasStreamedMessage`, preventing missed rotation on next boundary.
-- **Stale preview cleanup**: Deferred `finalizedPreviewByLane` reset to `ingestDraftLaneSegments` so media-only turns don't delete previously finalized preview text.
-- **Test coverage**: 5 new tests for partial-mode coalescing, block-mode regression guard, flush-revive race, and media-only turn preservation.
+- **Telegram DM streaming coalesce**: Gate rotation behind `shouldSplitPreviewMessages` so partial mode keeps editing same message across tool-call boundaries. Add `revive()` to reopen stream after finalization.
+- **DM message transport**: Force `"message"` transport for ALL DM lanes (not just reasoning), ensuring `editMessageText` has a real `messageId`.
+- **`@tloncorp/api` build fix**: Upstream `5ce5309` fixes git URL format; also added `npm install -g npm@latest` as belt-and-suspenders.
 
 ## [2.0.9] - 2026-03-03
 
