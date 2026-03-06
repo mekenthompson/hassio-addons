@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.19] - 2026-03-07
+
+### Changed
+- **Synced with upstream**: 145 new commits from `openclaw/openclaw` (82eebc905)
+- Key upstream changes:
+  - **Security**: reject spoofed input_image MIME payloads (#38289), enforce 600 perms for cron store (#36078)
+  - **Telegram**: clear DM draft after materialize (#36746), narrow failed-after retry match, honor outbound mediaMaxMb uploads (#38065)
+  - **Gateway**: keep probe routes reachable with root-mounted control UI (#38199), normalize HEIC input images (#38122), discriminate input sources, path-scoped config schema lookup (#37266)
+  - **Features**: custom context management plugin system (#22201), web search in onboarding (#34009), opt-in extension deps via OPENCLAW_EXTENSIONS build arg (#32223)
+  - **Failover**: classify HTTP 402 as rate_limit (#36802), zhipuai limit fix (#33813)
+  - **Session routing**: prefer webchat routes for direct UI turns (#37135), respect source channel for agent event surfacing (#36030)
+  - **Codex OAuth**: fix bogus probe + scope mutation
+  - **Cron**: stabilize one-shot migration tests, migrate legacy delivery hints
+- **Custom commits re-applied**: 3 GPU + 1 DM streaming coalesce cherry-picked cleanly (no conflicts)
+
 ## [2.0.17] - 2026-03-05
 
 ### Changed
