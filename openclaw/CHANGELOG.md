@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.20] - 2026-03-08
+
+### Changed
+- **Synced with upstream**: 242 new commits from `openclaw/openclaw` (733f7af92)
+- Key upstream changes:
+  - **Heartbeat**: fix requests-in-flight retries from drifting schedule (#39182)
+  - **Telegram**: reset webhook cleanup latch after polling 409 conflicts (#39205), guard null persisted update id, resolve status SecretRefs with provider-safe env checks, harden persisted offset confirmation and stall recovery, route native topic commands to active session (#38871)
+  - **Security**: harden install base drift cleanup, strip custom auth headers on cross-origin redirects, require admin for chat config writes, harden fs-safe copy writes, stage installs before publish
+  - **Cron**: eliminate double-announce, replace delivery polling with push-based flow (#39089)
+  - **Gateway**: harden service-mode stale process cleanup (#38463), flush chat delta before tool-start events (#39128), order bootstrap cache clear after embedded run wait, harden plugin HTTP route auth
+  - **Browser**: keep dispatcher context with no-retry hints
+  - **Models**: refresh gpt/gemini alias defaults (#38638), prevent plaintext apiKey writes to models state (#38889), respect explicit provider baseUrl in merge mode (#39103)
+  - **Agents**: avoid double websocket retry accounting on reconnect failures (#39133), apply contextTokens cap for compaction threshold (#39099), increment compaction counter on overflow-triggered compaction (#39123)
+  - **Docker**: slim image option (#38479)
+  - **Config**: degrade gracefully on missing env vars (#39050), sanitize validation log output (#39116)
+  - **Discord**: avoid native plugin command collisions, make message listener non-blocking (#39154)
+  - **Refactor**: large deduplication pass across channels (telegram, discord, slack, feishu), unify DM pairing challenge flows, centralize gateway auth env credential readers
+- Custom patches maintained: 3 GPU commits + 1 streaming coalesce commit (PR #33844 still pending upstream)
+
 ## [2.0.19] - 2026-03-07
 
 ### Changed
