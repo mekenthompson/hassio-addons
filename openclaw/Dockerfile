@@ -18,8 +18,8 @@ RUN corepack enable
 WORKDIR /build
 
 # Clone and build OpenClaw
-ARG OPENCLAW_VERSION=2026.03.08a
-ARG CACHEBUST=50
+ARG OPENCLAW_VERSION=2026.03.09a
+ARG CACHEBUST=51
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && npm install -g npm@latest \

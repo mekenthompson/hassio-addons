@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.21] - 2026-03-09
+
+### Changed
+- **Synced with upstream**: 422 new commits from `openclaw/openclaw` (abb8f6310)
+- Key upstream changes:
+  - **Backup**: new local backup CLI (#40163), harden backup verify path validation
+  - **Cron**: consolidate announce delivery, fire-and-forget trigger, and minimal prompt mode (#40204)
+  - **Browser**: scope CDP sessions and harden stale target recovery, configurable relay bind address (#39364), wait for extension relay tab reconnects (#32461), normalize wildcard remote CDP websocket URLs (#17760), share context engine registry across bundled chunks (#40115)
+  - **iOS/macOS**: auto-load scoped gateway canvas with safe fallback (#40282), replay queued foreground actions safely after resume (#40281), improve tailscale gateway discovery (#40167), add remote gateway token field for remote mode
+  - **Plugin SDK**: lazily load legacy root alias
+  - **Security**: harden backup verify path validation, refresh detect-secrets baseline, scope secrets scan to branch changes
+  - **Docs**: WSL2 + Windows remote Chrome CDP troubleshooting (#39407)
+- Custom cherry-picks (3 commits): GPU browser config, DM streaming coalesce
+
 ## [2.0.20] - 2026-03-08
 
 ### Changed
