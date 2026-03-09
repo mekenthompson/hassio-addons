@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.2
+
+- Bump RustDesk Server Pro from 1.7.5 to 1.7.7
+- Admin Console Roles: Granular RBAC permissions
+- Device Control Roles: Scoped access levels
+- sync_device_name option
+- OIDC/ADFS fixes
+
 All notable changes to this add-on will be documented in this file.
 
 ## [1.4.0] - 2026-01-15
