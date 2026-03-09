@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.03.09b
-ARG CACHEBUST=52
+ARG CACHEBUST=53
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && npm install -g npm@latest \
