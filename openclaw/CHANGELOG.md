@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.24] - 2026-03-11
+
+### Changed
+- **Synced with upstream**: 42 new commits from `openclaw/openclaw` (283570de4)
+- Key upstream changes:
+  - **Telegram**: chunk long HTML outbound messages (#42240), prevent duplicate messages when preview edit times out (#41662), thread runtime config through Discord/Telegram sends (#42352)
+  - **Security**: reject exec SecretRef traversal ids across schema/runtime/gateway (#42370)
+  - **Failover**: classify Gemini MALFORMED_RESPONSE as retryable timeout (#42292), recognize Poe 402 billing for fallback (#42278)
+  - **Logging**: include model and provider in overload/error log (#41236), log auth profile resolution failures (#41271)
+  - **Cron**: record lastErrorReason in job state (#14382)
+  - **Web search**: recover OpenRouter Perplexity citations from message annotations (#40881)
+  - **iOS**: welcome home canvas, refresh home toolbar, generic pairing instructions
+  - **Onboarding**: integrate Alibaba Bailian/ModelStudio (#40634)
+  - **CI**: npm release workflow and CalVer checks (#42414)
+- Custom cherry-picks (2 commits): GPU browser config, DM streaming coalesce
+
 ## [2.0.23] - 2026-03-10
 
 ### Changed
