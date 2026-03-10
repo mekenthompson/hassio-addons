@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.23] - 2026-03-10
+
+### Changed
+- **Synced with upstream**: 60 new commits from `openclaw/openclaw` (cf9db91b6)
+- Key upstream fixes:
+  - **Auth**: reset cooldown error counters on expiry — prevents infinite escalation (#41028)
+  - **Cron**: fix NO_REPLY misclassified as interim ack — stops forced reruns on heartbeat (#41401)
+  - **Cron**: record lastErrorReason in job state (#14382)
+  - **Cron**: enforce cron-owned delivery contract (#40998)
+  - **Discord**: apply effective maxLinesPerMessage in live replies (#40133)
+  - **Telegram**: prevent duplicate messages when preview edit times out (#41662)
+  - **Telegram**: exec approvals for OpenCode/Codex (#37233)
+  - **Telegram**: bridge direct delivery to internal message:sent hooks (#40185)
+  - **Secrets**: resolve web tool SecretRefs atomically at runtime
+  - **Agents**: probe single-provider billing cooldowns (#41422)
+  - **Agents**: fix Brave llm-context empty snippets (#41387)
+  - **Agents**: bound compaction retry wait and drain embedded runs on restart (#40324)
+  - **Plugins**: expose model auth API to context-engine plugins (#41090)
+  - **ACP**: harden follow-up reliability, attachments, streaming, error handling (5 commits)
+  - **Gateway**: add pending node work primitives (#41409)
+  - **UI**: preserve control-ui auth across refresh (#40892)
+  - **Web Search**: recover OpenRouter Perplexity citations from annotations (#40881)
+  - **Memory**: protect bootstrap files during memory flush (#38574)
+  - **Fallback**: add HTTP 499 to transient error codes (#41468)
+  - **Exec**: mark child command env with OPENCLAW_CLI (#41411)
+  - **Doctor**: fix non-interactive cron repair gating (#41386)
+- Cherry-picks preserved: GPU browser config, Telegram DM streaming coalesce (adapted to new lifecycle model)
+
 ## [2.0.21] - 2026-03-09
 
 ### Changed
