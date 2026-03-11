@@ -23,7 +23,7 @@ ARG CACHEBUST=57
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && npm install -g npm@latest \
-    && pnpm install --frozen-lockfile \
+    && pnpm install --no-frozen-lockfile \
     && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build \
     && OPENCLAW_PREFER_PNPM=1 pnpm ui:build
 
