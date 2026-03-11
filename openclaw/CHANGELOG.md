@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.26] - 2026-03-12
+
+### Fixed
+- **SSRF pinned dispatcher IPv4 regression**: Default `autoSelectFamily` to `false` in `createPinnedDispatcher()` — fixes Telegram media download failures (ETIMEDOUT) in dual-stack environments with broken IPv6 routes. Regression from upstream commit `45b74fb56c`.
+
+### Changed
+- **Synced with upstream**: 29 new commits from `openclaw/openclaw` (8cc0c9baf)
+- Key upstream changes:
+  - **Gateway**: run `before_tool_call` for HTTP tools
+  - **WebSocket**: preserve payload overrides
+  - **Ollama**: share model context discovery, fix default custom URL
+  - **Memory**: normalize Gemini embeddings, add gemini-embedding-2-preview support
+  - **Agents**: prevent false billing error replacing valid response text, check billing errors before context overflow heuristics
+  - **Discord**: add missing `autoThread` to config type
+  - **Telegram**: clear stale retain before transient final fallback, add missing `editMessage`/`createForumTopic` to actions schema
+  - **Config**: add missing Signal `accountUuid`, voice-call TTS `speed`/`instructions` to schemas
+  - **Web tools**: restore to coding profile
+  - **Venice**: recognize 402 billing errors for model fallback
+
 ## [2.0.25] - 2026-03-12
 
 ### Changed
