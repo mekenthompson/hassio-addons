@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.25] - 2026-03-12
+
+### Changed
+- **Synced with upstream**: 65 new commits from `openclaw/openclaw` (f063e57d4)
+- Key upstream changes:
+  - **Security**: harden subagent control boundaries, bind system.run approvals to exact argv, enforce target account configWrites, pin fs-bridge staged writes, fail closed for unresolved local gateway auth refs, harden archive extraction destinations, harden secret-file readers, sanitize Docker env before marking OPENCLAW_CLI
+  - **Context pruning**: prune image-containing tool results instead of skipping them (#41789)
+  - **Telegram**: prevent duplicate messages with slow LLM providers (#41932), fall back on ambiguous first preview sends
+  - **ACP**: scope cancellation and event routing by runId (#41331), strip provider auth env for child ACP processes (#42250), implicit streamToParent for mode=run without thread (#42404)
+  - **Browser**: surface 429 rate limit errors with actionable hints (#40491)
+  - **Gateway**: harden token fallback/reconnect behavior (#42507), split conversation reset from admin reset, fail closed unresolved local auth SecretRefs (#42672)
+  - **Discord**: add autoArchiveDuration config option (#35065)
+  - **macOS**: add chat model selector, persist thinking, fix browser proxy POST serialization (#43069)
+  - **iOS**: add local beta release flow
+  - **Providers**: add Opencode Go support (#42313), include azure-openai in Responses API store override
+  - **Cron**: fix embedded lane deadlock, cover nested lane selection
+  - **Refactoring**: large dedup pass across channels, security, onboarding, and approval code
+- **Cherry-picks reapplied**: GPU config (f63492aad), DM streaming coalesce (73923e01d)
+
 ## [2.0.24] - 2026-03-11
 
 ### Changed
