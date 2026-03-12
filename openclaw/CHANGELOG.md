@@ -5,10 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.27] - 2026-03-12
+
+### Fixed
+- **Telegram media download IPv4 regression**: Thread `connectOptions` through SSRF fetch pipeline so Telegram media downloads pass `autoSelectFamily: false` to pinned dispatcher — fixes ETIMEDOUT in dual-stack containers with broken IPv6 routes (regression from `45b74fb56c`)
+
+### Changed
+- **Synced with upstream**: latest from `openclaw/openclaw` (e11be576f)
+- Key new upstream changes:
+  - **Terminal**: sanitize skills JSON and fallback on legacy Windows
+  - **Gateway/Dashboard**: surface config validation issues
+  - **Build**: repair bundled plugin dirs after npm install
+
 ## [2.0.26] - 2026-03-12
 
 ### Fixed
-- **SSRF pinned dispatcher IPv4 regression**: Default `autoSelectFamily` to `false` in `createPinnedDispatcher()` — fixes Telegram media download failures (ETIMEDOUT) in dual-stack environments with broken IPv6 routes. Regression from upstream commit `45b74fb56c`.
+- *Superseded by v2.0.27* — initial blanket-default approach replaced with surgical pipeline fix
 
 ### Changed
 - **Synced with upstream**: 29 new commits from `openclaw/openclaw` (8cc0c9baf)
