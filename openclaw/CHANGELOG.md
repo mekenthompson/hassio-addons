@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.28] - 2026-03-13
+
+### Changed
+- **Synced with upstream**: 223 new commits from `openclaw/openclaw` (771066d12)
+- Key upstream changes:
+  - **Compaction**: use full-session token count for post-compaction sanity check (#28347), show status reaction during compaction (#35474), guard compact() throw + fire hooks (#41361)
+  - **Telegram**: quiet command overflow retry logs, clear polling cleanup timers, avoid polling restart hang after stall detection
+  - **Cron**: avoid false legacy payload kind migrations, stop false doctor warnings (#44012), enable fast mode for isolated runs
+  - **Security**: strip Mongolian selectors in exec obfuscation detector, escape invisible exec approval format chars, block GIT_EXEC_PATH in host env, harden nodes owner-only tool gating, enforce browser origin check
+  - **Models**: Anthropic fast mode support, OpenAI fast mode toggle, modularize provider plugin architecture, normalize bundled provider ids
+  - **ACP**: preserve final assistant message snapshot before end_turn (#44597), rehydrate restarted main ACP sessions (#43285)
+  - **Gateway**: strip unbound scopes for shared-auth connects, expose runtime version in status
+  - **Browser**: restore proxy attachment media size cap
+- Custom cherry-picks (3 commits): GPU browser config, DM streaming coalesce, SSRF IPv4 fallback fix
+
 ## [2.0.27] - 2026-03-12
 
 ### Fixed
