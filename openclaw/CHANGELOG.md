@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.29] - 2026-03-14
+
+### Changed
+- **Synced with upstream**: 287 new commits from `openclaw/openclaw` (3957f29)
+- Key upstream changes:
+  - **Browser**: Chrome MCP existing-session support
+  - **Compaction**: preserve persona and language continuity in summaries (#10456)
+  - **Ollama**: hide native reasoning-only output (#45330)
+  - **Cron**: restore manual run type narrowing
+  - **Docker**: exclude .env from build context (#44956)
+  - **Security**: harden external content marker sanitization, harden exec obfuscation, enforce browser origin check, harden nodes owner-only tool gating
+  - **Plugins**: fix update dependency failures and dedupe warnings, modularize provider architecture
+  - **Subagents**: resolve target agent workspace for cross-agent spawns (#40176)
+  - **Telegram**: quiet command overflow retry logs, avoid polling restart hang after stall detection
+- Custom cherry-picks (3 commits): GPU browser config, DM streaming coalesce, SSRF IPv4 fallback fix (adapted to upstream's new PinnedDispatcherPolicy API)
+
 ## [2.0.28] - 2026-03-13
 
 ### Changed
