@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.30] - 2026-03-15
+
+### Changed
+- **Synced with upstream**: ~500 new commits from `openclaw/openclaw` (cbec476b6)
+- **Dropped SSRF IPv4 cherry-pick** — upstream PR #44639 threads the full TelegramTransport policy through the media download pipeline, properly fixing the IPv4 fallback regression
+- Custom cherry-picks reduced to 2: GPU browser config, DM streaming coalesce
+
 ## [2.0.29] - 2026-03-14
 
 ### Changed
