@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.32] - 2026-03-16
+
+### Changed
+- **Synced upstream fork**: 20 new commits from `openclaw/openclaw` (963237a1), rebased cherry-picks
+- Key upstream changes:
+  - **Plugins**: fix bundled plugin roots and skill assets (#47601), harden context engine ownership — fixes `Context engine "legacy" is not registered` error
+  - **Plugins**: restore provider compatibility fallbacks, move provider runtimes into bundled plugins
+  - **Plugins**: relocate/clean bundled skill assets, skip nested node_modules
+  - **CLI**: support package-manager installs from GitHub main (#47630), lazy-load non-interactive plugin provider runtime (#47593)
+  - **Gateway**: sync runtime post-build artifacts
+- Custom cherry-picks (2, rebased): GPU browser config, DM streaming coalesce
+
 ## [2.0.31] - 2026-03-16
 
 ### Changed
