@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.31] - 2026-03-16
+
+### Changed
+- **Synced with upstream**: 91 new commits from `openclaw/openclaw` (b795ba1)
+- Key upstream changes:
+  - **Plugins**: reserve context engine ownership, load bundled extensions from dist (#47560)
+  - **Models**: preserve stream usage compat opt-ins (#45733)
+  - **CLI**: fix generator OOM and harden plugin registries (#45537), lazy-load auth/model picker providers
+  - **Config**: avoid failing startup on implicit memory slot (#47494)
+  - **Security**: tighten forwarded client and pairing guards (#46800), scrub credentials from endpoint snapshots (#46799), tighten pre-auth body handling (#46802), revalidate workspace-only patch targets (#46803)
+  - **Gateway**: scope Control UI sessions per gateway (#47453)
+  - **Release**: block oversized npm packs that regress low-memory startup (#46850)
+- Custom cherry-picks (2): GPU browser config, DM streaming coalesce
+
 ## [2.0.30] - 2026-03-15
 
 ### Changed
