@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.34] - 2026-03-16
+
+### Fixed
+- **Plugin registry desync fix**: Cherry-picked PR #45568 (carry forward httpRoutes) and extended to also carry forward `channels` across registry replacements. Fixes "Unknown channel: telegram" errors from the message tool caused by `loadOpenClawPlugins()` creating new empty registries at runtime.
+- **Dropped PR #32414** (channel bootstrap) — its `maybeBootstrapChannelPlugin()` call to `loadOpenClawPlugins()` was actually triggering more registry swaps, making the desync worse.
+
+### Changed
+- **Synced with upstream**: 129 new commits from `openclaw/openclaw` (d8e138c74)
+- Custom cherry-picks now 4: GPU browser config, DM streaming coalesce, httpRoutes carry-forward (#45568), channels carry-forward (our extension)
+
 ## [2.0.33] - 2026-03-16
 
 ### Fixed
