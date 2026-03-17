@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.36] - 2026-03-18
+
+### Changed
+- **Synced with upstream**: 251 new commits from `openclaw/openclaw` (5a2a4abc1)
+- Notable upstream: Telegram transport fallback chain unification, sticky IPv4 fallback across polling restarts, compaction safeguard loop fix, image generation tool, host exec sandbox security hardening, Chutes extension
+- All 4 cherry-picks rebased cleanly: GPU config, DM streaming coalesce, pinned channel registry, guard fix
+
 ## [2.0.35] - 2026-03-17
 
 ### Fixed
