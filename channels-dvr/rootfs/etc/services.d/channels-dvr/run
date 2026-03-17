@@ -5,12 +5,14 @@ bashio::log.info "Starting Channels DVR Server..."
 # Define paths
 SEED_DIR="/opt/channels-dvr"
 BINARY_DIR="/media/dvr/channels-dvr-server"
-DATA_DIR="/media/dvr/channels-dvr-data"
+LOCAL_DATA_DIR="/data/channels-dvr-data"
+NFS_DATA_DIR="/media/dvr/channels-dvr-data"
+NFS_BACKUP_DIR="/media/dvr/channels-dvr-backups"
+MAX_BACKUPS=5
 
-# Ensure binary directory is initialized
+# --- Binary initialization (unchanged — stays on NFS) ---
 if [ ! -d "$BINARY_DIR/latest" ]; then
     bashio::log.info "First run detected. Initializing binary storage at $BINARY_DIR..."
-    # Only create directory if parent mount exists and this directory doesn't
     if [ -d "/media/dvr" ] && [ ! -d "$BINARY_DIR" ]; then
         mkdir -p "$BINARY_DIR"
     fi
@@ -20,65 +22,99 @@ else
     bashio::log.info "Found existing binary at $BINARY_DIR"
 fi
 
-# Ensure data directory exists (only create if NFS mount is present but dir is missing)
-if [ -d "/media/dvr" ] && [ ! -d "$DATA_DIR" ]; then
-    mkdir -p "$DATA_DIR"
-fi
-bashio::log.info "Using data directory: $DATA_DIR"
+# --- Migrate data from NFS to local storage (one-time) ---
+mkdir -p "$LOCAL_DATA_DIR"
 
-# Auto-restore database from backup if missing or empty
-# The backup settings.db is ~60KB; a fresh/empty one is much smaller
+if [ ! -f "$LOCAL_DATA_DIR/settings.db" ] && [ -f "$NFS_DATA_DIR/settings.db" ]; then
+    bashio::log.info "Migrating data from NFS to local storage..."
+    # Copy essential files — skip logs and XMLTV cache (they regenerate)
+    for f in settings.db settings.db.bak recorder.db recorder.db.bak cert.pem key.pem; do
+        if [ -f "$NFS_DATA_DIR/$f" ]; then
+            cp "$NFS_DATA_DIR/$f" "$LOCAL_DATA_DIR/"
+            bashio::log.info "  Migrated: $f"
+        fi
+    done
+    # Copy directories that hold state
+    for d in recorder.idx channels-tailscale cache; do
+        if [ -d "$NFS_DATA_DIR/$d" ]; then
+            cp -a "$NFS_DATA_DIR/$d" "$LOCAL_DATA_DIR/"
+            bashio::log.info "  Migrated: $d/"
+        fi
+    done
+    bashio::log.info "Migration complete. Data now lives in $LOCAL_DATA_DIR"
+fi
+
+bashio::log.info "Using data directory: $LOCAL_DATA_DIR"
+
+# --- Restore from backup if database is missing or empty ---
 SETTINGS_SIZE=0
-if [ -f "$DATA_DIR/settings.db" ]; then
-    SETTINGS_SIZE=$(stat -c%s "$DATA_DIR/settings.db" 2>/dev/null || echo 0)
+if [ -f "$LOCAL_DATA_DIR/settings.db" ]; then
+    SETTINGS_SIZE=$(stat -c%s "$LOCAL_DATA_DIR/settings.db" 2>/dev/null || echo 0)
 fi
 if [ "$SETTINGS_SIZE" -lt 50000 ]; then
-    bashio::log.warning "Database missing or empty in $DATA_DIR (size: ${SETTINGS_SIZE}B)! Attempting restore from backup..."
-    # Try NAS backup first (has the good 204KB recorder.db)
-    NAS_BACKUP_BASE="/media/dvr/Database"
-    BACKUP_BASE="/share/channels-dvr/Database"
-    if [ -d "$NAS_BACKUP_BASE" ]; then
-        LATEST_BACKUP=$(ls -td "$NAS_BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
+    bashio::log.warning "Database missing or empty (size: ${SETTINGS_SIZE}B). Attempting restore..."
+    # Try NFS backup dir first
+    if [ -d "$NFS_BACKUP_DIR" ]; then
+        LATEST_BACKUP=$(ls -td "$NFS_BACKUP_DIR"/backup-*/ 2>/dev/null | head -1)
         if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
-            bashio::log.info "Restoring from NAS backup: $LATEST_BACKUP"
-            cp "$LATEST_BACKUP/settings.db" "$DATA_DIR/"
-            [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$DATA_DIR/"
-            bashio::log.info "Database restored from NAS successfully."
-            SETTINGS_SIZE=$(stat -c%s "$DATA_DIR/settings.db" 2>/dev/null || echo 0)
+            bashio::log.info "Restoring from: $LATEST_BACKUP"
+            cp "$LATEST_BACKUP/settings.db" "$LOCAL_DATA_DIR/"
+            [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$LOCAL_DATA_DIR/"
+            bashio::log.info "Database restored from NFS backup."
+            SETTINGS_SIZE=$(stat -c%s "$LOCAL_DATA_DIR/settings.db" 2>/dev/null || echo 0)
         fi
     fi
-    # Fall back to local backup if NAS restore didn't work
+    # Fall back to legacy NAS backup location
     if [ "$SETTINGS_SIZE" -lt 50000 ]; then
-        bashio::log.warning "NAS backup not available, trying local backup..."
-        BACKUP_BASE="/share/channels-dvr/Database"
-    if [ -d "$BACKUP_BASE" ]; then
-        LATEST_BACKUP=$(ls -td "$BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
-        if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
-            bashio::log.info "Restoring from backup: $LATEST_BACKUP"
-            cp "$LATEST_BACKUP/settings.db" "$DATA_DIR/"
-            [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$DATA_DIR/"
-            bashio::log.info "Database restored successfully."
-        else
-            bashio::log.warning "No valid backup found in $BACKUP_BASE"
-        fi
-    else
-        bashio::log.warning "No backup directory found at $BACKUP_BASE"
-    fi
+        for BACKUP_BASE in "/media/dvr/Database" "/share/channels-dvr/Database"; do
+            if [ -d "$BACKUP_BASE" ]; then
+                LATEST_BACKUP=$(ls -td "$BACKUP_BASE"/backup-*/ 2>/dev/null | head -1)
+                if [ -n "$LATEST_BACKUP" ] && [ -f "$LATEST_BACKUP/settings.db" ]; then
+                    bashio::log.info "Restoring from legacy backup: $LATEST_BACKUP"
+                    cp "$LATEST_BACKUP/settings.db" "$LOCAL_DATA_DIR/"
+                    [ -f "$LATEST_BACKUP/recorder.db" ] && cp "$LATEST_BACKUP/recorder.db" "$LOCAL_DATA_DIR/"
+                    bashio::log.info "Database restored."
+                    break
+                fi
+            fi
+        done
     fi
 else
-    bashio::log.info "Database found in $DATA_DIR (size: ${SETTINGS_SIZE}B)"
+    bashio::log.info "Database found in $LOCAL_DATA_DIR (size: ${SETTINGS_SIZE}B)"
 fi
 
-# Create default recordings directory if it doesn't exist
+# --- Periodic backup to NFS (background) ---
+backup_to_nfs() {
+    while true; do
+        sleep 3600  # Every hour
+        if [ -d "/media/dvr" ] && [ -f "$LOCAL_DATA_DIR/settings.db" ]; then
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            BACKUP_PATH="$NFS_BACKUP_DIR/backup-$TIMESTAMP"
+            mkdir -p "$BACKUP_PATH"
+            cp "$LOCAL_DATA_DIR/settings.db" "$BACKUP_PATH/" 2>/dev/null
+            cp "$LOCAL_DATA_DIR/recorder.db" "$BACKUP_PATH/" 2>/dev/null
+            bashio::log.info "Backup saved to $BACKUP_PATH"
+
+            # Prune old backups — keep only the newest MAX_BACKUPS
+            BACKUP_COUNT=$(ls -d "$NFS_BACKUP_DIR"/backup-*/ 2>/dev/null | wc -l)
+            if [ "$BACKUP_COUNT" -gt "$MAX_BACKUPS" ]; then
+                ls -td "$NFS_BACKUP_DIR"/backup-*/ | tail -n +$((MAX_BACKUPS + 1)) | while read -r OLD; do
+                    rm -rf "$OLD"
+                    bashio::log.info "Pruned old backup: $OLD"
+                done
+            fi
+        fi
+    done
+}
+backup_to_nfs &
+
+# --- Create default recordings directory ---
 if [ -d "/share" ]; then
     mkdir -p "/share/channels-dvr"
 fi
 
-# Note: /media/dvr is an NFS mount - do NOT create it here
-# It should be mounted by the host system before addon starts
-
-# Start Channels DVR Server with explicit data path
+# --- Start Channels DVR Server ---
 cd "$BINARY_DIR/latest"
 
-bashio::log.info "Starting Channels DVR binary from $(pwd) with data path $DATA_DIR"
-exec ./channels-dvr -dir "$DATA_DIR"
+bashio::log.info "Starting Channels DVR binary from $(pwd) with data path $LOCAL_DATA_DIR"
+exec ./channels-dvr -dir "$LOCAL_DATA_DIR"
