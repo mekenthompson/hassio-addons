@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.35] - 2026-03-17
+
+### Fixed
+- **Pinned channel registry** — proper fix for "Unknown channel: telegram" message tool bug. Mirrors upstream's httpRoute pinning approach (#47902) to also protect channel plugin registrations from being lost when `loadOpenClawPlugins()` creates a new registry at runtime. Gateway startup pins the channel registry; runtime reloads can't wipe it.
+- **Cache invalidation hardening** — `resolveCachedChannelPlugins()` now checks both registry object identity AND version, preventing stale lookups after pin release.
+
+### Changed
+- **Synced with upstream**: 420+ new commits from `openclaw/openclaw` (c1ef5748e)
+- Cherry-picks now 3: GPU browser config, DM streaming coalesce, pinned channel registry (our fix)
+- **Dropped** previous band-aid fixes: PR #32414 (channel bootstrap), PR #45568 carry-forward
+
 ## [2.0.34] - 2026-03-16
 
 ### Fixed
