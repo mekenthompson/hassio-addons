@@ -4,7 +4,7 @@
 
 - **Move data directory to local storage** — SQLite databases (settings.db, recorder.db) now live in `/data/channels-dvr-data/` (addon-local, not NFS). Fixes NFS file-lock hangs that caused the DVR process to become unresponsive.
 - **Auto-migration:** On first start, existing data is automatically copied from `/media/dvr/channels-dvr-data/` to local storage. No manual action needed.
-- **Hourly backups to NFS:** Databases are backed up to `/media/dvr/channels-dvr-backups/` every hour. Only the 5 most recent backups are kept.
+- **Daily backups to NFS:** Databases are backed up to `/media/dvr/channels-dvr-backups/` every 24 hours. Only the 7 most recent backups are kept (~2.5MB total).
 - **Auto-restore:** If the local database is missing or empty, restores from the latest NFS backup automatically.
 - Recordings and binaries remain on NFS (unchanged).
 

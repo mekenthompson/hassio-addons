@@ -8,7 +8,7 @@ BINARY_DIR="/media/dvr/channels-dvr-server"
 LOCAL_DATA_DIR="/data/channels-dvr-data"
 NFS_DATA_DIR="/media/dvr/channels-dvr-data"
 NFS_BACKUP_DIR="/media/dvr/channels-dvr-backups"
-MAX_BACKUPS=5
+MAX_BACKUPS=7
 
 # --- Binary initialization (unchanged — stays on NFS) ---
 if [ ! -d "$BINARY_DIR/latest" ]; then
@@ -86,7 +86,7 @@ fi
 # --- Periodic backup to NFS (background) ---
 backup_to_nfs() {
     while true; do
-        sleep 3600  # Every hour
+        sleep 86400  # Every 24 hours
         if [ -d "/media/dvr" ] && [ -f "$LOCAL_DATA_DIR/settings.db" ]; then
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
             BACKUP_PATH="$NFS_BACKUP_DIR/backup-$TIMESTAMP"
