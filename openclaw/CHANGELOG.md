@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.40] - 2026-03-19 (cachebust 75)
+
+### Fixed
+- Telegram threading fix now also guards against overriding explicit topic targets (e.g. `chatId:topic:42`) — auto-injection skipped when `to` already encodes a `messageThreadId`
+- Upstream synced to HEAD `b9c4db1a77` (+9 more commits since cachebust 74)
+- Clean PR #50068 opened against upstream (single file, single commit, addresses all review feedback)
+- Old PR #49389 closed (was incorrectly PRing from `main`, included unrelated GPU/build commits)
+
 ## [2.0.40] - 2026-03-19
 
 ### Changed
