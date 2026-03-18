@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.40] - 2026-03-19
+
+### Changed
+- Synced fork to upstream HEAD `b526098eb2` (+79 commits since 2026-03-18)
+- Cherry-picks applied: GPU config, Telegram DM topic threading fix, INEFFECTIVE_DYNAMIC_IMPORT build warning downgrade
+- Telegram threading conflict resolved: kept our `buildToolContext` implementation alongside upstream's `resolveReplyToMode` refactor (functionally equivalent, non-overlapping)
+- Upstream added retry fallback for "thread not found" in delivery.ts — complementary to our proactive fix
+
+## [2.0.39] - 2026-03-18
+
+### Changed
+- Bumped cachebust to match last sync
+
 ## [2.0.38] - 2026-03-18
 
 ### Fixed
