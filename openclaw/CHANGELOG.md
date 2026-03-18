@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.38] - 2026-03-18
+
+### Fixed
+- **Telegram DM topic threading** — message tool, cron delivery, and sessions_send now correctly include `message_thread_id` for DM topics. Previously messages silently landed in parent chat instead of the topic thread. Root cause: Telegram was the only channel without `buildToolContext` implementation. Fixes #14762, #27560, #28523.
+
+### Changed
+- Rebased fork to upstream HEAD (ed72695). Cherry-picks: GPU config + threading fix.
+- Dropped stale `guard pinned registry` and streaming coalesce commits.
+
 ## [2.0.37] - 2026-03-18
 
 ### Fixed
