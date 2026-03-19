@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.42] - 2026-03-20 (cachebust 76)
+
+### Fixed
+- Synced fork to upstream HEAD `628b55a825` (+many commits since 2026-03-19)
+- Cherry-picks re-applied: GPU config (`990d5585ae`), Telegram DM topic threading (`f496e5bffb`), build warning downgrade (`94f0f01052`)
+- Submitted PR #50657 upstream: fix buttons schema contribution not being Optional in Telegram + Mattermost channel plugins (caused cron/isolated session message sends to fail silently)
+
 ## [2.0.40] - 2026-03-19 (cachebust 75)
 
 ### Fixed
