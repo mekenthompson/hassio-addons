@@ -46,6 +46,9 @@ bashio::log.info "Starting gateway on internal port ${OPENCLAW_GATEWAY_PORT} (ng
 
 cd /app || exit 1
 
+# Auto-fix config if it has stale plugin entry paths from a prior version
+s6-setuidgid node node dist/index.js doctor --fix 2>/dev/null || true
+
 exec s6-setuidgid node \
     node dist/index.js gateway \
     --allow-unconfigured \
