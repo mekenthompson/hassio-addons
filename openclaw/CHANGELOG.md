@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.47] - 2026-03-20 (cachebust 79)
+
+### Fixed
+- Plugin cleanup uses `del(.plugins)` not `.plugins = []` — `plugins` is an object in openclaw.json schema, setting it to an array caused "expected object, received array" validation error
+- Stale entry detection updated for object-type plugins field (was using array iterator `[]?`)
+
 ## [2.0.46] - 2026-03-20 (cachebust 79)
 
 ### Fixed

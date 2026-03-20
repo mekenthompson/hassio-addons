@@ -360,10 +360,10 @@ fi
 # Clear them — openclaw re-discovers bundled plugins from
 # OPENCLAW_BUNDLED_PLUGINS_DIR on next gateway startup.
 if [ -f /data/openclaw-config/openclaw.json ]; then
-    STALE=$(jq -r 'if ([.plugins[]? | select(.entry? | (type == "string") and startswith("./"))] | length) > 0 then "yes" else "no" end' /data/openclaw-config/openclaw.json 2>/dev/null || echo "no")
+    STALE=$(jq -r 'if ([(.plugins // {} | to_entries[].value) | select(type == "object") | select(.entry? | (type == "string") and startswith("./"))] | length) > 0 then "yes" else "no" end' /data/openclaw-config/openclaw.json 2>/dev/null || echo "no")
     if [ "$STALE" = "yes" ]; then
         bashio::log.info "Clearing stale plugin registry entries from openclaw.json (image upgrade)..."
-        jq '.plugins = []' /data/openclaw-config/openclaw.json > /tmp/oc-plugins-fix.json \
+        jq 'del(.plugins)' /data/openclaw-config/openclaw.json > /tmp/oc-plugins-fix.json \
             && mv /tmp/oc-plugins-fix.json /data/openclaw-config/openclaw.json \
             && chown node:node /data/openclaw-config/openclaw.json \
             || bashio::log.warning "Failed to clear stale plugin entries"
