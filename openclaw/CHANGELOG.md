@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.49] - 2026-03-21 (cachebust 80)
+
+### Fixed
+- **Telegram streaming regression resolved**: streaming now correctly uses edit-in-place (single updating message) instead of sending multiple separate message bubbles during generation. Root cause: upstream rewrote `draft-stream.ts` replacing the buggy `revive()` method with `forceNewMessage()`, which correctly clears `lastSentText` — eliminating the dedup-swallowed-edits bug that caused us to drop the streaming cherry-pick on 2026-03-17
+- Upstream streaming PR #50917 included: `message:sent` hooks now fire correctly on preview finalization for Telegram streaming replies
+
+### Changed
+- Upstream sync to `39a4fe5` (2026-03-21) — includes Telegram transport fallback chain unification (#49148), streaming hook fixes (#50917), seq-gap broadcast fix, and 100+ upstream commits since last sync
+- Rebased custom cherry-picks onto new upstream HEAD:
+  - `feat(browser)`: GPU configuration support for headless Chrome
+  - `fix(telegram)`: add `buildToolContext` to resolve `message_thread_id` for DM topics
+  - `build`: downgrade `INEFFECTIVE_DYNAMIC_IMPORT` from error to warning
+
 ## [2.0.48] - 2026-03-20 (cachebust 79)
 
 ### Fixed
