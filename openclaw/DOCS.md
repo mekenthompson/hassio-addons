@@ -46,11 +46,12 @@ Or, if you set `telegram_user_id`, pairing is automatic.
 
 ### 5. Add API Keys
 
-Via the OpenClaw web UI (HA sidebar → OpenClaw):
-- Add Anthropic API key for Claude
-- Optionally add OpenAI (for Whisper), Google, Perplexity, etc.
+The two most common providers can be bootstrapped from the add-on config (HA UI → OpenClaw → Configuration):
 
-Or edit `/data/openclaw-config/openclaw.json` directly.
+- **claude_session_key**: Anthropic API key (`sk-ant-...`) or Claude Pro session token
+- **openai_api_key**: OpenAI API key (`sk-...`) — needed for GPT models and Whisper transcription
+
+These are applied on every restart as environment variables. All other providers (Gemini, Perplexity, etc.) are configured via the OpenClaw web UI or `/data/openclaw-config/openclaw.json` directly.
 
 ---
 
@@ -445,6 +446,21 @@ Each agent's memory search indexes only their own workspace. Check:
 ### Permission errors
 
 The init script sets ownership on boot. Try restarting the add-on. If persistent, check that `/data/openclaw-*` directories are owned by `node:node`.
+
+### Gateway restart loop — "extension entry escapes package directory"
+
+After an image upgrade, the persisted `openclaw.json` may have plugin registry entries from the previous image that fail validation in the new image, causing an infinite restart loop. The init script automatically detects and clears these stale entries on startup (relative `./index.js` paths that no longer match the current image layout). This self-heals on the first restart after upgrade.
+
+If the loop persists, clear it manually:
+```bash
+jq '.plugins = []' /data/openclaw-config/openclaw.json > /tmp/fix.json \
+    && mv /tmp/fix.json /data/openclaw-config/openclaw.json
+```
+Then restart the add-on.
+
+### "Multiple matrix-js-sdk entrypoints detected"
+
+This error (pre-2.0.44) was caused by the git clone `.git` directory triggering source-mode plugin loading (TypeScript via Jiti instead of compiled JS). Fixed in 2.0.44 via `rm -rf .git` in the build stage, and permanently resolved in 2.0.46 by setting `OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions` to use compiled output directly.
 
 ---
 

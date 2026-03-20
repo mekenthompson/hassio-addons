@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.46] - 2026-03-20 (cachebust 79)
+
+### Fixed
+- **Upstream best practice applied**: set `OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions` (Dockerfile ENV + gateway run env) — bypasses `isSourceCheckoutRoot()` detection and `dist-runtime` symlink path entirely; uses compiled `dist/extensions/` directly, eliminating the "extension entry escapes package directory" restart loop
+- **Auto-clear stale plugin registry on startup**: `openclaw-init` now detects relative `./index.js` plugin entries in `openclaw.json` (stale from prior image) and clears them before `doctor --fix` runs — self-healing upgrade path
+- **Build target**: `pnpm build` → `pnpm build:docker` (Docker-optimized, skips plugin SDK DTS generation and Canvas A2UI bundle — faster, same runtime output)
+- Removed redundant `doctor --fix` in gateway run script (it runs once in openclaw-init already)
+
+### Added
+- `openai_api_key` optional bootstrap config option — passed as `OPENAI_API_KEY` env var to gateway on every restart (useful for GPT models and Whisper transcription alongside Claude)
+- Updated DOCS.md: config options section, gateway restart loop troubleshooting, matrix-js-sdk entrypoint explanation
+
 ## [2.0.45] - 2026-03-20 (cachebust 78)
 
 ### Fixed

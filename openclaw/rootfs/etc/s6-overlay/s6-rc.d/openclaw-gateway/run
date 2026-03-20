@@ -31,9 +31,19 @@ if bashio::config.has_value 'claude_session_key'; then
     bashio::log.info "Anthropic API key configured"
 fi
 
+# OpenAI API key (for GPT models and Whisper transcription)
+if bashio::config.has_value 'openai_api_key'; then
+    export OPENAI_API_KEY=$(bashio::config 'openai_api_key')
+    bashio::log.info "OpenAI API key configured"
+fi
+
 # Power-user features (enabled by default)
 export OPENCLAW_CONFIG_DIR="/data/openclaw-config"
 export OPENCLAW_WORKSPACE_DIR="/data/openclaw-workspace"
+
+# Explicit plugin directory — bypasses isSourceCheckoutRoot detection and
+# dist-runtime path, using compiled dist/extensions directly (upstream best practice)
+export OPENCLAW_BUNDLED_PLUGINS_DIR="/app/dist/extensions"
 
 # Playwright configuration
 export PLAYWRIGHT_BROWSERS_PATH="/data/openclaw-home/.cache/ms-playwright"
@@ -45,9 +55,6 @@ chown -R node:node /data/openclaw-*
 bashio::log.info "Starting gateway on internal port ${OPENCLAW_GATEWAY_PORT} (nginx proxy on 18789)..."
 
 cd /app || exit 1
-
-# Auto-fix config if it has stale plugin entry paths from a prior version
-s6-setuidgid node node dist/index.js doctor --fix 2>/dev/null || true
 
 exec s6-setuidgid node \
     node dist/index.js gateway \

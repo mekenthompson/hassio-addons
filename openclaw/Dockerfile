@@ -19,13 +19,13 @@ WORKDIR /build
 
 # Clone and build OpenClaw
 ARG OPENCLAW_VERSION=2026.03.20
-ARG CACHEBUST=78
+ARG CACHEBUST=79
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && rm -rf .git \
     && npm install -g npm@latest \
     && pnpm install --no-frozen-lockfile \
-    && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build \
+    && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build:docker \
     && OPENCLAW_PREFER_PNPM=1 pnpm ui:build
 
 # Install additional packages if specified (power-user feature)
@@ -124,6 +124,11 @@ COPY --from=openclaw-builder /build /app
 
 # Set environment for production
 ENV NODE_ENV=production
+# Explicit bundled plugin directory — upstream best practice.
+# Bypasses isSourceCheckoutRoot() .git detection and dist-runtime symlink path.
+# Uses compiled dist/extensions/ directly, preventing "escapes package directory"
+# validation errors on gateway startup.
+ENV OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
 

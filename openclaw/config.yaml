@@ -1,6 +1,6 @@
 ---
 name: OpenClaw AI Assistant
-version: "2.0.45"
+version: "2.0.46"
 slug: openclaw
 description: Multi-agent AI assistant via Telegram, running on Home Assistant
 url: https://github.com/mekenthompson/hassio-addons
@@ -64,6 +64,8 @@ options:
   second_agent_user_id: ""
   # Initial Claude auth (optional — can also configure via web UI)
   claude_session_key: ""
+  # Initial OpenAI API key (optional — for GPT models and Whisper transcription)
+  openai_api_key: ""
 
   # --- Infrastructure (every restart) ---
   gateway_token: ""
@@ -76,6 +78,7 @@ schema:
   second_agent_bot_token: password?
   second_agent_user_id: str?
   claude_session_key: password?
+  openai_api_key: password?
   gateway_token: str?
   additional_packages:
     - str
