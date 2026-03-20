@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.44] - 2026-03-20 (cachebust 78)
+
+### Fixed
+- Root cause fix for `Multiple matrix-js-sdk entrypoints detected!` — remove `.git` dir after clone so `isSourceCheckoutRoot()` returns `false` and bundled plugins load from compiled `dist/extensions/` (native ESM) instead of source `.ts` via Jiti (CJS path). This eliminates the CJS/ESM split that triggered the duplicate entrypoint error for every plugin on startup.
+- Not yet fixed upstream: `bundled-dir.ts` `isSourceCheckoutRoot` still checks for `.git`; `runtime-channel.ts` still has static import of `runtime-matrix.js`
+
 ## [2.0.43] - 2026-03-20 (cachebust 77)
 
 ### Fixed
