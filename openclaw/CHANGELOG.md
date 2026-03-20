@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.43] - 2026-03-20 (cachebust 77)
+
+### Fixed
+- Force-rebuild to pick up upstream matrix-js-sdk entrypoint fix (ae02f4014) — resolves `Multiple matrix-js-sdk entrypoints detected!` error that prevented all plugins from loading on startup
+- Fork HEAD `94f0f010` (3 commits ahead of 2.0.42, includes GPU config + Telegram threading + build warning downgrade merged into main)
+
 ## [2.0.42] - 2026-03-20 (cachebust 76)
 
 ### Fixed
