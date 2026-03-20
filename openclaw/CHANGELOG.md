@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.48] - 2026-03-20 (cachebust 79)
+
+### Fixed
+- Stale plugin detection now catches `"plugins": []` (array type) in addition to relative-path entries — fixes "expected object, received array" restart loop when a previous manual fix incorrectly set `plugins` to an empty array instead of deleting the key
+
 ## [2.0.47] - 2026-03-20 (cachebust 79)
 
 ### Fixed
