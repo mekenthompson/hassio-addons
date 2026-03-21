@@ -1,3 +1,14 @@
+## [2.0.50] - 2026-03-22
+
+### Changes
+- Upstream sync to `5b31b3400` (~86 new commits)
+- Rebased 3 cherry-picks cleanly onto upstream HEAD
+- fix(telegram): buildToolContext tests added + channel.ts conflict resolved against bfcfc17 refactor
+- feat(browser): GPU config support for headless Chrome (cherry-pick)
+- build: INEFFECTIVE_DYNAMIC_IMPORT downgraded to warning (cherry-pick)
+- Fork HEAD: `147f48df4`
+- Addon cachebust: 81
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

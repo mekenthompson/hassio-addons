@@ -18,8 +18,8 @@ RUN corepack enable
 WORKDIR /build
 
 # Clone and build OpenClaw
-ARG OPENCLAW_VERSION=2026.03.21
-ARG CACHEBUST=80
+ARG OPENCLAW_VERSION=2026.03.22
+ARG CACHEBUST=81
 RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
     && git clone --depth 1 --branch main https://github.com/mekenthompson/openclaw.git . \
     && rm -rf .git \
