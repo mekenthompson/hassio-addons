@@ -1,3 +1,10 @@
+## [2.0.52] - 2026-03-22
+
+### Fixed
+- **Telegram plugin crash resolved**: `ReferenceError: createTopLevelChannelReplyToModeResolver is not defined` — the telegram extension called this function without importing it after the `bfcfc17` plugin SDK refactor. Fixed upstream by switching to `topLevelReplyToMode: "telegram"` shorthand, which `createChatChannelPlugin` handles internally.
+- Fork HEAD: `bbd158293`
+- Addon cachebust: 82
+
 ## [2.0.51] - 2026-03-22
 
 ### Changes
