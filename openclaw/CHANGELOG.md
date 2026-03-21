@@ -1,3 +1,11 @@
+## [2.0.51] - 2026-03-22
+
+### Changes
+- Upstream sync to `5b31b3400` (86 new commits since `39a4fe5`)
+- Rebased 3 cherry-picks cleanly onto upstream HEAD
+- Cherry-pick #2 (telegram buildToolContext) amended with 16 new tests — all pass
+- PR #50068 updated with test coverage
+
 ## [2.0.50] - 2026-03-22
 
 ### Changes
