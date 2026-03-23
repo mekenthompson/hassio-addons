@@ -31,6 +31,12 @@ if bashio::config.has_value 'claude_session_key'; then
     bashio::log.info "Anthropic API key configured"
 fi
 
+# Claude Code OAuth token (for claude CLI coding agent)
+if [ -f /data/openclaw-config/credentials/claude-code-token.txt ]; then
+    export CLAUDE_CODE_OAUTH_TOKEN=$(cat /data/openclaw-config/credentials/claude-code-token.txt)
+    bashio::log.info "Claude Code OAuth token configured"
+fi
+
 # OpenAI API key (for GPT models and Whisper transcription)
 if bashio::config.has_value 'openai_api_key'; then
     export OPENAI_API_KEY=$(bashio::config 'openai_api_key')
