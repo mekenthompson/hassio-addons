@@ -1,3 +1,13 @@
+## [2.0.53] - 2026-03-23
+
+### Fixed
+- **fix(telegram): make buttons schema contribution Optional** — fixes ALL silent message send failures when inlineButtons is enabled (critical)
+- **fix(mattermost): make buttons schema contribution Optional** (same root cause)
+- **fix(telegram): use topLevelReplyToMode correctly**
+- **fix(telegram): coalesce DM streaming into single message in partial mode**
+- Fork HEAD: `7f96ed8a45`
+- Addon cachebust: 83
+
 ## [2.0.52] - 2026-03-22
 
 ### Fixed
