@@ -1,3 +1,9 @@
+## [2.0.55] - 2026-03-25
+
+### Fixed
+- `claude_session_key` OAuth tokens (`sk-ant-oat01-*`) now correctly routed to `CLAUDE_CODE_OAUTH_TOKEN` instead of `ANTHROPIC_API_KEY`, fixing Claude Code CLI authentication failures
+- `claude-code-token.txt` credentials file no longer overrides OAuth token set via `claude_session_key`
+
 ## [2.0.53] - 2026-03-23
 
 ### Fixed

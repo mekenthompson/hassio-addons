@@ -62,7 +62,9 @@ options:
   # Second agent Telegram bot (optional)
   second_agent_bot_token: ""
   second_agent_user_id: ""
-  # Initial Claude auth (optional — can also configure via web UI)
+  # Claude authentication (optional — can also configure via web UI)
+  # Accepts either a real API key (sk-ant-api03-...) or a Claude Pro OAuth token (sk-ant-oat01-...)
+  # OAuth tokens are automatically routed to CLAUDE_CODE_OAUTH_TOKEN; API keys to ANTHROPIC_API_KEY
   claude_session_key: ""
   # Initial OpenAI API key (optional — for GPT models and Whisper transcription)
   openai_api_key: ""

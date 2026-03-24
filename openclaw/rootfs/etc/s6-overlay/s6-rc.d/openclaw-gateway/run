@@ -25,16 +25,28 @@ if bashio::config.has_value 'telegram_bot_token'; then
 fi
 
 # Claude/Anthropic API authentication
-# Supports either an Anthropic API key or a Claude Pro setup-token
+# Supports either a real API key (sk-ant-api03-...) or a Claude Pro OAuth token (sk-ant-oat01-...)
 if bashio::config.has_value 'claude_session_key'; then
-    export ANTHROPIC_API_KEY=$(bashio::config 'claude_session_key')
-    bashio::log.info "Anthropic API key configured"
+    CLAUDE_SESSION_KEY=$(bashio::config 'claude_session_key')
+    case "$CLAUDE_SESSION_KEY" in
+        sk-ant-oat01-*)
+            # Claude Pro OAuth token — must use CLAUDE_CODE_OAUTH_TOKEN, not ANTHROPIC_API_KEY
+            export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_SESSION_KEY"
+            bashio::log.info "Claude Pro OAuth token configured (CLAUDE_CODE_OAUTH_TOKEN)"
+            ;;
+        *)
+            # Regular Anthropic API key
+            export ANTHROPIC_API_KEY="$CLAUDE_SESSION_KEY"
+            bashio::log.info "Anthropic API key configured"
+            ;;
+    esac
 fi
 
 # Claude Code OAuth token (for claude CLI coding agent)
-if [ -f /data/openclaw-config/credentials/claude-code-token.txt ]; then
+# Only set from file if not already configured via claude_session_key above
+if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ] && [ -f /data/openclaw-config/credentials/claude-code-token.txt ]; then
     export CLAUDE_CODE_OAUTH_TOKEN=$(cat /data/openclaw-config/credentials/claude-code-token.txt)
-    bashio::log.info "Claude Code OAuth token configured"
+    bashio::log.info "Claude Code OAuth token configured (from credentials file)"
 fi
 
 # OpenAI API key (for GPT models and Whisper transcription)
