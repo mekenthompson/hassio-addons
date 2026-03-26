@@ -33,8 +33,7 @@ RUN set -ex; \
     && rm -rf .git
 
 # Install dependencies
-RUN npm install -g npm@latest \
-    && pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Build OpenClaw
 RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build:docker \
