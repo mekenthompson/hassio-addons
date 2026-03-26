@@ -3,7 +3,8 @@ build_from:
   amd64: ghcr.io/hassio-addons/debian-base:7.3.3
 
 args:
-  OPENCLAW_REF: "v2026.3.24"
+  OPENCLAW_REF: "2de4aed1f6"
+  OPENCLAW_REPO: "https://github.com/mekenthompson/openclaw.git"
 
 labels:
   org.opencontainers.image.title: "OpenClaw AI Assistant"
