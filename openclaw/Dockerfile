@@ -12,9 +12,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Enable pnpm and upgrade npm
-RUN corepack enable \
-    && npm install -g npm@latest
+# Enable pnpm (npm upgrade deferred until after clone to avoid corepack conflicts)
+RUN corepack enable
 
 WORKDIR /build
 
@@ -34,7 +33,8 @@ RUN set -ex; \
     && rm -rf .git
 
 # Install dependencies
-RUN pnpm install --no-frozen-lockfile
+RUN npm install -g npm@latest \
+    && pnpm install --no-frozen-lockfile
 
 # Build OpenClaw
 RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build:docker \
