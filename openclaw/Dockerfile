@@ -12,20 +12,32 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Enable pnpm
-RUN corepack enable
+# Enable pnpm and upgrade npm
+RUN corepack enable \
+    && npm install -g npm@latest
 
 WORKDIR /build
 
-# Clone and build OpenClaw
-ARG OPENCLAW_VERSION=2026.03.25
-ARG CACHEBUST=87
-RUN echo "Building OpenClaw ${OPENCLAW_VERSION} (cachebust=${CACHEBUST})" \
-    && git clone --depth 1 --branch main https://github.com/openclaw/openclaw.git . \
-    && rm -rf .git \
-    && npm install -g npm@latest \
-    && pnpm install --no-frozen-lockfile \
-    && OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build:docker \
+# Clone OpenClaw source
+# OPENCLAW_REF can be a tag (v2026.3.24), branch (main), or 40-char commit SHA
+ARG OPENCLAW_REF=v2026.3.24
+RUN set -ex; \
+    if echo "${OPENCLAW_REF}" | grep -qE '^[0-9a-f]{40}$'; then \
+        echo "Cloning OpenClaw at commit ${OPENCLAW_REF}"; \
+        git clone --filter=blob:none --no-checkout https://github.com/openclaw/openclaw.git . \
+        && git checkout "${OPENCLAW_REF}"; \
+    else \
+        echo "Cloning OpenClaw at ref ${OPENCLAW_REF}"; \
+        git clone --depth 1 --branch "${OPENCLAW_REF}" https://github.com/openclaw/openclaw.git .; \
+    fi \
+    && git rev-parse HEAD > /build/.openclaw-commit \
+    && rm -rf .git
+
+# Install dependencies
+RUN pnpm install --no-frozen-lockfile
+
+# Build OpenClaw
+RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build:docker \
     && OPENCLAW_PREFER_PNPM=1 pnpm ui:build
 
 # Install additional packages if specified (power-user feature)
@@ -123,6 +135,8 @@ WORKDIR /app
 COPY --from=openclaw-builder /build /app
 
 # Set environment for production
+ARG OPENCLAW_REF
+ENV OPENCLAW_REF=${OPENCLAW_REF}
 ENV NODE_ENV=production
 # Explicit bundled plugin directory — upstream best practice.
 # Bypasses isSourceCheckoutRoot() .git detection and dist-runtime symlink path.
@@ -177,6 +191,7 @@ LABEL \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
+    io.openclaw.ref="${OPENCLAW_REF}" \
     maintainer="mekenthompson" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
