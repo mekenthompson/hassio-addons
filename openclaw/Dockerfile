@@ -12,7 +12,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Enable pnpm (npm upgrade deferred until after clone to avoid corepack conflicts)
+# Enable pnpm
 RUN corepack enable
 
 WORKDIR /build
