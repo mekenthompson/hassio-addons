@@ -1,3 +1,15 @@
+## [2.0.60] - 2026-03-26
+
+### Fixed
+- **Discord stale-socket crash resolved**: health-monitor restart caused uncaught exception (`Max reconnect attempts (0) reached`) — fixed upstream (#54697)
+- **Telegram DM topic routing resolved**: files/messages sent via tools now route to correct topic thread — fixed upstream (#52217)
+- **Telegram plugin ReferenceError resolved**: `createTopLevelChannelReplyToModeResolver is not defined` — fixed upstream
+
+### Changed
+- Upstream sync to `a3b85e1583` (1349 new commits since `5b31b34`)
+- Dropped all cherry-picks except GPU/Vulkan config — all others superseded by upstream
+- Fork HEAD: `08ba1db3f4`
+
 ## [2.0.55] - 2026-03-25
 
 ### Fixed
