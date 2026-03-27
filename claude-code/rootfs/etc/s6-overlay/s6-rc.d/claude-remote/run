@@ -49,4 +49,4 @@ cd "${WORKDIR}" || cd /
 
 bashio::log.info "Starting Claude remote-control in: ${WORKDIR}"
 
-exec yes | claude remote-control
+exec sh -c 'echo y | claude remote-control'
