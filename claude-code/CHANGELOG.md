@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Add GitHub CLI (gh) with persistent auth across restarts
+
 ## 1.0.1
 
 - Fix ingress 404: remove ttyd `--base-path` (HA ingress strips the prefix)
