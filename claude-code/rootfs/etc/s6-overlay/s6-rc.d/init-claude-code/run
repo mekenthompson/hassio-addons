@@ -68,6 +68,20 @@ else
     bashio::log.warning "Check Network Storage is connected: Settings > System > Storage"
 fi
 
+# Validate remote workspace directories
+if bashio::config.has_value 'remote_workspaces'; then
+    REMOTE_WS_COUNT=$(bashio::config 'remote_workspaces | length')
+    bashio::log.info "Remote workspaces configured: ${REMOTE_WS_COUNT}"
+    for (( i=0; i<REMOTE_WS_COUNT; i++ )); do
+        RWS=$(bashio::config "remote_workspaces[${i}]")
+        if [[ -d "${RWS}" ]]; then
+            bashio::log.info "  Remote workspace ${i}: ${RWS}"
+        else
+            bashio::log.warning "  Remote workspace '${RWS}' not found - will be skipped"
+        fi
+    done
+fi
+
 # Run init commands if configured
 if bashio::config.has_value 'init_commands'; then
     bashio::log.info "Running initialisation commands..."

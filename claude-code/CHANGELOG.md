@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8
+
+- Add multi-workspace remote-control: configure `remote_workspaces` to run separate `claude remote-control` sessions for each repository, each labeled with the folder name in claude.ai/code
+
 ## 1.0.7
 
 - Add configurable model selection (opus, sonnet, haiku) defaulting to opus
