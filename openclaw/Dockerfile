@@ -19,7 +19,7 @@ WORKDIR /build
 
 # Clone OpenClaw source (from fork with telegram threading fix)
 # OPENCLAW_REF can be a tag (v2026.3.24), branch (main), or 40-char commit SHA
-ARG OPENCLAW_REF=08ba1db3f4
+ARG OPENCLAW_REF=a290f07d55
 ARG OPENCLAW_REPO=https://github.com/mekenthompson/openclaw.git
 RUN set -ex; \
     if echo "${OPENCLAW_REF}" | grep -qE '^[0-9a-f]{7,40}$'; then \
