@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+
+- Silence remote-control TUI output in logs (redirect to /dev/null)
+
 ## 1.0.4
 
 - Fix remote-control log spam: use single `echo y` instead of `yes` pipe
