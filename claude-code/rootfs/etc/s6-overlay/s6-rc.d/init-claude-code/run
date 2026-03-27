@@ -1,0 +1,76 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Claude Code
+# Initialises Claude Code - sets up environment and auth
+# ==============================================================================
+
+bashio::log.info "Preparing Claude Code..."
+
+# Create persistent data directory (survives restarts)
+if ! bashio::fs.directory_exists '/data/claude-code'; then
+    mkdir -p /data/claude-code
+    bashio::log.info "Created claude-code data directory"
+fi
+
+# Create persistent .claude directory for OAuth tokens and config
+if ! bashio::fs.directory_exists '/data/claude-code/.claude'; then
+    mkdir -p /data/claude-code/.claude
+    bashio::log.info "Created .claude config directory"
+fi
+
+# Set HOME so Claude Code stores config persistently
+printf "%s" "/data/claude-code" > /var/run/s6/container_environment/HOME
+export HOME="/data/claude-code"
+
+# Handle authentication based on auth_mode
+AUTH_MODE=$(bashio::config 'auth_mode')
+
+if [[ "${AUTH_MODE}" == "api_key" ]]; then
+    if bashio::config.has_value 'anthropic_api_key'; then
+        ANTHROPIC_API_KEY=$(bashio::config 'anthropic_api_key')
+        printf "%s" "${ANTHROPIC_API_KEY}" > /var/run/s6/container_environment/ANTHROPIC_API_KEY
+        bashio::log.info "Auth mode: API key"
+    else
+        bashio::log.error "Auth mode is 'api_key' but no key is set"
+    fi
+elif [[ "${AUTH_MODE}" == "subscription" ]]; then
+    bashio::log.info "Auth mode: Claude subscription (Pro/Max)"
+    if [[ -f "/data/claude-code/.claude/credentials.json" ]] || \
+       [[ -f "/data/claude-code/.claude/.credentials.json" ]] || \
+       [[ -d "/data/claude-code/.claude/auth" ]]; then
+        bashio::log.info "Existing subscription login found"
+    else
+        bashio::log.warning "================================================================"
+        bashio::log.warning "  NOT LOGGED IN YET"
+        bashio::log.warning "  Open the web terminal and run: claude login"
+        bashio::log.warning "  You only need to do this once - tokens persist across restarts."
+        bashio::log.warning "================================================================"
+    fi
+    printf "" > /var/run/s6/container_environment/ANTHROPIC_API_KEY 2>/dev/null || true
+fi
+
+# Validate workspace directory (HA Network Storage mount)
+WORKSPACE=$(bashio::config 'workspace')
+WORKSPACE="${WORKSPACE:-/share/code}"
+
+if [[ -d "${WORKSPACE}" ]]; then
+    bashio::log.info "Workspace: ${WORKSPACE}"
+else
+    bashio::log.warning "Workspace '${WORKSPACE}' not found"
+    bashio::log.warning "Check Network Storage is connected: Settings > System > Storage"
+fi
+
+# Run init commands if configured
+if bashio::config.has_value 'init_commands'; then
+    bashio::log.info "Running initialisation commands..."
+
+    for cmd in $(bashio::config 'init_commands'); do
+        bashio::log.debug "Executing: ${cmd}"
+        if ! eval "${cmd}"; then
+            bashio::log.warning "Init command failed: ${cmd}"
+        fi
+    done
+fi
+
+bashio::log.info "Claude Code preparation complete"

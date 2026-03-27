@@ -10,9 +10,12 @@ This is a multi-addon Home Assistant repository containing several add-ons. Home
 hassio-addons/
 ├── repository.json          # Repository metadata (name, maintainer, URL)
 ├── README.md                 # User-facing documentation
-├── AGENTS.md                 # This file
+├── AGENTS.md                 # This file (also symlinked as claude.md, agent.md)
 ├── channels-dvr/             # Channels DVR Server add-on
+├── claude-code/              # Claude Code CLI add-on
 ├── coder/                    # VS Code Server add-on
+├── minecraft-bedrock/        # Minecraft Bedrock Server add-on
+├── openclaw/                 # OpenClaw add-on
 └── rustdesk-server-pro/      # RustDesk Server Pro add-on
 ```
 
@@ -58,6 +61,7 @@ Each add-on subdirectory follows the Home Assistant add-on specification:
 
 Add-on data is stored based on `slug`, not repository URL:
 - `channels-dvr` → `/addon_configs/channels-dvr/`
+- `claude-code` → `/addon_configs/claude-code/`
 - `coder` → `/addon_configs/coder/`
 - `rustdesk-server-pro` → `/addon_configs/rustdesk-server-pro/`
 
