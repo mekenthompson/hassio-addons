@@ -1,0 +1,8 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Claude Code
+# Take down web terminal
+# ==============================================================================
+
+bashio::log.info "Claude Code web terminal stopped"

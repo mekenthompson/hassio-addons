@@ -1,0 +1,8 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Claude Code
+# Take down claude remote-control
+# ==============================================================================
+
+bashio::log.info "Claude remote-control stopped"

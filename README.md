@@ -19,6 +19,7 @@ https://github.com/mekenthompson/hassio-addons
 | Add-on | Description |
 |--------|-------------|
 | [Channels DVR Server](channels-dvr/) | Manage and record live TV with Channels DVR Server |
+| [Claude Code](claude-code/) | Claude Code CLI with remote-control and web terminal |
 | [VS Code Server](coder/) | VS Code in the browser powered by code-server |
 | [RustDesk Server Pro](rustdesk-server-pro/) | Self-hosted RustDesk Pro server for remote desktop access |
 
@@ -27,6 +28,7 @@ https://github.com/mekenthompson/hassio-addons
 Each add-on stores its data based on its `slug` identifier. Reinstalling from this repository will **not** overwrite existing addon data:
 
 - `channels-dvr` → `/addon_config/channels-dvr/`
+- `claude-code` → `/addon_config/claude-code/`
 - `coder` → `/addon_config/coder/`
 - `rustdesk-server-pro` → `/addon_config/rustdesk-server-pro/`
 

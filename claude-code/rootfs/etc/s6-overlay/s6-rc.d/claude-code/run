@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Claude Code
+# Runs ttyd web terminal bound to the configured workspace
+# ==============================================================================
+
+bashio::log.info "Starting Claude Code web terminal..."
+
+WORKSPACE=$(bashio::config 'workspace')
+WORKSPACE="${WORKSPACE:-/share/code}"
+
+if [[ -d "${WORKSPACE}" ]]; then
+    WORKDIR="${WORKSPACE}"
+    bashio::log.info "Working directory: ${WORKDIR}"
+else
+    WORKDIR="/homeassistant"
+    bashio::log.info "Working directory: ${WORKDIR} (fallback)"
+fi
+
+exec ttyd \
+    --port 7681 \
+    --writable \
+    --base-path "$(bashio::addon.ingress_entry)" \
+    bash -c "cd ${WORKDIR} && export ANTHROPIC_API_KEY && exec bash"

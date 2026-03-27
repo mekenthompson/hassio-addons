@@ -1,0 +1,52 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Claude Code
+# Runs claude remote-control automatically at startup
+# ==============================================================================
+
+if ! bashio::config.true 'auto_start_remote_control'; then
+    bashio::log.info "Claude remote-control auto-start is disabled"
+    exec sleep infinity
+fi
+
+sleep 3
+
+AUTH_MODE=$(bashio::config 'auth_mode')
+
+# For subscription mode, wait until the user has logged in
+if [[ "${AUTH_MODE}" == "subscription" ]]; then
+    if [[ ! -f "/data/claude-code/.claude/credentials.json" ]] && \
+       [[ ! -f "/data/claude-code/.claude/.credentials.json" ]] && \
+       [[ ! -d "/data/claude-code/.claude/auth" ]]; then
+        bashio::log.warning "Waiting for subscription login before starting remote-control..."
+        bashio::log.warning "Open the web terminal and run: claude login"
+        while [[ ! -f "/data/claude-code/.claude/credentials.json" ]] && \
+              [[ ! -f "/data/claude-code/.claude/.credentials.json" ]] && \
+              [[ ! -d "/data/claude-code/.claude/auth" ]]; do
+            sleep 10
+        done
+        bashio::log.info "Login detected! Starting remote-control..."
+        sleep 2
+    fi
+fi
+
+if [[ "${AUTH_MODE}" == "api_key" ]] && ! bashio::config.has_value 'anthropic_api_key'; then
+    bashio::log.error "No API key configured - remote-control cannot start"
+    exec sleep infinity
+fi
+
+WORKSPACE=$(bashio::config 'workspace')
+WORKSPACE="${WORKSPACE:-/share/code}"
+
+if [[ -d "${WORKSPACE}" ]]; then
+    WORKDIR="${WORKSPACE}"
+else
+    WORKDIR="/homeassistant"
+fi
+
+cd "${WORKDIR}" || cd /
+
+bashio::log.info "Starting Claude remote-control in: ${WORKDIR}"
+
+exec claude remote-control

@@ -1,0 +1,70 @@
+---
+name: Claude Code
+version: "1.0.0"
+slug: claude-code
+description: Claude Code CLI with remote-control and web terminal, powered by Anthropic
+url: https://github.com/mekenthompson/hassio-addons
+arch:
+  - aarch64
+  - amd64
+homeassistant: "2024.1.0"
+stage: experimental
+init: false
+startup: application
+
+# Ingress configuration
+ingress: true
+ingress_port: 7681
+ingress_stream: true
+panel_icon: mdi:robot
+panel_title: Claude Code
+
+# Watchdog for automatic restart on failure
+watchdog: http://[HOST]:[PORT:7681]/
+
+# Optional direct port access (disabled by default)
+ports:
+  7681/tcp: null
+ports_description:
+  7681/tcp: Web terminal interface (optional, ingress recommended)
+
+# Directory mappings
+map:
+  - homeassistant_config:rw
+  - addon_config:rw
+  - ssl:ro
+  - share:rw
+  - media:rw
+  - addons:ro
+  - backup:ro
+
+# Full API and admin access to Home Assistant
+hassio_api: true
+hassio_role: admin
+homeassistant_api: true
+auth_api: true
+
+# Backup configuration
+backup_exclude:
+  - "**/node_modules/*"
+  - "**/.npm/*"
+  - "**/logs/*"
+
+# Default configuration
+options:
+  auth_mode: subscription
+  anthropic_api_key: ""
+  workspace: /share/code
+  auto_start_remote_control: true
+  init_commands: []
+  log_level: info
+
+# Configuration schema
+schema:
+  auth_mode: list(subscription|api_key)
+  anthropic_api_key: str?
+  workspace: str?
+  auto_start_remote_control: bool?
+  init_commands:
+    - str
+  log_level: list(trace|debug|info|warning|error|fatal)?
