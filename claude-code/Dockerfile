@@ -48,6 +48,14 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
+# Ensure s6 scripts are executable
+RUN chmod +x \
+    /etc/s6-overlay/s6-rc.d/init-claude-code/run \
+    /etc/s6-overlay/s6-rc.d/claude-code/run \
+    /etc/s6-overlay/s6-rc.d/claude-code/finish \
+    /etc/s6-overlay/s6-rc.d/claude-remote/run \
+    /etc/s6-overlay/s6-rc.d/claude-remote/finish
+
 # Build arguments
 ARG BUILD_ARCH
 ARG BUILD_DATE
