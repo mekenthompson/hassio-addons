@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- Fix remote-control log spam: use single `echo y` instead of `yes` pipe
+
 ## 1.0.3
 
 - Fix remote-control crash loop: auto-accept interactive prompt

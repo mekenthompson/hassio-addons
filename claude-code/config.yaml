@@ -1,6 +1,6 @@
 ---
 name: Claude Code
-version: "1.0.3"
+version: "1.0.4"
 slug: claude-code
 description: Claude Code CLI with remote-control and web terminal, powered by Anthropic
 url: https://github.com/mekenthompson/hassio-addons
