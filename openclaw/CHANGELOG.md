@@ -1,3 +1,13 @@
+## [2.0.65] - 2026-03-28
+
+### Fixed
+- **Telegram isForum simplification**: replace async `resolveTelegramForumFlag` API call with direct `msg.chat.is_forum` check in main message handler — removes unnecessary `getChat` round-trip
+- **Telegram session refactor**: remove group thread persistence from `updateLastRoute` (DM-only now), fixing stale thread routing in groups
+- **Telegram callback auth**: DM callbacks now enforce sender authorization gate matching normal DM commands
+- **Telegram reply format**: use `reply_parameters` instead of deprecated `reply_to_message_id`
+- Test suite reorganization and cleanup (108 files)
+- Fork ref: `8d6aefc2d3`
+
 ## [2.0.64] - 2026-03-27
 
 ### Changed
