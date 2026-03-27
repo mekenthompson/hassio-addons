@@ -23,6 +23,13 @@ fi
 printf "%s" "/data/claude-code" > /var/run/s6/container_environment/HOME
 export HOME="/data/claude-code"
 
+# Set model
+if bashio::config.has_value 'model'; then
+    MODEL=$(bashio::config 'model')
+    printf "%s" "${MODEL}" > /var/run/s6/container_environment/CLAUDE_MODEL
+    bashio::log.info "Model: ${MODEL}"
+fi
+
 # Handle authentication based on auth_mode
 AUTH_MODE=$(bashio::config 'auth_mode')
 
