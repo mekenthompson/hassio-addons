@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7
+
+- Add configurable model selection (opus, sonnet, haiku) defaulting to opus
+
 ## 1.0.6
 
 - Keep stderr for remote-control so errors still show in logs
