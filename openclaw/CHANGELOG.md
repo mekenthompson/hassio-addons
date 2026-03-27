@@ -1,3 +1,10 @@
+## [2.0.63] - 2026-03-27
+
+### Fixed
+- **Telegram threading fix complete**: forward toolContext through plugin dispatch for auto thread resolution — files/messages via tools now correctly route to topic threads instead of top-level DMs
+- Sync build.yaml ref to match fork HEAD (was stale)
+- Fork ref: `b8c1531f3a` (1 commit ahead of `08ba1db3f4`, completes threading fix from `1f605f8eed`)
+
 ## [2.0.60] - 2026-03-26
 
 ### Fixed
