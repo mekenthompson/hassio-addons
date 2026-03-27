@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6
+
+- Keep stderr for remote-control so errors still show in logs
+
 ## 1.0.5
 
 - Silence remote-control TUI output in logs (redirect to /dev/null)
