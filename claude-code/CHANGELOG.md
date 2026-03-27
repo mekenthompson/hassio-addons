@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+
+- Fix ingress 404: remove ttyd `--base-path` (HA ingress strips the prefix)
+- Fix s6 script permissions in Dockerfile
+- Change sidebar icon to `mdi:creation` (sparkle)
+- Add addon icon
+
 ## 1.0.0
 
 - Initial release
