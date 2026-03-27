@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- Fix remote-control crash loop: auto-accept interactive prompt
+
 ## 1.0.2
 
 - Add GitHub CLI (gh) with persistent auth across restarts
