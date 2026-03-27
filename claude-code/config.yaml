@@ -1,6 +1,6 @@
 ---
 name: Claude Code
-version: "1.0.0"
+version: "1.0.1"
 slug: claude-code
 description: Claude Code CLI with remote-control and web terminal, powered by Anthropic
 url: https://github.com/mekenthompson/hassio-addons
@@ -16,7 +16,7 @@ startup: application
 ingress: true
 ingress_port: 7681
 ingress_stream: true
-panel_icon: mdi:robot
+panel_icon: mdi:creation
 panel_title: Claude Code
 
 # Watchdog for automatic restart on failure

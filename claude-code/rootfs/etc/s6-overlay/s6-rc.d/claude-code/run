@@ -21,5 +21,4 @@ fi
 exec ttyd \
     --port 7681 \
     --writable \
-    --base-path "$(bashio::addon.ingress_entry)" \
     bash -c "cd ${WORKDIR} && export ANTHROPIC_API_KEY && exec bash"
