@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 # ==============================================================================
 # Home Assistant Add-on: Claude Code
-# Runs claude remote-control automatically at startup
+# Runs claude remote-control for one or more workspace directories
 # ==============================================================================
 
 if ! bashio::config.true 'auto_start_remote_control'; then
@@ -36,17 +36,95 @@ if [[ "${AUTH_MODE}" == "api_key" ]] && ! bashio::config.has_value 'anthropic_ap
     exec sleep infinity
 fi
 
-WORKSPACE=$(bashio::config 'workspace')
-WORKSPACE="${WORKSPACE:-/share/code}"
+# --- Build the list of workspaces ---
+declare -a WORKSPACES=()
 
-if [[ -d "${WORKSPACE}" ]]; then
-    WORKDIR="${WORKSPACE}"
-else
-    WORKDIR="/homeassistant"
+if bashio::config.has_value 'remote_workspaces'; then
+    REMOTE_WS_COUNT=$(bashio::config 'remote_workspaces | length')
+    for (( i=0; i<REMOTE_WS_COUNT; i++ )); do
+        WS=$(bashio::config "remote_workspaces[${i}]")
+        if [[ -d "${WS}" ]]; then
+            WORKSPACES+=("${WS}")
+        else
+            bashio::log.warning "Skipping remote workspace '${WS}' - directory not found"
+        fi
+    done
 fi
 
-cd "${WORKDIR}" || cd /
+# Fallback: if no remote_workspaces configured (or none valid), use single workspace
+if [[ ${#WORKSPACES[@]} -eq 0 ]]; then
+    WORKSPACE=$(bashio::config 'workspace')
+    WORKSPACE="${WORKSPACE:-/share/code}"
+    if [[ -d "${WORKSPACE}" ]]; then
+        WORKSPACES+=("${WORKSPACE}")
+    else
+        WORKSPACES+=("/homeassistant")
+    fi
+fi
 
-bashio::log.info "Starting Claude remote-control in: ${WORKDIR}"
+bashio::log.info "Starting Claude remote-control for ${#WORKSPACES[@]} workspace(s)"
 
-exec sh -c 'echo y | claude remote-control > /dev/null'
+# --- Per-workspace process tracking ---
+declare -A PID_TO_WS=()
+declare -A PID_TO_NAME=()
+
+start_remote() {
+    local ws_path="$1"
+    local ws_name
+    ws_name=$(basename "${ws_path}")
+
+    bashio::log.info "Starting remote-control: ${ws_name} (${ws_path})"
+    (
+        cd "${ws_path}" || exit 1
+        exec sh -c "echo y | claude remote-control --name '${ws_name}' > /dev/null"
+    ) &
+    local pid=$!
+    PID_TO_WS[${pid}]="${ws_path}"
+    PID_TO_NAME[${pid}]="${ws_name}"
+    bashio::log.debug "  PID ${pid} -> ${ws_name}"
+}
+
+# --- Cleanup on signal ---
+cleanup() {
+    bashio::log.info "Stopping all remote-control processes..."
+    for pid in "${!PID_TO_WS[@]}"; do
+        kill "${pid}" 2>/dev/null
+    done
+    wait
+    exit 0
+}
+trap cleanup SIGTERM SIGINT
+
+# --- Start all workspaces ---
+for ws in "${WORKSPACES[@]}"; do
+    start_remote "${ws}"
+done
+
+# --- Supervision loop: restart any child that exits ---
+while true; do
+    wait -n 2>/dev/null
+    exit_code=$?
+
+    # Find which PID(s) are no longer running and restart them
+    for pid in "${!PID_TO_WS[@]}"; do
+        if ! kill -0 "${pid}" 2>/dev/null; then
+            ws_path="${PID_TO_WS[${pid}]}"
+            ws_name="${PID_TO_NAME[${pid}]}"
+            unset "PID_TO_WS[${pid}]"
+            unset "PID_TO_NAME[${pid}]"
+            bashio::log.warning "Remote-control '${ws_name}' exited (code ${exit_code}), restarting in 5s..."
+            sleep 5
+            if [[ -d "${ws_path}" ]]; then
+                start_remote "${ws_path}"
+            else
+                bashio::log.error "Workspace '${ws_path}' no longer exists, not restarting"
+            fi
+        fi
+    done
+
+    # If no children remain, exit (s6 will restart the whole service)
+    if [[ ${#PID_TO_WS[@]} -eq 0 ]]; then
+        bashio::log.error "No remote-control processes running, exiting"
+        exit 1
+    fi
+done

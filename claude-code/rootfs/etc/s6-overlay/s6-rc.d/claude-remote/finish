@@ -5,4 +5,7 @@
 # Take down claude remote-control
 # ==============================================================================
 
+# Kill any lingering remote-control processes
+pkill -f "claude remote-control" 2>/dev/null || true
+
 bashio::log.info "Claude remote-control stopped"

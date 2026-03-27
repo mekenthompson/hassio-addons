@@ -53,6 +53,9 @@ HA host IP (e.g. `192.168.2.6`) with Read/Write access on the shared folder.
 auth_mode: subscription
 workspace: /share/code
 auto_start_remote_control: true
+remote_workspaces:
+  - /share/code/project-alpha
+  - /share/code/project-beta
 init_commands:
   - git config --global user.name "Ken"
   - git config --global user.email "ken@buildkite.com"
@@ -80,6 +83,26 @@ which maps to an HA Network Storage mount named "code" with usage type "Share".
 You can point this at any directory available to the add-on (see Available
 Directories below). If the directory does not exist, the add-on falls back to
 `/homeassistant`.
+
+### Option: `remote_workspaces`
+
+A list of directories to run separate `claude remote-control` sessions in. Each
+directory gets its own remote-control session, visible in claude.ai/code labeled
+with the directory's name.
+
+```yaml
+remote_workspaces:
+  - /share/code/project-alpha
+  - /share/code/project-beta
+  - /homeassistant
+```
+
+When empty (default), a single remote-control session runs in the `workspace`
+directory. When populated, only the listed directories get remote-control sessions
+(the `workspace` option is only used for the web terminal).
+
+Each directory must exist and be accessible to the add-on (see Available
+Directories below). Non-existent directories are skipped with a warning in the logs.
 
 ### Option: `auto_start_remote_control`
 
@@ -109,7 +132,8 @@ The add-on runs two main services:
 
 2. **Claude Remote Control** - Runs `claude remote-control` in the background,
    allowing you to connect from your phone or other devices and send tasks to
-   Claude Code.
+   Claude Code. If `remote_workspaces` is configured, a separate session runs
+   for each directory, each labeled with the folder name in claude.ai/code.
 
 The add-on also has full Home Assistant API and admin access, so Claude Code
 can interact with your HA instance (read states, call services, manage add-ons)
