@@ -3,7 +3,7 @@ build_from:
   amd64: ghcr.io/hassio-addons/debian-base:7.3.3
 
 args:
-  OPENCLAW_REF: "b8c1531f3a"
+  OPENCLAW_REF: "main"
   OPENCLAW_REPO: "https://github.com/mekenthompson/openclaw.git"
 
 labels:

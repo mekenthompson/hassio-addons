@@ -1,3 +1,9 @@
+## [2.0.64] - 2026-03-27
+
+### Changed
+- **build**: switch OPENCLAW_REF to 'main' branch for simpler updates
+- Updates now only require cachebust bump to pull latest fork
+
 ## [2.0.63] - 2026-03-27
 
 ### Fixed
