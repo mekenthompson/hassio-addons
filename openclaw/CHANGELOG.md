@@ -1,3 +1,8 @@
+## [2.0.76] - 2026-03-29
+
+### Fixed
+- **Agent crash: `spawn docker EACCES`**: sandbox mode was not explicitly disabled, causing the agent to attempt Docker container spawning which is unavailable in HA addon containers. Bootstrap config now sets `sandbox.mode: "off"` for new installs, and gateway startup forces it off on every restart for existing installs.
+
 ## [2.0.75] - 2026-03-28
 
 ### Fixed

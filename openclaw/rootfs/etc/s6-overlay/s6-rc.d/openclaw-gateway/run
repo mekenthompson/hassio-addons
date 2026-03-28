@@ -131,6 +131,18 @@ if [ -f "$CONFIG" ]; then
         || bashio::log.warning "TTS config migration skipped (jq error)"
 fi
 
+# ---- Force sandbox off (Docker not available in HA addon containers) ----
+if [ -f "$CONFIG" ]; then
+    SANDBOX_MODE=$(jq -r '.agents.defaults.sandbox.mode // "off"' "$CONFIG" 2>/dev/null)
+    if [ "$SANDBOX_MODE" != "off" ]; then
+        bashio::log.warning "Sandbox mode was '${SANDBOX_MODE}' — forcing to 'off' (Docker unavailable in HA addon)"
+        flock -w 30 /tmp/openclaw-config.lock \
+            jq '.agents.defaults.sandbox.mode = "off"' "$CONFIG" > /tmp/oc-sandbox-fix.json \
+            && mv /tmp/oc-sandbox-fix.json "$CONFIG" \
+            && chown node:node "$CONFIG"
+    fi
+fi
+
 exec s6-setuidgid node \
     node dist/index.js gateway \
     --allow-unconfigured \
