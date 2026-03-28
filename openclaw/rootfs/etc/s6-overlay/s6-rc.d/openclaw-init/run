@@ -250,6 +250,9 @@ else
     "defaults": {
       "model": {
         "primary": "anthropic/claude-opus-4-6"
+      },
+      "sandbox": {
+        "mode": "off"
       }
     },
     "list": [ $AGENTS_LIST ]
