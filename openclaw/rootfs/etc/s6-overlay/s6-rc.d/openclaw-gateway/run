@@ -55,6 +55,35 @@ if bashio::config.has_value 'openai_api_key'; then
     bashio::log.info "OpenAI API key configured"
 fi
 
+# Fallback: read API keys from secrets.json if not already set via addon config
+# The upstream secrets file resolution broke after the 2.0.66 rebase — this ensures
+# keys stored in secrets.json are still available to the gateway process.
+SECRETS_FILE="/data/openclaw-config/secrets.json"
+if [ -f "$SECRETS_FILE" ]; then
+    if [ -z "$ANTHROPIC_API_KEY" ]; then
+        _KEY=$(jq -r '.providers.anthropic.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
+        if [ -n "$_KEY" ]; then
+            export ANTHROPIC_API_KEY="$_KEY"
+            bashio::log.info "Anthropic API key loaded from secrets.json"
+        fi
+    fi
+    if [ -z "$OPENAI_API_KEY" ]; then
+        _KEY=$(jq -r '.providers.openai.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
+        if [ -n "$_KEY" ]; then
+            export OPENAI_API_KEY="$_KEY"
+            bashio::log.info "OpenAI API key loaded from secrets.json"
+        fi
+    fi
+    if [ -z "$GOOGLE_API_KEY" ]; then
+        _KEY=$(jq -r '.providers.google.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
+        if [ -n "$_KEY" ]; then
+            export GOOGLE_API_KEY="$_KEY"
+            bashio::log.info "Google API key loaded from secrets.json"
+        fi
+    fi
+    unset _KEY
+fi
+
 # Power-user features (enabled by default)
 export OPENCLAW_CONFIG_DIR="/data/openclaw-config"
 export OPENCLAW_WORKSPACE_DIR="/data/openclaw-workspace"

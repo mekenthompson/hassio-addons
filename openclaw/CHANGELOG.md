@@ -1,3 +1,8 @@
+## [2.0.73] - 2026-03-28
+
+### Fixed
+- **"No API key for provider: anthropic"**: the upstream rebase (2.0.66) broke file-based secrets resolution — the gateway couldn't read API keys from `secrets.json` via the internal secret-ref system. Added fallback in gateway startup to read Anthropic, OpenAI, and Google API keys directly from `secrets.json` and export them as environment variables.
+
 ## [2.0.72] - 2026-03-28
 
 ### Fixed
