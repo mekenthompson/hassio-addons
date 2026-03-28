@@ -380,16 +380,16 @@ fi
 # under a .providers sub-object. Also handled in openclaw-gateway/run for
 # restart resilience.
 if [ -f /data/openclaw-config/openclaw.json ]; then
-    if jq -e '(.messages.tts | has("openai","edge","elevenlabs","microsoft")) or (.channels.discord.voice.tts | has("openai","edge","elevenlabs","microsoft"))' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
+    if jq -e '((.messages.tts // {}) | [has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any) or ((.channels.discord.voice.tts // {}) | [has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any)' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
         bashio::log.info "Migrating legacy TTS provider keys..."
         jq '
-          (if .messages.tts then .messages.tts |= (
+          (if (.messages.tts // null) then .messages.tts |= (
             (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
             (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |
             (if has("elevenlabs") then .providers.elevenlabs = (.providers.elevenlabs // {}) * .elevenlabs | del(.elevenlabs) else . end) |
             (if has("microsoft") then .providers.microsoft = (.providers.microsoft // {}) * .microsoft | del(.microsoft) else . end)
           ) else . end) |
-          (if .channels.discord.voice.tts then .channels.discord.voice.tts |= (
+          (if (.channels.discord.voice.tts // null) then .channels.discord.voice.tts |= (
             (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
             (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |
             (if has("elevenlabs") then .providers.elevenlabs = (.providers.elevenlabs // {}) * .elevenlabs | del(.elevenlabs) else . end) |

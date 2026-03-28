@@ -66,8 +66,9 @@ export OPENCLAW_BUNDLED_PLUGINS_DIR="/app/dist/extensions"
 # Playwright configuration
 export PLAYWRIGHT_BROWSERS_PATH="/data/openclaw-home/.cache/ms-playwright"
 
-# Set proper permissions
-chown -R node:node /data/openclaw-*
+# Fix ownership on config files modified by root (TTS migration above)
+# Avoid chown -R on large workspace dirs — init already handles that
+chown node:node /data/openclaw-config/openclaw.json 2>/dev/null || true
 
 # Start the gateway as node user
 bashio::log.info "Starting gateway on internal port ${OPENCLAW_GATEWAY_PORT} (nginx proxy on 18789)..."
@@ -80,7 +81,7 @@ cd /app || exit 1
 CONFIG="/data/openclaw-config/openclaw.json"
 if [ -f "$CONFIG" ]; then
     jq '
-      (if .messages.tts and (.messages.tts | has("openai","edge","elevenlabs","microsoft") | . == true) then
+      (if .messages.tts and ([.messages.tts | has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any) then
         .messages.tts |= (
           (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
           (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |
@@ -88,7 +89,7 @@ if [ -f "$CONFIG" ]; then
           (if has("microsoft") then .providers.microsoft = (.providers.microsoft // {}) * .microsoft | del(.microsoft) else . end)
         )
       else . end) |
-      (if .channels.discord.voice.tts and (.channels.discord.voice.tts | has("openai","edge","elevenlabs","microsoft") | . == true) then
+      (if .channels.discord.voice.tts and ([.channels.discord.voice.tts | has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any) then
         .channels.discord.voice.tts |= (
           (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
           (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |

@@ -172,7 +172,7 @@ RUN mkdir -p /data/openclaw-config /data/openclaw-workspace /data/openclaw-home 
     && chown -R node:node /data/openclaw-*
 
 # Health check
-HEALTHCHECK --start-period=60s --interval=30s --timeout=10s \
+HEALTHCHECK --start-period=300s --interval=30s --timeout=10s --retries=5 \
     CMD curl --fail http://localhost:18789/health || exit 1
 
 # Build arguments for labels
