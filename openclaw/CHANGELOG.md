@@ -1,3 +1,8 @@
+## [2.0.75] - 2026-03-28
+
+### Fixed
+- **Gateway crash-loop on unset env vars**: bashio's `set -u` mode caused `unbound variable` errors when checking `$ANTHROPIC_API_KEY`, `$OPENAI_API_KEY`, `$GOOGLE_API_KEY`, and `$CLAUDE_CODE_OAUTH_TOKEN` before they were set. Changed all checks to `${VAR:-}` syntax.
+
 ## [2.0.74] - 2026-03-28
 
 ### Changed

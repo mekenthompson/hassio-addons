@@ -44,7 +44,7 @@ fi
 
 # Claude Code OAuth token (for claude CLI coding agent)
 # Only set from file if not already configured via claude_session_key above
-if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ] && [ -f /data/openclaw-config/credentials/claude-code-token.txt ]; then
+if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -f /data/openclaw-config/credentials/claude-code-token.txt ]; then
     export CLAUDE_CODE_OAUTH_TOKEN=$(cat /data/openclaw-config/credentials/claude-code-token.txt)
     bashio::log.info "Claude Code OAuth token configured (from credentials file)"
 fi
@@ -60,21 +60,21 @@ fi
 # keys stored in secrets.json are still available to the gateway process.
 SECRETS_FILE="/data/openclaw-config/secrets.json"
 if [ -f "$SECRETS_FILE" ]; then
-    if [ -z "$ANTHROPIC_API_KEY" ]; then
+    if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
         _KEY=$(jq -r '.providers.anthropic.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
         if [ -n "$_KEY" ]; then
             export ANTHROPIC_API_KEY="$_KEY"
             bashio::log.info "Anthropic API key loaded from secrets.json"
         fi
     fi
-    if [ -z "$OPENAI_API_KEY" ]; then
+    if [ -z "${OPENAI_API_KEY:-}" ]; then
         _KEY=$(jq -r '.providers.openai.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
         if [ -n "$_KEY" ]; then
             export OPENAI_API_KEY="$_KEY"
             bashio::log.info "OpenAI API key loaded from secrets.json"
         fi
     fi
-    if [ -z "$GOOGLE_API_KEY" ]; then
+    if [ -z "${GOOGLE_API_KEY:-}" ]; then
         _KEY=$(jq -r '.providers.google.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
         if [ -n "$_KEY" ]; then
             export GOOGLE_API_KEY="$_KEY"
