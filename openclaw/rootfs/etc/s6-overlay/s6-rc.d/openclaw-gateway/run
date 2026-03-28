@@ -102,8 +102,16 @@ if [ -f "$CONFIG" ]; then
         || bashio::log.warning "TTS config migration skipped (jq error)"
 fi
 
-exec s6-setuidgid node \
+# Run gateway with error capture — log the crash reason and exit code
+# (s6 will restart this longrun service on exit)
+s6-setuidgid node \
     node dist/index.js gateway \
     --allow-unconfigured \
     --bind "${OPENCLAW_GATEWAY_BIND}" \
-    --port "${OPENCLAW_GATEWAY_PORT}"
+    --port "${OPENCLAW_GATEWAY_PORT}" 2>&1
+
+EXIT_CODE=$?
+bashio::log.error "Gateway exited with code ${EXIT_CODE}"
+
+# Brief pause to prevent rapid crash-restart cycling and allow log to flush
+sleep 10
