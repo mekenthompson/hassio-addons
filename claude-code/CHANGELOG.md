@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10
+
+- Add debug logging for remote-control sessions (`--debug-file`) to diagnose disconnections — logs written to `/data/claude-code/remote-control-<name>.log`
+
 ## 1.0.9
 
 - Add configurable `permission_mode` (default: `bypassPermissions`) for remote-control sessions and web terminal
