@@ -74,6 +74,33 @@ bashio::log.info "Starting gateway on internal port ${OPENCLAW_GATEWAY_PORT} (ng
 
 cd /app || exit 1
 
+# ---- Migrate legacy TTS provider keys (runs every gateway start) ----
+# Strict schema rejects openai/edge/elevenlabs/microsoft as direct children
+# of messages.tts or channels.discord.voice.tts — must be under .providers.
+CONFIG="/data/openclaw-config/openclaw.json"
+if [ -f "$CONFIG" ]; then
+    jq '
+      (if .messages.tts and (.messages.tts | has("openai","edge","elevenlabs","microsoft") | . == true) then
+        .messages.tts |= (
+          (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
+          (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |
+          (if has("elevenlabs") then .providers.elevenlabs = (.providers.elevenlabs // {}) * .elevenlabs | del(.elevenlabs) else . end) |
+          (if has("microsoft") then .providers.microsoft = (.providers.microsoft // {}) * .microsoft | del(.microsoft) else . end)
+        )
+      else . end) |
+      (if .channels.discord.voice.tts and (.channels.discord.voice.tts | has("openai","edge","elevenlabs","microsoft") | . == true) then
+        .channels.discord.voice.tts |= (
+          (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
+          (if has("edge") then .providers.microsoft = (.providers.microsoft // {}) * .edge | del(.edge) else . end) |
+          (if has("elevenlabs") then .providers.elevenlabs = (.providers.elevenlabs // {}) * .elevenlabs | del(.elevenlabs) else . end) |
+          (if has("microsoft") then .providers.microsoft = (.providers.microsoft // {}) * .microsoft | del(.microsoft) else . end)
+        )
+      else . end)
+    ' "$CONFIG" > /tmp/oc-tts-gw.json && mv /tmp/oc-tts-gw.json "$CONFIG" && chown node:node "$CONFIG" \
+        && bashio::log.info "TTS config migration applied" \
+        || bashio::log.warning "TTS config migration skipped (jq error)"
+fi
+
 exec s6-setuidgid node \
     node dist/index.js gateway \
     --allow-unconfigured \
