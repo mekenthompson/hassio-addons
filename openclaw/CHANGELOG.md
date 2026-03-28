@@ -1,3 +1,8 @@
+## [2.0.70] - 2026-03-28
+
+### Fixed
+- **Watchdog restart during startup**: nginx now returns 200 on `/health` while the gateway is still starting — the HA Supervisor watchdog (independent from Docker HEALTHCHECK) was getting 502s from nginx when the gateway wasn't ready yet and killing the container before it could finish starting
+
 ## [2.0.69] - 2026-03-28
 
 ### Fixed
