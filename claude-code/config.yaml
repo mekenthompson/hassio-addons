@@ -1,6 +1,6 @@
 ---
 name: Claude Code
-version: "1.0.8"
+version: "1.0.9"
 slug: claude-code
 description: Claude Code CLI with remote-control and web terminal, powered by Anthropic
 url: https://github.com/mekenthompson/hassio-addons
@@ -56,6 +56,7 @@ options:
   anthropic_api_key: ""
   workspace: /share/code
   model: opus
+  permission_mode: bypassPermissions
   auto_start_remote_control: true
   remote_workspaces: []
   init_commands: []
@@ -67,6 +68,7 @@ schema:
   anthropic_api_key: str?
   workspace: str?
   model: list(opus|sonnet|haiku)?
+  permission_mode: list(default|acceptEdits|bypassPermissions|dontAsk)?
   auto_start_remote_control: bool?
   remote_workspaces:
     - str
