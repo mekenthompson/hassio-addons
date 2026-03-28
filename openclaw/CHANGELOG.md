@@ -1,3 +1,8 @@
+## [2.0.71] - 2026-03-28
+
+### Debug
+- **Gateway crash capture**: replace `exec` with error capture — logs the actual Node.js exit code and stderr before s6 restarts the service. Adds 10s pause between crash-restart cycles to prevent log flooding. This is a diagnostic build to find the root cause of the gateway crash.
+
 ## [2.0.70] - 2026-03-28
 
 ### Fixed
