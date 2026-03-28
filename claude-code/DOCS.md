@@ -52,6 +52,7 @@ HA host IP (e.g. `192.168.2.6`) with Read/Write access on the shared folder.
 ```yaml
 auth_mode: subscription
 workspace: /share/code
+permission_mode: bypassPermissions
 auto_start_remote_control: true
 remote_workspaces:
   - /share/code/project-alpha
@@ -83,6 +84,20 @@ which maps to an HA Network Storage mount named "code" with usage type "Share".
 You can point this at any directory available to the add-on (see Available
 Directories below). If the directory does not exist, the add-on falls back to
 `/homeassistant`.
+
+### Option: `permission_mode`
+
+Controls how Claude Code handles tool permissions for remote-control sessions
+and the default mode for manual `claude` invocations. Options:
+
+- **`bypassPermissions`** (default) - No prompts. Claude can use all tools
+  (Bash, Edit, Write, MCP, etc.) without asking. Best for headless/server use.
+- **`dontAsk`** - Similar to bypass but still respects deny rules in settings.
+- **`acceptEdits`** - Auto-accepts file edits but prompts for shell commands.
+- **`default`** - Prompts for dangerous operations.
+
+All MCP tools (including ones added after boot) are automatically allowed
+regardless of this setting.
 
 ### Option: `remote_workspaces`
 

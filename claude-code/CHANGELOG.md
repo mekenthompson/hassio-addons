@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9
+
+- Add configurable `permission_mode` (default: `bypassPermissions`) for remote-control sessions and web terminal
+- Auto-allow all MCP tools (including those added after boot) via settings.json
+
 ## 1.0.8
 
 - Add multi-workspace remote-control: configure `remote_workspaces` to run separate `claude remote-control` sessions for each repository, each labeled with the folder name in claude.ai/code

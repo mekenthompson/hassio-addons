@@ -62,7 +62,13 @@ if [[ ${#WORKSPACES[@]} -eq 0 ]]; then
     fi
 fi
 
-bashio::log.info "Starting Claude remote-control for ${#WORKSPACES[@]} workspace(s)"
+# --- Read permission mode ---
+PERMISSION_MODE="bypassPermissions"
+if bashio::config.has_value 'permission_mode'; then
+    PERMISSION_MODE=$(bashio::config 'permission_mode')
+fi
+
+bashio::log.info "Starting Claude remote-control for ${#WORKSPACES[@]} workspace(s) (mode: ${PERMISSION_MODE})"
 
 # --- Per-workspace process tracking ---
 declare -A PID_TO_WS=()
@@ -76,7 +82,7 @@ start_remote() {
     bashio::log.info "Starting remote-control: ${ws_name} (${ws_path})"
     (
         cd "${ws_path}" || exit 1
-        exec sh -c "echo y | claude remote-control --name '${ws_name}' > /dev/null"
+        exec sh -c "echo y | claude remote-control --name '${ws_name}' --permission-mode '${PERMISSION_MODE}' > /dev/null"
     ) &
     local pid=$!
     PID_TO_WS[${pid}]="${ws_path}"

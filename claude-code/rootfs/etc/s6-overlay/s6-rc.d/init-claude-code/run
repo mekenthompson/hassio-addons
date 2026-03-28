@@ -23,6 +23,29 @@ fi
 printf "%s" "/data/claude-code" > /var/run/s6/container_environment/HOME
 export HOME="/data/claude-code"
 
+# Set permission mode and write settings.json
+PERMISSION_MODE="bypassPermissions"
+if bashio::config.has_value 'permission_mode'; then
+    PERMISSION_MODE=$(bashio::config 'permission_mode')
+fi
+bashio::log.info "Permission mode: ${PERMISSION_MODE}"
+
+SETTINGS_FILE="/data/claude-code/.claude/settings.json"
+node -e "
+const fs = require('fs');
+let settings = {};
+try { settings = JSON.parse(fs.readFileSync('${SETTINGS_FILE}', 'utf8')); } catch {}
+settings.permissions = settings.permissions || {};
+settings.permissions.allow = settings.permissions.allow || [];
+// Ensure mcp__* wildcard is in the allow list (allows all MCP tools including future ones)
+if (!settings.permissions.allow.includes('mcp__*')) {
+    settings.permissions.allow.push('mcp__*');
+}
+settings.defaultMode = '${PERMISSION_MODE}';
+fs.writeFileSync('${SETTINGS_FILE}', JSON.stringify(settings, null, 2));
+"
+bashio::log.info "Settings written: defaultMode=${PERMISSION_MODE}, MCP tools allowed"
+
 # Set model
 if bashio::config.has_value 'model'; then
     MODEL=$(bashio::config 'model')
