@@ -1,3 +1,12 @@
+## [2.0.66] - 2026-03-28
+
+### Fixed
+- **TTS config crash-loop fix**: add legacy detection rules for TTS provider keys (`openai`, `edge`, `elevenlabs`, `microsoft`) so the existing migration actually triggers — configs with legacy `messages.tts.openai`/`messages.tts.edge` or `channels.discord.voice.tts.edge` no longer cause strict schema validation to reject the config before migration runs
+
+### Changed
+- **Fork rebased to upstream** (399 new commits): dropped large telegram isForum refactor (conflicted heavily, upstream hasn't adopted); kept 3 targeted fixes (threading, browser GPU, toolContext forwarding)
+- Fork ref: `3367f675d0`
+
 ## [2.0.65] - 2026-03-28
 
 ### Fixed
@@ -6,7 +15,7 @@
 - **Telegram callback auth**: DM callbacks now enforce sender authorization gate matching normal DM commands
 - **Telegram reply format**: use `reply_parameters` instead of deprecated `reply_to_message_id`
 - Test suite reorganization and cleanup (108 files)
-- Fork ref: `8d6aefc2d3`
+- Fork ref: `8d6aefc2d3` (superseded by 2.0.66 rebase)
 
 ## [2.0.64] - 2026-03-27
 
