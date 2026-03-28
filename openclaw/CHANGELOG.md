@@ -1,7 +1,12 @@
+## [2.0.68] - 2026-03-28
+
+### Fixed
+- **TTS crash-loop hotfix v2**: add `jq` migration using `has()` to both init AND gateway startup scripts — runs on every gateway restart attempt, not just once at boot. Uses single `jq` expression with `has()` key detection instead of fragile `jq -e` value checks
+
 ## [2.0.67] - 2026-03-28
 
 ### Fixed
-- **TTS crash-loop hotfix**: add `jq`-based config migration to init script that moves legacy TTS provider keys (`openai`, `edge`, `elevenlabs`, `microsoft`) into the `providers` sub-object before OpenClaw starts — works immediately on restart without needing a full image rebuild
+- **TTS crash-loop hotfix**: add `jq`-based config migration to init script that moves legacy TTS provider keys (`openai`, `edge`, `elevenlabs`, `microsoft`) into the `providers` sub-object before OpenClaw starts
 
 ## [2.0.66] - 2026-03-28
 
