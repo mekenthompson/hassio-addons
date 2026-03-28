@@ -374,6 +374,39 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     fi
 fi
 
+# ---- Migrate legacy TTS provider keys ----
+# Upstream strict schema rejects openai/edge/elevenlabs/microsoft as direct
+# children of messages.tts or channels.discord.voice.tts — they must live
+# under a .providers sub-object. Perform the migration here so existing
+# configs don't crash-loop before openclaw's own migration code runs.
+if [ -f /data/openclaw-config/openclaw.json ]; then
+    TTS_MIGRATED="false"
+    for LEGACY_KEY in openai edge elevenlabs microsoft; do
+        # messages.tts.<legacy> → messages.tts.providers.<target>
+        TARGET_KEY="$LEGACY_KEY"
+        [ "$LEGACY_KEY" = "edge" ] && TARGET_KEY="microsoft"
+        if jq -e ".messages.tts.${LEGACY_KEY}" /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
+            bashio::log.info "Migrating messages.tts.${LEGACY_KEY} → messages.tts.providers.${TARGET_KEY}"
+            jq ".messages.tts.providers.${TARGET_KEY} = (.messages.tts.providers.${TARGET_KEY} // {}) * .messages.tts.${LEGACY_KEY} | del(.messages.tts.${LEGACY_KEY})" \
+                /data/openclaw-config/openclaw.json > /tmp/oc-tts-fix.json \
+                && mv /tmp/oc-tts-fix.json /data/openclaw-config/openclaw.json
+            TTS_MIGRATED="true"
+        fi
+        # channels.discord.voice.tts.<legacy> → channels.discord.voice.tts.providers.<target>
+        if jq -e ".channels.discord.voice.tts.${LEGACY_KEY}" /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
+            bashio::log.info "Migrating channels.discord.voice.tts.${LEGACY_KEY} → channels.discord.voice.tts.providers.${TARGET_KEY}"
+            jq ".channels.discord.voice.tts.providers.${TARGET_KEY} = (.channels.discord.voice.tts.providers.${TARGET_KEY} // {}) * .channels.discord.voice.tts.${LEGACY_KEY} | del(.channels.discord.voice.tts.${LEGACY_KEY})" \
+                /data/openclaw-config/openclaw.json > /tmp/oc-tts-fix.json \
+                && mv /tmp/oc-tts-fix.json /data/openclaw-config/openclaw.json
+            TTS_MIGRATED="true"
+        fi
+    done
+    if [ "$TTS_MIGRATED" = "true" ]; then
+        chown node:node /data/openclaw-config/openclaw.json
+        bashio::log.info "Legacy TTS config migrated successfully"
+    fi
+fi
+
 # ---- Doctor check ----
 bashio::log.info "Running openclaw doctor --fix..."
 export OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions
