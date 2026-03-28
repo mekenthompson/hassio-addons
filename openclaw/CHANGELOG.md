@@ -1,7 +1,7 @@
 ## [2.0.69] - 2026-03-28
 
 ### Fixed
-- **Restart loop fix**: increase Docker HEALTHCHECK `--start-period` from 60s to 300s with 5 retries — the old 60s timeout killed the container before init + `openclaw doctor --fix` could finish
+- **Restart loop fix**: `openclaw doctor --fix` takes ~2 minutes (old binary), causing the HA watchdog health check to kill the container before init finishes. Moved doctor to background so init completes instantly and the gateway starts
 - **jq generator bug**: `has("openai","edge","elevenlabs","microsoft")` is a jq generator that produces 4 separate booleans, not one. Replaced with `[has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any` in both init and gateway scripts — fixes silent migration skip and potential config corruption from multiple JSON outputs
 - **nginx 502 on startup**: add s6 dependency from `openclaw-nginx` to `openclaw-gateway` so nginx only starts after the gateway process launches — eliminates false 502 health-check failures during init
 - **Slow gateway restart**: replace `chown -R node:node /data/openclaw-*` (recursive over entire workspace) with targeted `chown` on just the config file modified by root — removes 10-30s delay on every gateway restart

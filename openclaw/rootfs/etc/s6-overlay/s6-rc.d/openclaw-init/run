@@ -403,12 +403,10 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     fi
 fi
 
-# ---- Doctor check ----
-bashio::log.info "Running openclaw doctor --fix..."
+# ---- Doctor check (background — avoids blocking init and triggering watchdog restart) ----
+bashio::log.info "Scheduling openclaw doctor --fix in background..."
 export OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions
-cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions node dist/index.js doctor --fix" || {
-    bashio::log.warning "openclaw doctor --fix had warnings, continuing..."
-}
+(cd /app && su - node -s /bin/bash -c "cd /app && HOME=/home/node OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions node dist/index.js doctor --fix" 2>&1 || true) &
 
 # ---- Playwright Chromium ----
 if [ ! -d "/data/openclaw-home/.cache/ms-playwright" ]; then
