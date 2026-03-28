@@ -1,3 +1,8 @@
+## [2.0.77] - 2026-03-29
+
+### Added
+- **Auto-topic-label mode config**: New `mode` option on `autoTopicLabel` — `"new-only"` (default) only labels brand-new topics, `"every-session"` re-labels on each session start (old behavior). Prevents overwriting manual topic renames on resumed conversations.
+
 ## [2.0.76] - 2026-03-29
 
 ### Fixed
