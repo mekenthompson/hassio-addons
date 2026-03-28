@@ -269,7 +269,8 @@ if [ -f /data/openclaw-config/openclaw.json ]; then
     CURRENT_TOKEN=$(jq -r '.gateway.auth.token // empty' /data/openclaw-config/openclaw.json 2>/dev/null)
     if [ "$CURRENT_TOKEN" != "$GATEWAY_TOKEN" ]; then
         bashio::log.info "Syncing gateway token to openclaw.json..."
-        jq --arg token "$GATEWAY_TOKEN" '.gateway.auth.token = $token' \
+        flock -w 30 /tmp/openclaw-config.lock \
+            jq --arg token "$GATEWAY_TOKEN" '.gateway.auth.token = $token' \
             /data/openclaw-config/openclaw.json > /tmp/oc-token-sync.json \
             && mv /tmp/oc-token-sync.json /data/openclaw-config/openclaw.json
         chown node:node /data/openclaw-config/openclaw.json
@@ -359,7 +360,8 @@ bashio::log.info "nginx configuration generated"
 if [ -f /data/openclaw-config/openclaw.json ]; then
     if ! jq -e '.gateway.controlUi.allowedOrigins' /data/openclaw-config/openclaw.json > /dev/null 2>&1; then
         bashio::log.info "Adding allowedOrigins to controlUi config..."
-        jq '.gateway.controlUi.allowedOrigins = ["*"]' \
+        flock -w 30 /tmp/openclaw-config.lock \
+            jq '.gateway.controlUi.allowedOrigins = ["*"]' \
             /data/openclaw-config/openclaw.json > /tmp/oc-patch.json \
             && mv /tmp/oc-patch.json /data/openclaw-config/openclaw.json
         chown node:node /data/openclaw-config/openclaw.json

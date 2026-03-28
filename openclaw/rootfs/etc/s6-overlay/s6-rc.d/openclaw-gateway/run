@@ -80,7 +80,7 @@ cd /app || exit 1
 # of messages.tts or channels.discord.voice.tts — must be under .providers.
 CONFIG="/data/openclaw-config/openclaw.json"
 if [ -f "$CONFIG" ]; then
-    jq '
+    flock -w 30 /tmp/openclaw-config.lock jq '
       (if .messages.tts and ([.messages.tts | has("openai"), has("edge"), has("elevenlabs"), has("microsoft")] | any) then
         .messages.tts |= (
           (if has("openai") then .providers.openai = (.providers.openai // {}) * .openai | del(.openai) else . end) |
@@ -102,16 +102,8 @@ if [ -f "$CONFIG" ]; then
         || bashio::log.warning "TTS config migration skipped (jq error)"
 fi
 
-# Run gateway with error capture — log the crash reason and exit code
-# (s6 will restart this longrun service on exit)
-s6-setuidgid node \
+exec s6-setuidgid node \
     node dist/index.js gateway \
     --allow-unconfigured \
     --bind "${OPENCLAW_GATEWAY_BIND}" \
-    --port "${OPENCLAW_GATEWAY_PORT}" 2>&1
-
-EXIT_CODE=$?
-bashio::log.error "Gateway exited with code ${EXIT_CODE}"
-
-# Brief pause to prevent rapid crash-restart cycling and allow log to flush
-sleep 10
+    --port "${OPENCLAW_GATEWAY_PORT}"

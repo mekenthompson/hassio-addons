@@ -1,7 +1,9 @@
-## [2.0.71] - 2026-03-28
+## [2.0.72] - 2026-03-28
 
-### Debug
-- **Gateway crash capture**: replace `exec` with error capture — logs the actual Node.js exit code and stderr before s6 restarts the service. Adds 10s pause between crash-restart cycles to prevent log flooding. This is a diagnostic build to find the root cause of the gateway crash.
+### Fixed
+- **Root cause: 2.5GB corrupt openclaw.json** — racing `jq > /tmp && mv` writes from concurrent background doctor, init, and persist scripts produced ~65K concatenated JSON copies. Every jq command then tried to parse 2.5GB and spun at 100% CPU, blocking init indefinitely. Fixed on-device by extracting the first valid 38KB JSON object.
+- **Prevent future corruption**: all `jq` read-modify-write operations on `openclaw.json` now use `flock -w 30 /tmp/openclaw-config.lock` to serialize concurrent writes
+- **Restore exec**: remove diagnostic error capture from 2.0.71, restore `exec` for proper s6 process supervision
 
 ## [2.0.70] - 2026-03-28
 
