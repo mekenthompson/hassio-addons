@@ -1,3 +1,8 @@
+## [2.0.67] - 2026-03-28
+
+### Fixed
+- **TTS crash-loop hotfix**: add `jq`-based config migration to init script that moves legacy TTS provider keys (`openai`, `edge`, `elevenlabs`, `microsoft`) into the `providers` sub-object before OpenClaw starts — works immediately on restart without needing a full image rebuild
+
 ## [2.0.66] - 2026-03-28
 
 ### Fixed
