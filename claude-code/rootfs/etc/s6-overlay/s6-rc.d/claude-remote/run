@@ -78,11 +78,13 @@ start_remote() {
     local ws_path="$1"
     local ws_name
     ws_name=$(basename "${ws_path}")
+    local debug_file="/data/claude-code/remote-control-${ws_name}.log"
 
     bashio::log.info "Starting remote-control: ${ws_name} (${ws_path})"
+    bashio::log.info "  Debug log: ${debug_file}"
     (
         cd "${ws_path}" || exit 1
-        exec sh -c "echo y | claude remote-control --name '${ws_name}' --permission-mode '${PERMISSION_MODE}' > /dev/null"
+        exec sh -c "echo y | claude remote-control --name '${ws_name}' --permission-mode '${PERMISSION_MODE}' --debug-file '${debug_file}' > /dev/null"
     ) &
     local pid=$!
     PID_TO_WS[${pid}]="${ws_path}"
