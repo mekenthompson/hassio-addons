@@ -1,3 +1,13 @@
+## [2.0.74] - 2026-03-28
+
+### Changed
+- **Fork rebased to upstream** (337 new commits): clean reset to upstream HEAD (`49f693d06a`), re-applied 3 targeted cherry-picks:
+  1. `currentThreadTs` in buildToolContext fallback — upstream accidentally reverted this in a test migration commit; needed for Telegram forum topic threading
+  2. GPU/Vulkan browser config — not in upstream, needed for HA addon headless Chrome
+  3. TTS legacy migration rules — not in upstream, prevents crash-loop on configs with legacy TTS keys
+- **Dropped** telegram toolContext forwarding cherry-pick — superseded by upstream's plugin-based `resolveAutoThreadId` architecture
+- Fork ref: `e33ba7c484`
+
 ## [2.0.73] - 2026-03-28
 
 ### Fixed
