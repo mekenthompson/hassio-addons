@@ -21,6 +21,8 @@ WORKDIR /build
 # OPENCLAW_REF can be a tag (v2026.3.24), branch (main), or 40-char commit SHA
 ARG OPENCLAW_REF=main
 ARG OPENCLAW_REPO=https://github.com/mekenthompson/openclaw.git
+# Cache-bust: bump this value to force a fresh git clone when OPENCLAW_REF is a branch
+ARG OPENCLAW_CACHEBUST=1
 RUN set -ex; \
     if echo "${OPENCLAW_REF}" | grep -qE '^[0-9a-f]{7,40}$'; then \
         echo "Cloning OpenClaw at commit ${OPENCLAW_REF}"; \
