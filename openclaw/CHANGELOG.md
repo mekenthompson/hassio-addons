@@ -1,3 +1,8 @@
+## [2.0.78] - 2026-03-29
+
+### Changed
+- **Rebuild with latest fork**: picks up auto-topic-label `new-only`/`every-session` mode and `isNewTopic` fix from fork HEAD.
+
 ## [2.0.77] - 2026-03-29
 
 ### Added
