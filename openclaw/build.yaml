@@ -5,6 +5,7 @@ build_from:
 args:
   OPENCLAW_REF: "main"
   OPENCLAW_REPO: "https://github.com/mekenthompson/openclaw.git"
+  CACHEBUST: "1743392940"
 
 labels:
   org.opencontainers.image.title: "OpenClaw AI Assistant"
