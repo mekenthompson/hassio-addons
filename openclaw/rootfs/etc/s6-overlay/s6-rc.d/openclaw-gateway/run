@@ -63,8 +63,21 @@ if [ -f "$SECRETS_FILE" ]; then
     if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
         _KEY=$(jq -r '.providers.anthropic.apiKey // empty' "$SECRETS_FILE" 2>/dev/null)
         if [ -n "$_KEY" ]; then
-            export ANTHROPIC_API_KEY="$_KEY"
-            bashio::log.info "Anthropic API key loaded from secrets.json"
+            case "$_KEY" in
+                sk-ant-oat*)
+                    # OAuth token — route to CLAUDE_CODE_OAUTH_TOKEN, not ANTHROPIC_API_KEY
+                    # (Claude Code CLI needs OAuth token via this var; ANTHROPIC_API_KEY would
+                    # cause 401s when Claude Code tries to use it as a raw API key)
+                    if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+                        export CLAUDE_CODE_OAUTH_TOKEN="$_KEY"
+                        bashio::log.info "Anthropic OAuth token from secrets.json → CLAUDE_CODE_OAUTH_TOKEN"
+                    fi
+                    ;;
+                *)
+                    export ANTHROPIC_API_KEY="$_KEY"
+                    bashio::log.info "Anthropic API key loaded from secrets.json"
+                    ;;
+            esac
         fi
     fi
     if [ -z "${OPENAI_API_KEY:-}" ]; then
