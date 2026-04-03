@@ -1,3 +1,9 @@
+## [2.0.84] - 2026-04-03
+
+### Changed
+- **Upstream sync to 2026.4.3 (latest)**: Rebased fork onto upstream `9b80344e58`. Dropped threading cherry-pick (superseded by upstream Telegram topic fixes). 2 cherry-picks remain (GPU config, GPU zod schema).
+- **Telegram topic fixes from upstream**: `c001c09` (keep topic thread on message tool reply) + `a5d6e51` (preserve explicit topic targets on replies)
+
 ## [2.0.83] - 2026-04-03
 
 ### Changed
