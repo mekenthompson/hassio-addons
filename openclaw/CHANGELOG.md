@@ -1,3 +1,8 @@
+## [2.0.83] - 2026-04-03
+
+### Changed
+- **Upstream sync to 2026.4.3**: Rebased fork onto upstream `1efa923ab8` (278 new upstream commits). All 3 cherry-picks (GPU config, GPU zod schema, threading fix) applied cleanly — no conflicts.
+
 ## [2.0.82] - 2026-04-02
 
 ### Changed
