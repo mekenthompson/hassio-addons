@@ -144,6 +144,20 @@ if [ -f "$CONFIG" ]; then
         || bashio::log.warning "TTS config migration skipped (jq error)"
 fi
 
+# ---- Migrate stale topicId in bindings to peer.id:topic:N format ----
+if [ -f "$CONFIG" ]; then
+    if jq -e '[.bindings[]? | select(.match.topicId)] | length > 0' "$CONFIG" > /dev/null 2>&1; then
+        bashio::log.info "Migrating bindings topicId into peer.id..."
+        flock -w 30 /tmp/openclaw-config.lock \
+            jq '(.bindings // []) |= [.[] | if .match.topicId then .match.peer.id = (.match.peer.id + ":topic:" + .match.topicId) | del(.match.topicId) else . end]' \
+            "$CONFIG" > /tmp/oc-topicid-fix.json \
+            && mv /tmp/oc-topicid-fix.json "$CONFIG" \
+            && chown node:node "$CONFIG" \
+            && bashio::log.info "Bindings topicId migration applied" \
+            || bashio::log.warning "Bindings topicId migration failed"
+    fi
+fi
+
 # ---- Force sandbox off (Docker not available in HA addon containers) ----
 if [ -f "$CONFIG" ]; then
     SANDBOX_MODE=$(jq -r '.agents.defaults.sandbox.mode // "off"' "$CONFIG" 2>/dev/null)

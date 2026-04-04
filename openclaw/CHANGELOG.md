@@ -1,3 +1,8 @@
+## [2.0.86] - 2026-04-04
+
+### Fixed
+- **Gateway crash loop: `bindings.0: Invalid input`**: Stale `topicId` field in binding match objects caused strict schema validation to reject the config on every startup. Added a gateway startup migration that merges `topicId` into the canonical `peer.id:topic:N` format and removes the invalid field.
+
 ## [2.0.85] - 2026-04-04
 
 ### Changed
