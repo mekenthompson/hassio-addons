@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.0.11
+
+- Rebuild to pull latest Claude Code CLI (2.1.92)
 ## 1.0.10
 
 - Add debug logging for remote-control sessions (`--debug-file`) to diagnose disconnections — logs written to `/data/claude-code/remote-control-<name>.log`
