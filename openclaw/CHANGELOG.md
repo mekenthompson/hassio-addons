@@ -1,3 +1,8 @@
+## [2.0.85] - 2026-04-04
+
+### Changed
+- **Upstream sync to latest**: Rebased fork onto upstream `45675c1698` (913 new upstream commits since last rebase). 2 GPU cherry-picks (GPU config, GPU zod schema) applied cleanly. Includes Task Flow substrate, compaction improvements, session routing cleanup, exec YOLO defaults, provider transport hardening, and more.
+
 ## [2.0.84] - 2026-04-03
 
 ### Changed
