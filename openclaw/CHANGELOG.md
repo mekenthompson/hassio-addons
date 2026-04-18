@@ -1,3 +1,8 @@
+## [2.0.88] - 2026-04-19
+
+### Fixed
+- **Gateway crash loop: `Refusing to traverse symlink in exec approvals path`**: Upstream >= 2026.4.15 added `assertNoSymlinkPathComponents` on the exec-approvals file, which walked `~/.openclaw` and rejected the addon's `/home/node/.openclaw -> /data/openclaw-config` symlink. Fixed by setting `OPENCLAW_HOME=/data/openclaw-home` and making `~/.openclaw` resolve to the real directory `/data/openclaw-home/.openclaw`. Config is migrated from the legacy `/data/openclaw-config` location on first boot; a compat symlink (outside HOME, so not walked by the check) preserves the old path for any scripts still referencing it.
+
 ## [2.0.87] - 2026-04-19
 
 ### Changed

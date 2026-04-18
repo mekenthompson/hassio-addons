@@ -22,7 +22,7 @@ WORKDIR /build
 ARG OPENCLAW_REF=main
 ARG OPENCLAW_REPO=https://github.com/openclaw/openclaw.git
 # Cache-bust: bump this value to force a fresh git clone when OPENCLAW_REF is a branch
-ARG OPENCLAW_CACHEBUST=3
+ARG OPENCLAW_CACHEBUST=4
 RUN set -ex; \
     if echo "${OPENCLAW_REF}" | grep -qE '^[0-9a-f]{7,40}$'; then \
         echo "Cloning OpenClaw at commit ${OPENCLAW_REF}"; \

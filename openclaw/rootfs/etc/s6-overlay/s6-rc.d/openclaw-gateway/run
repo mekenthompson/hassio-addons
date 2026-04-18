@@ -8,6 +8,10 @@ bashio::log.info "Starting OpenClaw Gateway..."
 
 # Export environment variables
 export HOME=/home/node
+# OPENCLAW_HOME makes upstream resolve ~/.openclaw to /data/openclaw-home/.openclaw
+# (a real directory) instead of /home/node/.openclaw (which would be a symlink
+# rejected by assertNoSymlinkPathComponents in upstream >= 2026.4.15).
+export OPENCLAW_HOME=/data/openclaw-home
 export TERM=xterm-256color
 export NODE_ENV=production
 export PATH="/home/node/.bun/bin:/home/node/.local/bin:${PATH}"
