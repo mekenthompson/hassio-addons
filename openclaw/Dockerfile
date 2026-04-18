@@ -17,12 +17,12 @@ RUN corepack enable
 
 WORKDIR /build
 
-# Clone OpenClaw source (from fork with telegram threading fix)
+# Clone OpenClaw source from upstream openclaw/openclaw
 # OPENCLAW_REF can be a tag (v2026.3.24), branch (main), or 40-char commit SHA
 ARG OPENCLAW_REF=main
-ARG OPENCLAW_REPO=https://github.com/mekenthompson/openclaw.git
+ARG OPENCLAW_REPO=https://github.com/openclaw/openclaw.git
 # Cache-bust: bump this value to force a fresh git clone when OPENCLAW_REF is a branch
-ARG OPENCLAW_CACHEBUST=2
+ARG OPENCLAW_CACHEBUST=3
 RUN set -ex; \
     if echo "${OPENCLAW_REF}" | grep -qE '^[0-9a-f]{7,40}$'; then \
         echo "Cloning OpenClaw at commit ${OPENCLAW_REF}"; \

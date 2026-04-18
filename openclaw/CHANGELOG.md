@@ -1,3 +1,11 @@
+## [2.0.87] - 2026-04-19
+
+### Changed
+- **Build from upstream `openclaw/openclaw` directly**: Dropped the `mekenthompson/openclaw` fork as the OpenClaw source. Addon now clones from `https://github.com/openclaw/openclaw.git` at `main` (HEAD `da228660` at release time, ~6468 commits ahead of the last fork rebase at `45675c1698`). Simplifies maintenance — no more fork rebases.
+
+### Removed
+- **Headless Chrome GPU acceleration** (`browser.gpuEnabled` config option): dropped with the fork. Upstream PR [#20845](https://github.com/openclaw/openclaw/pull/20845) was closed unmerged on 2026-04-03. Browser plugin now runs headless Chrome without Vulkan GPU, even though `video: true` and `mesa-vulkan-drivers` remain in the addon for other potential uses. If upstream re-lands GPU support, a future release can re-enable it.
+
 ## [2.0.86] - 2026-04-04
 
 ### Fixed
