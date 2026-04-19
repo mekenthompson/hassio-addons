@@ -1,3 +1,8 @@
+## [2.0.89] - 2026-04-19
+
+### Fixed
+- **Gateway boot no-op config rewrite**: The addon wrapper now only runs the legacy TTS migration when old `openai`/`edge`/`elevenlabs`/`microsoft` TTS keys are actually present, instead of rewriting `openclaw.json` on every boot.
+
 ## [2.0.88] - 2026-04-19
 
 ### Fixed
