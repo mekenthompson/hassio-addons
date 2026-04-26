@@ -1,3 +1,8 @@
+## [2.0.90] - 2026-04-26
+
+### Changed
+- **Upstream sync**: Cachebust bumped to pull latest `openclaw/openclaw` main (HEAD `5037298d82`).
+
 ## [2.0.89] - 2026-04-19
 
 ### Fixed
